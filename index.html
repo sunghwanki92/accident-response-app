@@ -2998,12 +2998,7 @@ async function runAI(prefilled){
     };
     if(tools) body.tools = tools;
 
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
-    if(!res.ok)throw new Error('API 오류 '+res.status);
-    const data=await res.json();
+    const data = await callAI(body);
     const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
     const parsed = safeParseAI(raw);
     document.getElementById('ai-loading').className='ai-loading';
@@ -3195,9 +3190,9 @@ async function runGuardAI(){
   const sys=`당신은 대한민국 보험 분쟁 전문가입니다. 아래 JSON으로만 응답하세요:
 {"isSuspicious":true|false,"suspicionLevel":"high|medium|low","summary":"문제점 한줄","tactics":[{"name":"전술명","desc":"설명"}],"counters":["대응문구1","대응문구2","대응문구3"],"legalBasis":"관련법령","actions":[{"icon":"이모지","title":"제목","body":"방법","priority":"즉시|권장|선택"}],"escalation":"분쟁조정 방법"}`;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:input}]})});
-    if(!res.ok)throw new Error('API '+res.status);
-    const data=await res.json();const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const data = await callAI({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:input}]});
+    if(!data)throw new Error('응답 없음');
+    const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
     const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
     const lc={high:'var(--red)',medium:'var(--orange)',low:'var(--green)'};const lt={high:'⚠️ 고위험',medium:'⚠️ 주의',low:'✅ 일반'};
     let html=`<div class="r-card" style="border-left:5px solid ${lc[d.suspicionLevel]}">
@@ -3287,9 +3282,9 @@ async function runPolicyAI(){
     let mc;
     if(policyFileBase64&&(policyFileType==='application/pdf'||policyFileType?.startsWith('image/'))){mc=[{type:policyFileType==='application/pdf'?'document':'image',source:{type:'base64',media_type:policyFileType,data:policyFileBase64}},{type:'text',text:`이 보험 증권을 분석해주세요.${q?'\n\n추가 질문: '+q:''}`}];}
     else{mc=`보험 내용:\n${tc||'(텍스트 없음)'}${q?'\n\n질문: '+q:''}`;}
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:mc}]})});
-    if(!res.ok)throw new Error('API '+res.status);
-    const data=await res.json();const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const data = await callAI({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:mc}]});
+    if(!data)throw new Error('응답 없음');
+    const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
     const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
     let html='';
     if(d.coverageItems?.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 보장 항목 & 한도</div><div class="pcover-grid">`;d.coverageItems.forEach(item=>{html+=`<div class="pcover-card"><div class="pcover-name">${item.name}</div><div class="pcover-limit">${item.limit}</div>${item.selfPay?`<div style="font-size:12px;color:var(--orange);margin-bottom:3px">자기부담: ${item.selfPay}</div>`:''}<div class="pcover-note">${item.note||''}</div></div>`;});html+=`</div>`;}
