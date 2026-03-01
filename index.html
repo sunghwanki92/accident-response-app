@@ -1436,9 +1436,9 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <button class="doc-sel-btn" id="docbtn-insurance" onclick="selectDoc('insurance')">🏢 보험 청구용 확인서</button>
     <button class="doc-sel-btn" id="docbtn-memo" onclick="selectDoc('memo')">📋 현장 메모</button>
   </div>
-  <div id="doc-preview" class="doc-preview empty" style="position:relative">
+  <div id="doc-preview" class="doc-preview empty" style="position:relative;cursor:pointer" onclick="if(this.classList.contains('empty'))goPage('quick')">
     <div class="doc-empty-icon">📄</div>
-    <div class="doc-empty-text">위에서 서류 종류를 선택하세요</div>
+    <div class="doc-empty-text">현장기록 탭에서 먼저 입력해주세요</div><div style="margin-top:12px;font-size:14px;color:#1A6FD4;font-weight:700">📍 탭하면 현장기록으로 이동 →</div>
   </div>
   <div class="btn-row" style="margin-top:14px">
     <button class="btn-primary" onclick="printDoc()">🖨️ 인쇄 / PDF 저장</button>
@@ -3124,7 +3124,7 @@ function checkData(){return D.myPlate||D.opPlate||D.location||D.desc;}
 
 function renderDoc(type){
   const prev=document.getElementById('doc-preview');
-  if(!checkData()){prev.className='doc-preview empty';prev.innerHTML='<div class="doc-empty-icon">📋</div><div class="doc-empty-text">현장기록 탭에서 먼저 입력해주세요</div>';return;}
+  if(!checkData()){prev.className='doc-preview empty';prev.innerHTML='<div class="doc-empty-icon">📋</div><div class="doc-empty-text">현장기록 탭에서 먼저 입력해주세요</div><div style="margin-top:12px;font-size:14px;color:#1A6FD4;font-weight:700">탭하면 현장기록으로 이동 →</div>';return;}
   const now=new Date().toLocaleDateString('ko-KR'),dtStr=D.datetime?new Date(D.datetime).toLocaleString('ko-KR'):'미입력';
   prev.className='doc-preview';
   if(type==='police'){
