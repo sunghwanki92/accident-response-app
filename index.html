@@ -937,16 +937,58 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     </div>
     <div class="card">
       <div class="card-title">어떤 사고인가요?</div>
-      <div class="card-sub">해당 유형을 선택하세요 (복수 선택 가능)</div>
-      <div class="sel-grid">
-        <div class="sel-btn" onclick="toggleType(this,'정차 중 추돌')"><div class="sb-icon">🛑</div><div class="sb-label">정차 중 추돌</div><div class="sb-sub">멈춰있다 박힘</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'후방 추돌')"><div class="sb-icon">🚗💨</div><div class="sb-label">후방 추돌</div><div class="sb-sub">뒤에서 박힘</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'로터리 사고')"><div class="sb-icon">🔄</div><div class="sb-label">로터리 사고</div><div class="sb-sub">진입 차 충돌</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'교차로 충돌')"><div class="sb-icon">✚</div><div class="sb-label">교차로 충돌</div><div class="sb-sub">신호·무신호</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'끼어들기')"><div class="sb-icon">↙️</div><div class="sb-label">끼어들기</div><div class="sb-sub">차선 위반</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label">측면 충돌</div><div class="sb-sub">옆면 긁힘·충격</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label">주차장 사고</div><div class="sb-sub">후진·주차 중</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'기타')" id="type-btn-other"><div class="sb-icon">❓</div><div class="sb-label">기타</div><div class="sb-sub">직접 입력</div></div>
+      <div class="card-sub">해당 유형을 모두 선택하세요 (복수 선택 가능)</div>
+
+      <!-- 🚗 차 대 차 -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:900;color:var(--blue);background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:8px;padding:7px 12px;margin-bottom:8px;letter-spacing:0.5px">
+          🚗 차 대 차 사고 <span style="font-weight:400;opacity:0.7;font-size:11px">— 전체 사고의 71%</span>
+        </div>
+        <div class="sel-grid">
+          <div class="sel-btn" onclick="toggleType(this,'후방 추돌')"><div class="sb-icon">🚗💨</div><div class="sb-label">후방 추돌</div><div class="sb-sub">뒤에서 박힘</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'교차로 충돌')"><div class="sb-icon">✚</div><div class="sb-label">교차로 충돌</div><div class="sb-sub">신호·무신호</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'차선변경 충돌')"><div class="sb-icon">↙️</div><div class="sb-label">차선변경 충돌</div><div class="sb-sub">끼어들기·추월</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'정차 중 추돌')"><div class="sb-icon">🛑</div><div class="sb-label">정차 중 추돌</div><div class="sb-sub">멈춰있다 박힘</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label">측면 충돌</div><div class="sb-sub">옆면 긁힘·충격</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label">주차장 사고</div><div class="sb-sub">후진·주차 중</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'로터리 사고')"><div class="sb-icon">🔄</div><div class="sb-label">로터리 사고</div><div class="sb-sub">진입 차 충돌</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'중앙선 침범')"><div class="sb-icon">⛔</div><div class="sb-label">중앙선 침범</div><div class="sb-sub">맞은편 차로</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'고속도로 추돌')"><div class="sb-icon">🛣️</div><div class="sb-label">고속도로 추돌</div><div class="sb-sub">고속·자동차전용</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'음주운전 사고')"><div class="sb-icon">🍺</div><div class="sb-label">음주운전 사고</div><div class="sb-sub">음주·무면허</div></div>
+        </div>
+      </div>
+
+      <!-- 🚶 차 대 사람 -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:900;color:var(--orange);background:#FFF4E5;border:2px solid rgba(217,119,6,0.2);border-radius:8px;padding:7px 12px;margin-bottom:8px;letter-spacing:0.5px">
+          🚶 차 대 사람 (보행자) <span style="font-weight:400;opacity:0.7;font-size:11px">— 전체 사고의 19%</span>
+        </div>
+        <div class="sel-grid">
+          <div class="sel-btn" onclick="toggleType(this,'횡단보도 보행자 충돌')"><div class="sb-icon">🦓</div><div class="sb-label">횡단보도 충돌</div><div class="sb-sub">신호·무신호 횡단</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'보도·골목 보행자 충돌')"><div class="sb-icon">🚶</div><div class="sb-label">보도·골목 충돌</div><div class="sb-sub">인도·이면도로</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'무단횡단 충돌')"><div class="sb-icon">🏃</div><div class="sb-label">무단횡단 충돌</div><div class="sb-sub">횡단보도 외 횡단</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'주차장 보행자 사고')"><div class="sb-icon">🅿️🚶</div><div class="sb-label">주차장 보행자</div><div class="sb-sub">후진·주차 중</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'스쿨존 어린이 사고')"><div class="sb-icon">🧒</div><div class="sb-label">스쿨존 어린이</div><div class="sb-sub">어린이보호구역</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'노인 보행자 사고')"><div class="sb-icon">👴</div><div class="sb-label">노인 보행자</div><div class="sb-sub">65세 이상</div></div>
+        </div>
+      </div>
+
+      <!-- 🏍️ 이륜차·자전거·PM -->
+      <div style="margin-bottom:10px">
+        <div style="font-size:12px;font-weight:900;color:var(--green);background:var(--green-bg);border:2px solid rgba(26,150,71,0.2);border-radius:8px;padding:7px 12px;margin-bottom:8px;letter-spacing:0.5px">
+          🏍️ 이륜차 · 자전거 · 개인형 이동수단 <span style="font-weight:400;opacity:0.7;font-size:11px">— 전체 사고의 10%</span>
+        </div>
+        <div class="sel-grid">
+          <div class="sel-btn" onclick="toggleType(this,'오토바이 충돌')"><div class="sb-icon">🏍️</div><div class="sb-label">오토바이 충돌</div><div class="sb-sub">이륜차·원동기</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'배달 오토바이 사고')"><div class="sb-icon">📦</div><div class="sb-label">배달 오토바이</div><div class="sb-sub">배달 중 사고</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'자전거 충돌')"><div class="sb-icon">🚲</div><div class="sb-label">자전거 충돌</div><div class="sb-sub">자전거 전용·일반</div></div>
+          <div class="sel-btn" onclick="toggleType(this,'전동킥보드·PM 충돌')"><div class="sb-icon">🛴</div><div class="sb-label">킥보드·PM</div><div class="sb-sub">전동킥보드·전동차</div></div>
+        </div>
+      </div>
+
+      <!-- 기타 -->
+      <div class="sel-grid" style="margin-top:4px">
+        <div class="sel-btn" onclick="toggleType(this,'기타')" id="type-btn-other" style="grid-column:1/-1"><div class="sb-icon">❓</div><div class="sb-label">기타</div><div class="sb-sub">직접 입력</div></div>
       </div>
       <!-- 기타 직접입력 칸 -->
       <div id="type-other-input" style="display:none;margin-top:10px">
@@ -1900,15 +1942,33 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
       <div class="set-section-body" id="set-s1">
         <div class="field">
           <label class="field-label">사고 유형</label>
-          <div class="sel-grid" id="set-types-grid" style="margin-top:0">
-            <div class="sel-btn" onclick="setToggleType(this,'정차 중 추돌')"><div class="sb-icon">🛑</div><div class="sb-label" style="font-size:12px">정차 중 추돌</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'후방 추돌')"><div class="sb-icon">🚗</div><div class="sb-label" style="font-size:12px">후방 추돌</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'로터리 사고')"><div class="sb-icon">🔄</div><div class="sb-label" style="font-size:12px">로터리</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'교차로 충돌')"><div class="sb-icon">✚</div><div class="sb-label" style="font-size:12px">교차로</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'끼어들기')"><div class="sb-icon">↙️</div><div class="sb-label" style="font-size:12px">끼어들기</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label" style="font-size:12px">측면</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label" style="font-size:12px">주차장</div></div>
-            <div class="sel-btn" onclick="setToggleType(this,'기타')"><div class="sb-icon">❓</div><div class="sb-label" style="font-size:12px">기타</div></div>
+          <div id="set-types-grid" style="margin-top:4px">
+            <div style="font-size:11px;font-weight:900;color:var(--blue);margin-bottom:6px">🚗 차 대 차</div>
+            <div class="sel-grid" style="margin-bottom:10px">
+              <div class="sel-btn" onclick="setToggleType(this,'후방 추돌')"><div class="sb-icon">🚗💨</div><div class="sb-label" style="font-size:11px">후방 추돌</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'교차로 충돌')"><div class="sb-icon">✚</div><div class="sb-label" style="font-size:11px">교차로</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'차선변경 충돌')"><div class="sb-icon">↙️</div><div class="sb-label" style="font-size:11px">차선변경</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'정차 중 추돌')"><div class="sb-icon">🛑</div><div class="sb-label" style="font-size:11px">정차 중</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label" style="font-size:11px">측면</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label" style="font-size:11px">주차장</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'중앙선 침범')"><div class="sb-icon">⛔</div><div class="sb-label" style="font-size:11px">중앙선</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'로터리 사고')"><div class="sb-icon">🔄</div><div class="sb-label" style="font-size:11px">로터리</div></div>
+            </div>
+            <div style="font-size:11px;font-weight:900;color:var(--orange);margin-bottom:6px">🚶 차 대 사람</div>
+            <div class="sel-grid" style="margin-bottom:10px">
+              <div class="sel-btn" onclick="setToggleType(this,'횡단보도 보행자 충돌')"><div class="sb-icon">🦓</div><div class="sb-label" style="font-size:11px">횡단보도</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'보도·골목 보행자 충돌')"><div class="sb-icon">🚶</div><div class="sb-label" style="font-size:11px">보도·골목</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'무단횡단 충돌')"><div class="sb-icon">🏃</div><div class="sb-label" style="font-size:11px">무단횡단</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'스쿨존 어린이 사고')"><div class="sb-icon">🧒</div><div class="sb-label" style="font-size:11px">스쿨존</div></div>
+            </div>
+            <div style="font-size:11px;font-weight:900;color:var(--green);margin-bottom:6px">🏍️ 이륜차·자전거·PM</div>
+            <div class="sel-grid" style="margin-bottom:6px">
+              <div class="sel-btn" onclick="setToggleType(this,'오토바이 충돌')"><div class="sb-icon">🏍️</div><div class="sb-label" style="font-size:11px">오토바이</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'배달 오토바이 사고')"><div class="sb-icon">📦</div><div class="sb-label" style="font-size:11px">배달</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'자전거 충돌')"><div class="sb-icon">🚲</div><div class="sb-label" style="font-size:11px">자전거</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'전동킥보드·PM 충돌')"><div class="sb-icon">🛴</div><div class="sb-label" style="font-size:11px">킥보드</div></div>
+              <div class="sel-btn" onclick="setToggleType(this,'기타')"><div class="sb-icon">❓</div><div class="sb-label" style="font-size:11px">기타</div></div>
+            </div>
           </div>
         </div>
         <div class="field"><label class="field-label">사고 일시</label><input type="datetime-local" id="set-datetime"></div>
