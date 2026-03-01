@@ -1868,10 +1868,17 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <p>가족·지인에게 사고 상황과 위치를 한 번에 전달하세요</p>
   </div>
   <div class="card">
-    <div class="card-title">👥 수신자</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:0">👥 수신자</div>
+      <button onclick="pickContact()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+        📒 연락처 가져오기
+      </button>
+    </div>
+    <!-- 저장된 비상연락처 퀵 버튼 -->
+    <div id="ntf-quick-contacts" style="display:none;margin-bottom:12px"></div>
     <div class="field-row">
       <div class="field"><label class="field-label">이름</label><input type="text" id="ntf-name" placeholder="배우자, 부모님..."></div>
-      <div class="field"><label class="field-label">전화번호</label><input type="tel" id="ntf-phone" placeholder="010-0000-0000"></div>
+      <div class="field"><label class="field-label">전화번호</label><input type="tel" id="ntf-phone" placeholder="010-0000-0000" oninput="autoGenerateIfReady()"></div>
     </div>
   </div>
   <div class="card">
@@ -2127,6 +2134,7 @@ function goPage(name) {
   if(name==='settings') { loadSettings(); renderHistoryList(); loadQuotaStatus(); }
   if(name==='timeline') renderTimeline();
   if(name==='share') generateShareCard();
+  if(name==='notify') renderNtfQuickContacts();
   if(name==='repair') loadQuotaStatus();
   if(name==='settle') loadQuotaStatus();
   if(name==='ai') updateAIPhotoHint();
@@ -4119,6 +4127,96 @@ JSON으로만 응답:
 }
 
 /* ══════════════ 📢 알림공유 ══════════════ */
+
+// 연락처 앱에서 직접 선택 (Contact Picker API - 크롬 안드로이드/iOS Safari 지원)
+async function pickContact() {
+  // Contact Picker API 지원 여부 확인
+  if ('contacts' in navigator && 'ContactsManager' in window) {
+    try {
+      const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+      if (contacts && contacts.length > 0) {
+        const c = contacts[0];
+        const name = (c.name && c.name[0]) || '';
+        const tel  = (c.tel  && c.tel[0])  || '';
+        if (name) document.getElementById('ntf-name').value = name;
+        if (tel)  document.getElementById('ntf-phone').value = tel;
+        if (name || tel) generateNotifyMsg();
+      }
+      return;
+    } catch(e) {
+      // 사용자 취소 또는 오류 → 아래 폴백으로
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  // 미지원 기기: 저장된 비상연락처 or 수동 입력 안내
+  const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
+  const saved = [];
+  if (info.emergency) saved.push({ label: '🆘 비상연락처', phone: info.emergency });
+  if (info.agent)     saved.push({ label: '🏢 보험설계사', phone: info.agent });
+
+  if (saved.length) {
+    // 저장된 연락처 선택 모달
+    showContactModal(saved);
+  } else {
+    alert('이 기기는 연락처 직접 가져오기를 지원하지 않습니다.
+내 정보 탭에서 비상연락처를 저장하면 빠르게 불러올 수 있습니다.');
+  }
+}
+
+function showContactModal(contacts) {
+  let modal = document.getElementById('contact-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'contact-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center';
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div style="background:var(--bg);border-radius:20px 20px 0 0;padding:24px 20px;width:100%;max-width:480px;box-shadow:0 -8px 32px rgba(0,0,0,0.3)">
+      <div style="font-size:17px;font-weight:900;margin-bottom:16px">📒 저장된 연락처 선택</div>
+      ${contacts.map((c,i) => `
+        <button onclick="selectSavedContact('${c.label}','${c.phone}')" style="width:100%;padding:16px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-align:left;margin-bottom:8px;color:var(--text)">
+          ${c.label}<br><span style="font-size:17px;color:var(--blue);font-weight:900">${c.phone}</span>
+        </button>`).join('')}
+      <button onclick="document.getElementById('contact-modal').remove()" style="width:100%;padding:14px;border-radius:12px;border:2px solid var(--border);background:none;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;color:var(--text2);margin-top:4px">취소</button>
+    </div>`;
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+}
+
+function selectSavedContact(label, phone) {
+  const cleanLabel = label.replace(/[🆘🏢]/g, '').trim();
+  document.getElementById('ntf-name').value = cleanLabel;
+  document.getElementById('ntf-phone').value = phone;
+  const modal = document.getElementById('contact-modal');
+  if (modal) modal.remove();
+  generateNotifyMsg();
+}
+
+function renderNtfQuickContacts() {
+  const el = document.getElementById('ntf-quick-contacts');
+  if (!el) return;
+  const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
+  const items = [];
+  if (info.emergency) items.push({ label: '🆘 비상연락처', phone: info.emergency });
+  if (info.agent)     items.push({ label: '🏢 보험설계사', phone: info.agent });
+  if (!items.length) { el.style.display = 'none'; return; }
+
+  el.style.display = 'block';
+  el.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px">⚡ 빠른 선택</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${items.map(c => `<button onclick="selectSavedContact('${c.label}','${c.phone}')" style="padding:8px 14px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);display:flex;flex-direction:column;gap:2px;text-align:left">
+        <span>${c.label}</span><span style="color:var(--blue);font-size:14px;font-weight:900">${c.phone}</span>
+      </button>`).join('')}
+    </div>`;
+}
+
+function autoGenerateIfReady() {
+  const name = document.getElementById('ntf-name').value.trim();
+  const phone = document.getElementById('ntf-phone').value.trim();
+  if (name && phone.length >= 10) generateNotifyMsg();
+}
+
 function generateNotifyMsg() {
   const name = document.getElementById('ntf-name').value.trim() || '보호자';
   const location = D.location || '위치 미확인';
