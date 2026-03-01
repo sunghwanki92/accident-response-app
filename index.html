@@ -858,6 +858,11 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <button class="nav-tab" onclick="goPage('docs')">📄 서류</button>
     <button class="nav-tab" onclick="goPage('guard')">🛡️ 보험사대응</button>
     <button class="nav-tab" onclick="goPage('policy')">📑 보험분석</button>
+    <button class="nav-tab" onclick="goPage('timeline')">⏱️ 타임라인</button>
+    <button class="nav-tab" onclick="goPage('share')">🪪 공유카드</button>
+    <button class="nav-tab" onclick="goPage('repair')">🔧 수리비</button>
+    <button class="nav-tab" onclick="goPage('settle')">💰 합의금</button>
+    <button class="nav-tab" onclick="goPage('notify')">📢 알림공유</button>
     <button class="nav-tab" onclick="goPage('myinfo')">👤 내 정보</button>
     <button class="nav-tab" onclick="goPage('settings')">⚙️ 설정</button>
   </div>
@@ -1664,13 +1669,197 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 </div>
 
 
+<!-- ═══ PAGE 8: 타임라인 ═══ -->
+<div class="page" id="page-timeline">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:#7C3AED;background:#F5F3FF;border-color:rgba(124,58,237,0.2)">⏱️ 타임라인</div>
+    <h2>사고 진행 타임라인</h2>
+    <p>사고 발생부터 각 단계를 시간 순서로 기록합니다. 분쟁 시 증거로 활용하세요</p>
+  </div>
+  <div id="timeline-list" style="margin-bottom:14px"></div>
+  <div class="card">
+    <div class="card-title">✍️ 수동 기록 추가</div>
+    <div class="field">
+      <input type="text" id="tl-text" placeholder="예: 병원 도착, 진단서 수령, 보험사 담당자 배정...">
+    </div>
+    <button class="btn-primary" onclick="addTimelineEvent()">+ 기록 추가</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+    <button class="btn-secondary" onclick="printTimeline()">🖨️ PDF 저장</button>
+    <button class="btn-secondary" onclick="clearTimeline()">🗑️ 전체 삭제</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ PAGE 9: 공유 카드 ═══ -->
+<div class="page" id="page-share">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:#0891B2;background:#E0F7FA;border-color:rgba(8,145,178,0.2)">🪪 공유카드</div>
+    <h2>내 정보 공유 카드</h2>
+    <p>사고 현장에서 상대방에게 보여주세요. QR코드로 정보를 빠르게 공유할 수 있습니다</p>
+  </div>
+  <div id="share-card-wrap" style="margin-bottom:14px"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="btn-primary" style="background:#0891B2" onclick="generateShareCard()">🔄 카드 생성</button>
+    <button class="btn-secondary" onclick="printShareCard()">🖨️ 인쇄/저장</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ PAGE 10: 수리비 ═══ -->
+<div class="page" id="page-repair">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:#D97706;background:#FFFBEB;border-color:rgba(217,119,6,0.2)">🔧 수리비 분석</div>
+    <h2>수리비 견적 AI 비교</h2>
+    <p>공업사 2~3곳 견적을 입력하면 AI가 적정 수리비와 과다 청구 여부를 분석합니다</p>
+  </div>
+  <div class="card">
+    <div class="card-title">🚗 차량 정보</div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">차종</label><input type="text" id="rep-car" placeholder="현대 아반떼 2021"></div>
+      <div class="field"><label class="field-label">주행거리</label><input type="text" id="rep-mileage" placeholder="5만 km"></div>
+    </div>
+    <div class="field"><label class="field-label">파손 부위</label><input type="text" id="rep-damage" placeholder="앞범퍼 교체, 보닛 교체, 좌측 헤드라이트"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">💰 견적 입력 (최대 3곳)</div>
+    <div class="field-row" style="margin-bottom:10px">
+      <div class="field"><label class="field-label">공업사 1 이름</label><input type="text" class="rep-shop" placeholder="삼성 오토"></div>
+      <div class="field"><label class="field-label">견적금액 (원)</label><input type="number" class="rep-price" placeholder="850000"></div>
+    </div>
+    <div class="field-row" style="margin-bottom:10px">
+      <div class="field"><label class="field-label">공업사 2 이름</label><input type="text" class="rep-shop" placeholder="현대 직영"></div>
+      <div class="field"><label class="field-label">견적금액 (원)</label><input type="number" class="rep-price" placeholder="1200000"></div>
+    </div>
+    <div id="rep-row3" style="display:none">
+    <div class="field-row" style="margin-bottom:10px">
+      <div class="field"><label class="field-label">공업사 3 이름</label><input type="text" class="rep-shop" placeholder="동네 공업사"></div>
+      <div class="field"><label class="field-label">견적금액 (원)</label><input type="number" class="rep-price" placeholder="700000"></div>
+    </div>
+    </div>
+    <button class="btn-secondary" style="font-size:13px;padding:10px" onclick="document.getElementById('rep-row3').style.display='block'">+ 공업사 3곳째 추가</button>
+  </div>
+  <div class="card">
+    <div class="field"><label class="field-label">추가 메모 (선택)</label>
+    <textarea id="rep-memo" rows="2" placeholder="보험사 제시 금액, 순정/재생부품 여부, 특이사항"></textarea></div>
+  </div>
+  <div id="rep-quota-banner" style="display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--blue)">
+    <span>💡</span><span id="rep-quota-msg">AI 분석 남은 횟수 확인 중...</span>
+  </div>
+  <button class="btn-primary" style="background:#D97706" onclick="runRepairAI()">🔧 AI 수리비 분석</button>
+  <div class="ai-loading" id="rep-loading"><div class="spinner"></div><div class="loading-text">수리비 시세 분석 중...</div></div>
+  <div id="rep-result" style="margin-top:14px"></div>
+</div>
+</div>
+
+<!-- ═══ PAGE 11: 합의금 ═══ -->
+<div class="page" id="page-settle">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--green);background:var(--green-bg);border-color:rgba(26,150,71,0.2)">💰 합의금</div>
+    <h2>합의금 적정 범위 계산</h2>
+    <p>부상 정도와 치료 내용을 입력하면 AI가 적정 합의금 범위를 산출합니다</p>
+  </div>
+  <div class="card">
+    <div class="card-title">🏥 부상 및 치료 정보</div>
+    <div class="field"><label class="field-label">부상 부위 및 진단명</label>
+    <input type="text" id="stl-injury" placeholder="경추 염좌 2주, 요추 타박상, 무릎 찰과상"></div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">입원 일수</label><input type="number" id="stl-indays" placeholder="0" min="0"></div>
+      <div class="field"><label class="field-label">통원 일수</label><input type="number" id="stl-outdays" placeholder="0" min="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">치료비 합계 (원)</label><input type="number" id="stl-medcost" placeholder="500000"></div>
+      <div class="field"><label class="field-label">휴업 손해 (일)</label><input type="number" id="stl-lostdays" placeholder="0" min="0"></div>
+    </div>
+    <div class="field"><label class="field-label">직업 / 월 소득</label>
+    <input type="text" id="stl-job" placeholder="직장인 월 350만원, 자영업 등"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚖️ 과실 및 기타</div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">나의 과실 (%)</label><input type="number" id="stl-myfault" placeholder="0" min="0" max="100"></div>
+      <div class="field"><label class="field-label">상대 과실 (%)</label><input type="number" id="stl-opfault" placeholder="100" min="0" max="100"></div>
+    </div>
+    <div class="field"><label class="field-label">추가 정보 (선택)</label>
+    <textarea id="stl-extra" rows="2" placeholder="후유증, 정신적 피해, 특이사항"></textarea></div>
+  </div>
+  <div id="stl-quota-banner" style="display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--blue)">
+    <span>💡</span><span id="stl-quota-msg">AI 분석 남은 횟수 확인 중...</span>
+  </div>
+  <button class="btn-primary" style="background:var(--green)" onclick="runSettleAI()">💰 합의금 범위 계산</button>
+  <div class="ai-loading" id="stl-loading"><div class="spinner"></div><div class="loading-text">합의금 기준 분석 중...</div></div>
+  <div id="stl-result" style="margin-top:14px"></div>
+</div>
+</div>
+
+<!-- ═══ PAGE 12: 알림공유 ═══ -->
+<div class="page" id="page-notify">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--red);background:var(--red-bg);border-color:rgba(214,43,43,0.2)">📢 알림공유</div>
+    <h2>사고 알림 보내기</h2>
+    <p>가족·지인에게 사고 상황과 위치를 한 번에 전달하세요</p>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 수신자</div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">이름</label><input type="text" id="ntf-name" placeholder="배우자, 부모님..."></div>
+      <div class="field"><label class="field-label">전화번호</label><input type="tel" id="ntf-phone" placeholder="010-0000-0000"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📝 메시지 미리보기</div>
+    <div id="ntf-preview" style="background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:14px;line-height:1.9;color:var(--text2);white-space:pre-wrap;min-height:80px">아래 버튼을 눌러 메시지를 생성하세요</div>
+    <button class="btn-secondary" style="margin-top:10px;font-size:13px" onclick="generateNotifyMsg()">🔄 메시지 자동 생성</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+    <a id="ntf-sms-btn" href="#" class="btn-primary" style="text-align:center;text-decoration:none;padding:16px;display:block">📱 문자 보내기</a>
+    <a id="ntf-kakao-btn" href="#" class="btn-primary" style="text-align:center;text-decoration:none;padding:16px;display:block;background:#FAE100;color:#3A1D1D">💬 카카오</a>
+  </div>
+  <div class="card" style="margin-top:14px;background:var(--blue-bg);border-color:rgba(26,111,212,0.2)">
+    <div style="font-size:13px;color:var(--blue)">💡 문자 앱이 열리면 수신자 번호를 입력하고 전송하세요. 카카오는 나에게 보내기로 복사 후 전달하세요.</div>
+  </div>
+</div>
+</div>
+
 <!-- ═══ PAGE 7: 설정 ═══ -->
 <div class="page" id="page-settings">
 <div class="wrap">
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--text2);background:var(--bg3);border-color:var(--border)">⚙️ 설정</div>
-    <h2>기록 관리</h2>
+    <h2>기록 관리 · 설정</h2>
     <p>저장된 사고 기록을 확인하고 수정하거나 PDF로 저장할 수 있습니다</p>
+  </div>
+
+  <!-- ═ AI 설정 ═ -->
+  <div class="set-section" style="margin-bottom:14px">
+    <div class="set-section-title" onclick="toggleSetSection('set-apikey')" style="background:#F5F3FF;border-color:rgba(124,58,237,0.2)">
+      <span style="color:#7C3AED">🔑 AI 사용 설정</span>
+      <span class="set-toggle-icon" id="set-apikey-icon">▼</span>
+    </div>
+    <div class="set-section-body open" id="set-apikey">
+      <div style="background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--blue);line-height:1.7">
+        💡 <strong>무료 제공:</strong> AI 분석은 하루 <strong>3회</strong> 무료로 사용 가능합니다.<br>
+        더 많이 사용하려면 본인의 Anthropic API 키를 입력하세요. (이 기기에만 저장)
+      </div>
+      <div id="quota-status-box" style="margin-bottom:12px;padding:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:700"></div>
+      <div class="field">
+        <label class="field-label">Anthropic API 키 (선택 — 무제한 사용)</label>
+        <input type="password" id="user-api-key" placeholder="sk-ant-..." autocomplete="off">
+        <div style="font-size:12px;color:var(--text3);margin-top:4px">
+          발급: <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a> → API Keys → Create Key
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="btn-primary" style="background:#7C3AED" onclick="saveApiKey()">💾 키 저장</button>
+        <button class="btn-secondary" onclick="clearApiKey()">🗑️ 키 삭제</button>
+      </div>
+      <div id="apikey-msg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:14px;font-weight:700"></div>
+    </div>
   </div>
 
   <!-- ═ 사고 기록 목록 ═ -->
@@ -1848,13 +2037,17 @@ function goPage(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  const map={quick:0,ai:1,docs:2,guard:3,policy:4,myinfo:5,settings:6};
+  const map={quick:0,ai:1,docs:2,guard:3,policy:4,timeline:5,share:6,repair:7,settle:8,notify:9,myinfo:10,settings:11};
   const tab=document.querySelectorAll('.nav-tab')[map[name]];
   if(tab){
     tab.classList.add('active');
     try { setTimeout(()=>tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}),50); } catch(e){}
   }
-  if(name==='settings') { loadSettings(); renderHistoryList(); }
+  if(name==='settings') { loadSettings(); renderHistoryList(); loadQuotaStatus(); }
+  if(name==='timeline') renderTimeline();
+  if(name==='share') generateShareCard();
+  if(name==='repair') loadQuotaStatus();
+  if(name==='settle') loadQuotaStatus();
   if(name==='ai') updateAIPhotoHint();
   window.scrollTo(0,0);
 }
@@ -2502,6 +2695,11 @@ function finishRecord(){
   if(history.length > 20) history = history.slice(0,20);
   localStorage.setItem('accidentHistory', JSON.stringify(history));
   localStorage.setItem('accidentData', JSON.stringify(D));
+
+  // 타임라인 자동 기록
+  const types = D.types?.join(', ') || '교통사고';
+  const loc = D.location ? ` @ ${D.location.slice(0,20)}` : '';
+  addTimelineEvent(`현장기록 완료 — ${types}${loc}`, '🚨');
 
   showPanel('complete');
 
@@ -3358,6 +3556,351 @@ function resetGpsBtn() {
   btn.innerHTML = '<span style="font-size:22px">📡</span> 현재 위치 다시 가져오기';
   btn.disabled = false;
   btn.style.opacity = '1';
+}
+
+/* ══════════════ API 설정 & 쿼터 ══════════════ */
+const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+  ? 'https://accident-response-app.vercel.app/api/ai'  // 로컬 테스트 시 배포 서버 사용
+  : '/api/ai';
+
+function getUserApiKey() {
+  return localStorage.getItem('userApiKey') || '';
+}
+function saveApiKey() {
+  const key = document.getElementById('user-api-key').value.trim();
+  if (!key) { showApiKeyMsg('API 키를 입력해주세요.', 'warn'); return; }
+  if (!key.startsWith('sk-ant-')) { showApiKeyMsg('올바른 Anthropic API 키 형식이 아닙니다. (sk-ant-로 시작)', 'warn'); return; }
+  localStorage.setItem('userApiKey', key);
+  showApiKeyMsg('✅ API 키가 저장되었습니다. 이제 AI 분석을 무제한으로 사용할 수 있습니다!', 'ok');
+  loadQuotaStatus();
+}
+function clearApiKey() {
+  localStorage.removeItem('userApiKey');
+  document.getElementById('user-api-key').value = '';
+  showApiKeyMsg('🗑️ API 키가 삭제되었습니다. 하루 3회 무료 모드로 전환됩니다.', 'info');
+  loadQuotaStatus();
+}
+function showApiKeyMsg(msg, type) {
+  const el = document.getElementById('apikey-msg');
+  if (!el) return;
+  const colors = { ok:'var(--green-bg)', warn:'var(--red-bg)', info:'var(--blue-bg)' };
+  const borders = { ok:'rgba(26,150,71,0.3)', warn:'rgba(214,43,43,0.3)', info:'rgba(26,111,212,0.3)' };
+  el.style.cssText = `display:block;padding:12px;border-radius:8px;font-size:14px;font-weight:700;background:${colors[type]};border:2px solid ${borders[type]}`;
+  el.textContent = msg;
+  setTimeout(() => el.style.display='none', 4000);
+}
+async function loadQuotaStatus() {
+  const box = document.getElementById('quota-status-box');
+  if (!box) return;
+  const userKey = getUserApiKey();
+  if (userKey) {
+    box.innerHTML = `<span style="color:#7C3AED">🔑 본인 API 키 사용 중 — 무제한</span>`;
+    document.getElementById('user-api-key').value = userKey;
+    updateAllQuotaBanners('🔑 본인 API 키 사용 중 — 무제한');
+    return;
+  }
+  try {
+    const res = await fetch(API_BASE, { method: 'GET' });
+    const d = await res.json();
+    const remain = d.remaining ?? 3;
+    const color = remain > 0 ? 'var(--green)' : 'var(--red)';
+    box.innerHTML = `<span style="color:${color}">오늘 남은 무료 AI 분석: <strong>${remain}/${d.quota ?? 3}회</strong></span>`;
+    updateAllQuotaBanners(`오늘 AI 분석 ${remain}회 남음 — 무료 제공 (하루 ${d.quota ?? 3}회)`);
+  } catch(e) {
+    box.innerHTML = `<span style="color:var(--text3)">서버 연결 확인 중...</span>`;
+  }
+}
+function updateAllQuotaBanners(msg) {
+  ['rep-quota-msg','stl-quota-msg'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = msg;
+  });
+}
+async function callAI(body) {
+  const userKey = getUserApiKey();
+  const headers = { 'Content-Type': 'application/json' };
+  if (userKey) headers['X-User-Api-Key'] = userKey;
+  const res = await fetch(API_BASE, { method:'POST', headers, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'AI 오류');
+  if (data._remaining !== undefined) updateAllQuotaBanners(`오늘 AI 분석 ${data._remaining}회 남음`);
+  return data;
+}
+
+/* ══════════════ ⏱️ 타임라인 ══════════════ */
+function getTimeline() {
+  try { return JSON.parse(localStorage.getItem('accidentTimeline') || '[]'); } catch(e) { return []; }
+}
+function saveTimeline(list) {
+  localStorage.setItem('accidentTimeline', JSON.stringify(list));
+}
+function addTimelineEvent(autoText, autoIcon) {
+  const text = autoText || document.getElementById('tl-text')?.value?.trim();
+  if (!text) { alert('내용을 입력해주세요.'); return; }
+  const list = getTimeline();
+  list.push({ time: new Date().toISOString(), text, icon: autoIcon || '📝', auto: !!autoText });
+  saveTimeline(list);
+  if (!autoText) document.getElementById('tl-text').value = '';
+  renderTimeline();
+}
+function renderTimeline() {
+  const wrap = document.getElementById('timeline-list');
+  if (!wrap) return;
+  const list = getTimeline();
+  if (!list.length) {
+    wrap.innerHTML = `<div class="card" style="text-align:center;padding:28px;color:var(--text3)">
+      <div style="font-size:40px;margin-bottom:10px">⏱️</div>
+      <div style="font-weight:700">아직 기록이 없습니다</div>
+      <div style="font-size:13px;margin-top:6px">현장기록을 완료하면 자동으로 첫 기록이 생성됩니다</div>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = list.map((ev, i) => {
+    const dt = new Date(ev.time);
+    const dateStr = `${dt.getMonth()+1}/${dt.getDate()} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
+    return `<div style="display:flex;gap:12px;margin-bottom:12px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+        <div style="width:38px;height:38px;border-radius:50%;background:${ev.auto?'var(--blue)':'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${ev.icon}</div>
+        ${i<list.length-1?`<div style="width:2px;flex:1;background:var(--border);margin:4px 0"></div>`:''}
+      </div>
+      <div style="flex:1;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:${i<list.length-1?'0':'0'}">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">${dateStr} ${ev.auto?'<span style="background:var(--blue-bg);color:var(--blue);padding:2px 6px;border-radius:4px;font-size:11px">자동</span>':''}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">${ev.text}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function clearTimeline() {
+  if (!confirm('타임라인 기록을 모두 삭제할까요?')) return;
+  localStorage.removeItem('accidentTimeline');
+  renderTimeline();
+}
+function printTimeline() {
+  const list = getTimeline();
+  if (!list.length) { alert('기록이 없습니다.'); return; }
+  const win = window.open('', '_blank', 'width=700,height=900');
+  const rows = list.map(ev => {
+    const dt = new Date(ev.time);
+    const dateStr = `${dt.getFullYear()}-${dt.getMonth()+1}-${dt.getDate()} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
+    return `<tr><td style="width:140px;color:#555;font-size:13px">${dateStr}</td><td>${ev.icon} ${ev.text}</td></tr>`;
+  }).join('');
+  win.document.write(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>사고 타임라인</title>
+  <style>body{font-family:'Noto Sans KR',sans-serif;padding:30px;max-width:700px;margin:0 auto}
+  h1{font-size:20px;font-weight:900;margin-bottom:20px}
+  table{width:100%;border-collapse:collapse}
+  td{padding:10px 12px;border-bottom:1px solid #eee;vertical-align:top}
+  tr:first-child td{background:#f5f7fa;font-weight:700}
+  .no-print{text-align:center;margin-top:24px}
+  @media print{.no-print{display:none}}</style></head><body>
+  <h1>⏱️ 교통사고 타임라인</h1>
+  <table><tr><td>일시</td><td>내용</td></tr>${rows}</table>
+  <div class="no-print"><button onclick="window.print()" style="padding:12px 32px;background:#1A6FD4;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer">🖨️ 인쇄 / PDF 저장</button></div>
+  </body></html>`);
+  win.document.close(); win.focus();
+}
+
+/* ══════════════ 🪪 공유 카드 ══════════════ */
+function generateShareCard() {
+  let info = {};
+  try { info = JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) {}
+  const veh = (info.vehicles || [])[info.activeVehIdx || 0] || {};
+  const data = {
+    name: info.name || D.myName || '미입력',
+    phone: info.phone || D.myPhone || '미입력',
+    plate: veh.plate || D.myPlate || '미입력',
+    car: veh.car || D.myCar || '미입력',
+    insurer: veh.insurer || D.myInsurer || '미입력',
+    policy: veh.policy || D.myPolicy || '미입력',
+    location: D.location || '미입력',
+    datetime: D.datetime ? D.datetime.replace('T',' ').slice(0,16) : new Date().toLocaleString('ko-KR')
+  };
+  const wrap = document.getElementById('share-card-wrap');
+  wrap.innerHTML = `
+    <div id="share-card" style="background:linear-gradient(135deg,#1A6FD4,#0F4A8A);border-radius:16px;padding:24px;color:#fff">
+      <div style="font-size:13px;font-weight:700;opacity:0.8;margin-bottom:16px;letter-spacing:1px">🚨 교통사고 당사자 정보</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <div style="font-size:11px;opacity:0.7;margin-bottom:3px">성명</div>
+          <div style="font-size:20px;font-weight:900">${data.name}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;opacity:0.7;margin-bottom:3px">연락처</div>
+          <div style="font-size:20px;font-weight:900">${data.phone}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;opacity:0.7;margin-bottom:3px">차량번호</div>
+          <div style="font-size:22px;font-weight:900;letter-spacing:2px">${data.plate}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;opacity:0.7;margin-bottom:3px">차종</div>
+          <div style="font-size:16px;font-weight:700">${data.car}</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:12px;margin-bottom:12px">
+        <div style="font-size:11px;opacity:0.7;margin-bottom:4px">보험사 / 증권번호</div>
+        <div style="font-size:17px;font-weight:900">${data.insurer} ${data.policy ? '/ '+data.policy : ''}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;opacity:0.85">
+        📍 ${data.location}<br>🕐 ${data.datetime}
+      </div>
+    </div>`;
+}
+function printShareCard() {
+  const card = document.getElementById('share-card');
+  if (!card) { alert('먼저 카드를 생성하세요.'); return; }
+  const win = window.open('', '_blank', 'width=500,height=700');
+  win.document.write(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>사고 공유 카드</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+  body{font-family:'Noto Sans KR',sans-serif;padding:30px;background:#f5f5f5;display:flex;justify-content:center}
+  .no-print{text-align:center;margin-top:20px}@media print{.no-print{display:none}body{background:#fff}}</style></head><body>
+  ${card.outerHTML}
+  <div class="no-print"><button onclick="window.print()" style="padding:12px 32px;background:#1A6FD4;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;margin-top:16px">🖨️ 인쇄 / 저장</button></div>
+  </body></html>`);
+  win.document.close(); win.focus();
+}
+
+/* ══════════════ 🔧 수리비 AI ══════════════ */
+async function runRepairAI() {
+  const car = document.getElementById('rep-car').value.trim();
+  const damage = document.getElementById('rep-damage').value.trim();
+  if (!car || !damage) { alert('차종과 파손 부위를 입력해주세요.'); return; }
+  const shops = Array.from(document.querySelectorAll('.rep-shop'));
+  const prices = Array.from(document.querySelectorAll('.rep-price'));
+  const estimates = shops.map((s,i) => ({
+    shop: s.value.trim(), price: prices[i]?.value ? parseInt(prices[i].value) : null
+  })).filter(e => e.shop || e.price);
+  if (!estimates.length) { alert('공업사 견적을 최소 1곳 입력해주세요.'); return; }
+  const memo = document.getElementById('rep-memo').value.trim();
+  const mileage = document.getElementById('rep-mileage').value.trim();
+  document.getElementById('rep-loading').className = 'ai-loading show';
+  document.getElementById('rep-result').innerHTML = '';
+  const prompt = `교통사고 차량 수리비 분석을 요청합니다.
+차종: ${car}${mileage?' / 주행거리: '+mileage:''}
+파손 부위: ${damage}
+공업사 견적: ${estimates.map(e=>`${e.shop||'무명'} ${e.price?e.price.toLocaleString()+'원':''}`).join(', ')}
+${memo?'추가 메모: '+memo:''}
+
+JSON으로만 응답:
+{"summary":"한줄요약","avgPrice":숫자,"minPrice":숫자,"maxPrice":숫자,"fairRange":"적정 범위 문자열","verdict":"적정|약간과다|과다청구","verdictReason":"판단 근거 2문장","eachAnalysis":[{"shop":"공업사명","price":숫자,"comment":"코멘트"}],"tips":["주의사항1","주의사항2"],"redFlags":["과다청구 신호가 있다면"],"recommendation":"최종 추천 공업사 or 행동 제안"}`;
+  try {
+    const data = await callAI({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] });
+    const raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const d = safeParseAI(raw);
+    const verdictColor = d.verdict==='적정'?'var(--green)':d.verdict==='약간과다'?'var(--orange)':'var(--red)';
+    const verdictBg = d.verdict==='적정'?'var(--green-bg)':d.verdict==='약간과다'?'#FFF4E5':'var(--red-bg)';
+    let html = `
+      <div class="card" style="border-color:${verdictColor};border-width:3px">
+        <div style="font-size:20px;font-weight:900;color:${verdictColor};margin-bottom:6px">${d.verdict==='적정'?'✅':d.verdict==='약간과다'?'⚠️':'🚨'} ${d.verdict}</div>
+        <div style="font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:12px">${d.verdictReason||''}</div>
+        <div style="background:${verdictBg};border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+          <div><div style="font-size:11px;color:var(--text3)">최저</div><div style="font-size:16px;font-weight:900">${d.minPrice?d.minPrice.toLocaleString()+'원':'—'}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">평균</div><div style="font-size:18px;font-weight:900;color:${verdictColor}">${d.avgPrice?d.avgPrice.toLocaleString()+'원':'—'}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">최고</div><div style="font-size:16px;font-weight:900">${d.maxPrice?d.maxPrice.toLocaleString()+'원':'—'}</div></div>
+        </div>
+        ${d.fairRange?`<div style="text-align:center;margin-top:8px;font-size:13px;color:var(--text2)">적정 범위: <strong>${d.fairRange}</strong></div>`:''}
+      </div>`;
+    if (d.eachAnalysis?.length) {
+      html += `<div class="card"><div class="card-title">🏪 공업사별 분석</div>`;
+      d.eachAnalysis.forEach(e => {
+        html += `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${e.shop}</strong> ${e.price?e.price.toLocaleString()+'원':''}<br><span style="font-size:13px;color:var(--text2)">${e.comment||''}</span></div>`;
+      });
+      html += '</div>';
+    }
+    if (d.redFlags?.length) {
+      html += `<div class="card" style="background:var(--red-bg);border-color:rgba(214,43,43,0.3)"><div class="card-title" style="color:var(--red)">🚨 과다청구 의심 신호</div>${d.redFlags.map(r=>`<div style="font-size:14px;color:var(--text2);margin-bottom:6px">• ${r}</div>`).join('')}</div>`;
+    }
+    if (d.tips?.length) {
+      html += `<div class="card"><div class="card-title">💡 수리 시 주의사항</div>${d.tips.map(t=>`<div style="font-size:14px;color:var(--text2);margin-bottom:6px">• ${t}</div>`).join('')}</div>`;
+    }
+    if (d.recommendation) {
+      html += `<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="card-title" style="color:var(--blue)">📌 최종 추천</div><div style="font-size:15px;color:var(--text2);line-height:1.7">${d.recommendation}</div></div>`;
+    }
+    html += `<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">※ AI 참고용 분석입니다. 실제 수리비는 차량 상태에 따라 다를 수 있습니다.</div>`;
+    document.getElementById('rep-result').innerHTML = html;
+  } catch(e) {
+    document.getElementById('rep-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${e.message}</div>`;
+  }
+  document.getElementById('rep-loading').className = 'ai-loading';
+}
+
+/* ══════════════ 💰 합의금 AI ══════════════ */
+async function runSettleAI() {
+  const injury = document.getElementById('stl-injury').value.trim();
+  if (!injury) { alert('부상 내용을 입력해주세요.'); return; }
+  const indays = document.getElementById('stl-indays').value || '0';
+  const outdays = document.getElementById('stl-outdays').value || '0';
+  const medcost = document.getElementById('stl-medcost').value || '0';
+  const lostdays = document.getElementById('stl-lostdays').value || '0';
+  const job = document.getElementById('stl-job').value.trim();
+  const myfault = document.getElementById('stl-myfault').value || '0';
+  const opfault = document.getElementById('stl-opfault').value || '100';
+  const extra = document.getElementById('stl-extra').value.trim();
+  document.getElementById('stl-loading').className = 'ai-loading show';
+  document.getElementById('stl-result').innerHTML = '';
+  const prompt = `교통사고 합의금 적정 범위를 분석해주세요.
+부상: ${injury}
+입원 ${indays}일 / 통원 ${outdays}일
+치료비: ${parseInt(medcost).toLocaleString()}원
+휴업 ${lostdays}일 / 직업·소득: ${job||'미입력'}
+과실: 나 ${myfault}% / 상대 ${opfault}%
+${extra?'추가: '+extra:''}
+
+JSON으로만 응답:
+{"summary":"한줄요약","minSettle":숫자,"maxSettle":숫자,"recommendSettle":숫자,"breakdown":{"painDamage":"위자료 범위","incomeLoss":"휴업손해","medExpense":"치료비 정산","total":"합계"},"faultAdjust":"과실 공제 설명","strategy":"협상 전략 2문장","warnings":["주의사항"],"doList":["해야할것"],"dontList":["하지말것"]}`;
+  try {
+    const data = await callAI({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] });
+    const raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const d = safeParseAI(raw);
+    const fmt = n => n ? parseInt(n).toLocaleString()+'원' : '—';
+    let html = `
+      <div class="card" style="border-color:var(--green);border-width:3px">
+        <div style="font-size:14px;font-weight:700;color:var(--text3);margin-bottom:8px">💰 적정 합의금 범위</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;background:var(--green-bg);border-radius:8px;padding:14px">
+          <div><div style="font-size:11px;color:var(--text3)">최소</div><div style="font-size:16px;font-weight:900">${fmt(d.minSettle)}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">권장</div><div style="font-size:20px;font-weight:900;color:var(--green)">${fmt(d.recommendSettle)}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">최대</div><div style="font-size:16px;font-weight:900">${fmt(d.maxSettle)}</div></div>
+        </div>
+        ${d.faultAdjust?`<div style="margin-top:10px;font-size:13px;color:var(--text2);background:var(--bg2);padding:10px;border-radius:8px">⚖️ ${d.faultAdjust}</div>`:''}
+      </div>`;
+    if (d.breakdown) {
+      html += `<div class="card"><div class="card-title">📊 항목별 내역</div>
+        ${Object.entries(d.breakdown).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px"><span>${{painDamage:'위자료',incomeLoss:'휴업손해',medExpense:'치료비',total:'합계'}[k]||k}</span><strong>${v}</strong></div>`).join('')}
+      </div>`;
+    }
+    if (d.strategy) {
+      html += `<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="card-title" style="color:var(--blue)">🛡️ 협상 전략</div><div style="font-size:15px;color:var(--text2);line-height:1.7">${d.strategy}</div></div>`;
+    }
+    if (d.doList?.length || d.dontList?.length) {
+      html += `<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ 해야 할 것</div>${(d.doList||[]).map(t=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">• ${t}</div>`).join('')}</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">❌ 하지 말 것</div>${(d.dontList||[]).map(t=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">• ${t}</div>`).join('')}</div>
+      </div></div>`;
+    }
+    html += `<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">※ AI 참고용 분석입니다. 실제 합의금은 전문 변호사·손해사정사와 확인하세요.</div>`;
+    document.getElementById('stl-result').innerHTML = html;
+  } catch(e) {
+    document.getElementById('stl-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${e.message}</div>`;
+  }
+  document.getElementById('stl-loading').className = 'ai-loading';
+}
+
+/* ══════════════ 📢 알림공유 ══════════════ */
+function generateNotifyMsg() {
+  const name = document.getElementById('ntf-name').value.trim() || '보호자';
+  const location = D.location || '위치 미확인';
+  const datetime = D.datetime ? D.datetime.replace('T',' ').slice(0,16) : new Date().toLocaleString('ko-KR');
+  const types = D.types?.join(', ') || '교통사고';
+  const myinjury = D.myInjury || '확인 중';
+  const msg = `[교통사고 발생 알림]\n\n${name}에게 사고 사실을 알립니다.\n\n🕐 일시: ${datetime}\n📍 위치: ${location}\n🚗 사고유형: ${types}\n🏥 부상상태: ${myinjury}\n\n현재 현장에 있습니다. 연락 부탁드립니다.`;
+  document.getElementById('ntf-preview').textContent = msg;
+  const phone = document.getElementById('ntf-phone').value.trim().replace(/-/g,'');
+  const encoded = encodeURIComponent(msg);
+  document.getElementById('ntf-sms-btn').href = `sms:${phone}?body=${encoded}`;
+  document.getElementById('ntf-kakao-btn').onclick = function(e) {
+    e.preventDefault();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(msg).then(()=>alert('📋 메시지가 복사되었습니다.\n카카오톡 나에게 보내기에 붙여넣으세요.')).catch(()=>fallbackCopy(msg));
+    } else { fallbackCopy(msg); }
+  };
 }
 
 /* ══════════════ INIT ══════════════ */

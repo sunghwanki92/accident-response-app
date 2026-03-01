@@ -1,0 +1,9 @@
+{
+  "name": "accident-response-app",
+  "version": "1.0.0",
+  "description": "교통사고 대응 올인원 웹앱",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
