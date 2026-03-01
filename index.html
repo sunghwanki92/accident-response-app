@@ -2211,7 +2211,7 @@ function showCarSuggest(inputId, boxId) {
 
   const results = [...full, ...modelOnly].slice(0,12);
   if(!results.length){box.className='suggest-box';return;}
-  box.innerHTML=results.map(r=>{const s=r.replace(/'/g,"\\'");return`<div class="suggest-item" onmousedown="pickSuggest('${inputId}','${boxId}','${s}')">${r}</div>`;}).join('');
+  box.innerHTML=results.map(r=>`<div class="suggest-item" data-input="${inputId}" data-box="${boxId}" data-val="${r.replace(/"/g,'&quot;')}">${r}</div>`).join('');
   box.className='suggest-box open';
 }
 
@@ -2223,16 +2223,32 @@ function showInsurerSuggest(inputId, boxId) {
     i.name.toLowerCase().includes(q) || i.tel.includes(q)  // 보험사명도 소문자 비교
   ).slice(0,6);
   if(!results.length){box.className='suggest-box';return;}
-  box.innerHTML=results.map(r=>`<div class="suggest-item" onmousedown="pickSuggest('${inputId}','${boxId}','${r.name}')">${r.name} <span style="color:var(--text3);font-size:12px">${r.tel}</span></div>`).join('');
+  box.innerHTML=results.map(r=>`<div class="suggest-item" data-input="${inputId}" data-box="${boxId}" data-val="${r.name.replace(/"/g,'&quot;')}">${r.name} <span style="color:var(--text3);font-size:12px">${r.tel}</span></div>`).join('');
   box.className='suggest-box open';
 }
 
 function pickSuggest(inputId, boxId, val) {
   const el=document.getElementById(inputId);
-  if(el) el.value=val;
+  if(el) { el.value=val; el.dispatchEvent(new Event('input')); }
   const box=document.getElementById(boxId);
   if(box) box.className='suggest-box';
 }
+
+// 이벤트 위임 — suggest-item 터치/클릭 시 공백 포함 차종명 안전하게 처리
+document.addEventListener('mousedown', e => {
+  const item = e.target.closest('.suggest-item[data-val]');
+  if(item) {
+    e.preventDefault();
+    pickSuggest(item.dataset.input, item.dataset.box, item.dataset.val);
+  }
+});
+document.addEventListener('touchstart', e => {
+  const item = e.target.closest('.suggest-item[data-val]');
+  if(item) {
+    e.preventDefault();
+    pickSuggest(item.dataset.input, item.dataset.box, item.dataset.val);
+  }
+}, {passive: false});
 
 document.addEventListener('click', e => {
   if(!e.target.closest('[id]')||!e.target.closest('[id]').classList?.contains('suggest-box'))
