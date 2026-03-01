@@ -1749,6 +1749,11 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <h2>내 정보 공유 카드</h2>
     <p>사고 현장에서 상대방에게 보여주세요. QR코드로 정보를 빠르게 공유할 수 있습니다</p>
   </div>
+  <!-- 차량 선택 -->
+  <div id="share-veh-selector" style="display:none;margin-bottom:12px">
+    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px">🚗 어느 차량 카드를 생성할까요?</div>
+    <div id="share-veh-btns" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
   <div id="share-card-wrap" style="margin-bottom:14px"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
     <button class="btn-primary" style="background:#0891B2" onclick="generateShareCard()">🔄 카드 생성</button>
@@ -3809,10 +3814,51 @@ function printTimeline() {
 }
 
 /* ══════════════ 🪪 공유 카드 ══════════════ */
+function renderShareVehSelector() {
+  let info = {};
+  try { info = JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) {}
+  const vehs = info.vehicles || [];
+  const selector = document.getElementById('share-veh-selector');
+  const btnsEl = document.getElementById('share-veh-btns');
+  if (!selector || !btnsEl) return;
+
+  if (vehs.length < 2) {
+    selector.style.display = 'none';
+    window._shareVehIdx = info.activeVehIdx || 0;
+    return;
+  }
+
+  selector.style.display = 'block';
+  const cur = window._shareVehIdx !== undefined ? window._shareVehIdx : (info.activeVehIdx || 0);
+  const colors = ['#1A6FD4','#1A9647','#D4720A','#9B51E0','#D62B2B','#0891B2'];
+
+  btnsEl.innerHTML = vehs.map((v, i) => {
+    const label = v.nickname || v.plate || ('차량 ' + (i+1));
+    const color = colors[i % colors.length];
+    const active = i === cur;
+    return `<button onclick="selectShareVeh(${i})" style="
+      padding:10px 16px;border-radius:10px;border:2px solid ${active ? color : 'var(--border)'};
+      background:${active ? color : 'var(--bg)'};color:${active ? '#fff' : 'var(--text2)'};
+      font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer;
+      display:flex;flex-direction:column;align-items:flex-start;gap:2px;transition:all 0.15s">
+      <span>${label}</span>
+      <span style="font-size:11px;opacity:0.75">${v.insurer || '보험사 미입력'}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectShareVeh(idx) {
+  window._shareVehIdx = idx;
+  renderShareVehSelector();
+  generateShareCard();
+}
+
 function generateShareCard() {
   let info = {};
   try { info = JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) {}
-  const veh = (info.vehicles || [])[info.activeVehIdx || 0] || {};
+  renderShareVehSelector();
+  const vehIdx = window._shareVehIdx !== undefined ? window._shareVehIdx : (info.activeVehIdx || 0);
+  const veh = (info.vehicles || [])[vehIdx] || {};
   const data = {
     name: info.name || D.myName || '미입력',
     phone: info.phone || D.myPhone || '미입력',
