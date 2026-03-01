@@ -131,6 +131,64 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 /* ════ CONTENT WRAPPER ════ */
 .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 80px; }
 
+/* ════ SOS 고정 버튼 ════ */
+.sos-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+.sos-main-btn {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background: var(--red);
+  border: none;
+  box-shadow: 0 4px 20px rgba(214,43,43,0.5);
+  font-size: 26px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  animation: sos-pulse 2s infinite;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+@keyframes sos-pulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(214,43,43,0.5); }
+  50%      { box-shadow: 0 4px 32px rgba(214,43,43,0.85); transform: scale(1.06); }
+}
+.sos-menu {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+.sos-menu.open { display: flex; }
+.sos-menu-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px;
+  border-radius: 30px;
+  border: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* ════ 완료 화면 지도 ════ */
+.complete-map-wrap {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid var(--border);
+  margin-bottom: 14px;
+}
+.complete-map-wrap iframe {
+  width: 100%; height: 220px; border: none; display: block;
+}
+
 /* ════ SECTION HEADER ════ */
 .page-header {
   margin-bottom: 24px; padding: 20px;
@@ -805,6 +863,27 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   </div>
 </nav>
 
+<!-- ═══ SOS 고정 버튼 ═══ -->
+<div class="sos-fab" id="sos-fab">
+  <div class="sos-menu" id="sos-menu">
+    <a href="tel:112" class="sos-menu-btn" style="background:#1A6FD4;color:#fff">
+      🚔 <span>112 경찰</span>
+    </a>
+    <a href="tel:119" class="sos-menu-btn" style="background:var(--red);color:#fff">
+      🚑 <span>119 구급</span>
+    </a>
+    <a href="tel:1588-5114" id="sos-my-insurer" class="sos-menu-btn" style="background:var(--orange);color:#fff;display:none">
+      📞 <span id="sos-insurer-label">내 보험사</span>
+    </a>
+    <button onclick="toggleSOS()" class="sos-menu-btn" style="background:var(--bg3);color:var(--text2)">
+      ✕ <span>닫기</span>
+    </button>
+  </div>
+  <button class="sos-main-btn" onclick="toggleSOS()" title="긴급 SOS">
+    🆘
+  </button>
+</div>
+
 
 <!-- ═══ PAGE 1: 현장기록 ═══ -->
 <div class="page active" id="page-quick">
@@ -1144,6 +1223,17 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         <div class="complete-sub">입력하신 정보가 저장되었습니다</div>
       </div>
     </div>
+
+    <!-- 사고 위치 지도 미리보기 -->
+    <div id="complete-map-section" style="display:none;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        📍 <span id="complete-map-addr">사고 위치</span>
+      </div>
+      <div class="complete-map-wrap">
+        <iframe id="complete-map-iframe" src="" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
     <div style="margin-bottom:14px">
       <button class="btn-secondary" onclick="resetRecord()" style="font-size:14px;padding:12px">↩ 다시 입력하기</button>
     </div>
@@ -2278,6 +2368,73 @@ function applyVehicleToStep2(vehIdx) {
   });
 }
 
+/* ══════════════ SOS FAB ══════════════ */
+function toggleSOS() {
+  const menu = document.getElementById('sos-menu');
+  menu.classList.toggle('open');
+}
+// 외부 클릭 시 SOS 메뉴 닫기
+document.addEventListener('click', function(e) {
+  const fab = document.getElementById('sos-fab');
+  if (fab && !fab.contains(e.target)) {
+    document.getElementById('sos-menu').classList.remove('open');
+  }
+});
+function updateSOSInsurer() {
+  // 내 정보 or 현장기록에서 보험사 가져와 SOS에 반영
+  let insurerName = D.myInsurer;
+  if (!insurerName) {
+    try {
+      const info = JSON.parse(localStorage.getItem('myInfo') || '{}');
+      const veh = (info.vehicles || [])[info.activeVehIdx || 0];
+      if (veh) insurerName = veh.insurer;
+    } catch(e) {}
+  }
+  if (!insurerName) return;
+  const q = insurerName.toLowerCase();
+  const found = INSURER_DATA.find(i =>
+    i.name.toLowerCase().includes(q) || q.includes(i.name.toLowerCase())
+  );
+  const btn = document.getElementById('sos-my-insurer');
+  const lbl = document.getElementById('sos-insurer-label');
+  if (found && btn) {
+    btn.href = 'tel:' + found.tel;
+    lbl.textContent = found.name + ' ' + found.tel;
+    btn.style.display = 'flex';
+  }
+}
+
+/* ══════════════ 완료 화면 지도 ══════════════ */
+function renderCompleteMap() {
+  const section = document.getElementById('complete-map-section');
+  const iframe  = document.getElementById('complete-map-iframe');
+  const addrEl  = document.getElementById('complete-map-addr');
+  if (!section || !iframe) return;
+
+  // GPS 좌표가 있으면 좌표로, 없으면 주소로 지도 표시
+  const loc = D.location || '';
+  const latMatch = loc.match(/(\d+\.\d+),\s*(\d+\.\d+)/);
+
+  if (D._gpsLat && D._gpsLng) {
+    // GPS 좌표 직접 사용
+    iframe.src = `https://maps.google.com/maps?q=${D._gpsLat},${D._gpsLng}&z=17&output=embed`;
+    addrEl.textContent = loc || `${D._gpsLat}, ${D._gpsLng}`;
+    section.style.display = 'block';
+  } else if (latMatch) {
+    iframe.src = `https://maps.google.com/maps?q=${latMatch[1]},${latMatch[2]}&z=17&output=embed`;
+    addrEl.textContent = loc;
+    section.style.display = 'block';
+  } else if (loc && loc.length > 3) {
+    // 주소 텍스트로 검색
+    const encoded = encodeURIComponent(loc);
+    iframe.src = `https://maps.google.com/maps?q=${encoded}&z=16&output=embed`;
+    addrEl.textContent = loc;
+    section.style.display = 'block';
+  } else {
+    section.style.display = 'none';
+  }
+}
+
 /* ══════════════ STEP WIZARD ══════════════ */
 let currentStep=0;
 
@@ -2307,7 +2464,16 @@ function nextStep(to){
 function prevStep(to){showPanel(to);window.scrollTo(0,0);}
 
 function collectStep(from){
-  if(from===0){D.datetime=document.getElementById('f-datetime').value;D.location=document.getElementById('f-location').value;}
+  if(from===0){
+    D.datetime=document.getElementById('f-datetime').value;
+    D.location=document.getElementById('f-location').value;
+    // GPS 좌표 저장 (지도 미리보기용)
+    const locInput = document.getElementById('f-location');
+    if (locInput && locInput._gpsLat) {
+      D._gpsLat = locInput._gpsLat;
+      D._gpsLng = locInput._gpsLng;
+    }
+  }
   else if(from===1){D.myPlate=document.getElementById('f-myplate').value;D.myCar=document.getElementById('f-mycar').value;D.myName=document.getElementById('f-myname').value;D.myPhone=document.getElementById('f-myphone').value;D.myInsurer=document.getElementById('f-myinsurer').value;D.myPolicy=document.getElementById('f-mypolicy').value;}
   else if(from===2){D.opPlate=document.getElementById('f-opplate').value;D.opCar=document.getElementById('f-opcar').value;D.opName=document.getElementById('f-opname').value;D.opPhone=document.getElementById('f-opphone').value;D.opInsurer=document.getElementById('f-opinsurer').value;D.opPolicy=document.getElementById('f-oppolicy').value;D.witness=document.getElementById('f-witness').value;}
   else if(from===3){D.injuryDetail=document.getElementById('f-injurydetail').value;}
@@ -2339,8 +2505,10 @@ function finishRecord(){
 
   showPanel('complete');
 
-  // 완료 화면에 내 보험사 번호 즉시 표시
-  // 우선순위: 1) 방금 입력한 보험사 2) 내 정보에 등록된 차량 보험사
+  // 완료 화면 — 지도 미리보기
+  renderCompleteMap();
+
+  // 완료 화면 — 내 보험사 번호 표시
   const insurerFromInput = D.myInsurer;
   if (insurerFromInput) {
     highlightMyInsurerCall(insurerFromInput);
@@ -2352,6 +2520,9 @@ function finishRecord(){
       if (veh && veh.insurer) highlightMyInsurerCall(veh.insurer);
     } catch(e){}
   }
+
+  // SOS 버튼 보험사 업데이트
+  updateSOSInsurer();
 
   window.scrollTo(0,0);
 }
@@ -3088,8 +3259,13 @@ function getGPSLocation() {
         const addr = buildKoreanAddress(data, lat, lon);
 
         // 필드에 자동 입력
-        document.getElementById('f-location').value = addr;
+        const locEl = document.getElementById('f-location');
+        locEl.value = addr;
+        locEl._gpsLat = lat;  // 좌표 저장 (완료 화면 지도용)
+        locEl._gpsLng = lon;
         D.location = addr;
+        D._gpsLat  = lat;
+        D._gpsLng  = lon;
 
         // 지도 미리보기 (Google Maps embed)
         const mapEl  = document.getElementById('gps-map');
@@ -3186,7 +3362,7 @@ function resetGpsBtn() {
 
 /* ══════════════ INIT ══════════════ */
 window.addEventListener('load',()=>{
-  loadSaved();loadMyInfo();renderVehicleSelectInQuick();applyMyInfoToRecord();checkFirstRun();
+  loadSaved();loadMyInfo();renderVehicleSelectInQuick();applyMyInfoToRecord();checkFirstRun();updateSOSInsurer();
   const now=new Date(),iso=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
   const dt=document.getElementById('f-datetime');if(dt)dt.value=iso;
 });
