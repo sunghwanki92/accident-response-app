@@ -1750,9 +1750,17 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <p>사고 현장에서 상대방에게 보여주세요. QR코드로 정보를 빠르게 공유할 수 있습니다</p>
   </div>
   <div id="share-card-wrap" style="margin-bottom:14px"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
     <button class="btn-primary" style="background:#0891B2" onclick="generateShareCard()">🔄 카드 생성</button>
     <button class="btn-secondary" onclick="printShareCard()">🖨️ 인쇄/저장</button>
+  </div>
+  <button id="qr-gen-btn" class="btn-primary" style="background:#7C3AED;display:none" onclick="toggleQR()">📱 QR코드 생성</button>
+  <div id="qr-section" style="display:none;margin-top:12px">
+    <div class="card" style="text-align:center;padding:24px">
+      <div style="font-size:14px;font-weight:700;color:var(--text2);margin-bottom:16px">📱 상대방이 스캔하면 내 정보를 바로 확인</div>
+      <div id="qr-container" style="display:inline-block;padding:16px;background:#fff;border-radius:12px;border:2px solid var(--border)"></div>
+      <div style="margin-top:12px;font-size:13px;color:var(--text3)">카메라 앱으로 QR코드를 스캔하세요</div>
+    </div>
   </div>
 </div>
 </div>
@@ -3844,6 +3852,84 @@ function generateShareCard() {
         📍 ${data.location}<br>🕐 ${data.datetime}
       </div>
     </div>`;
+
+  // QR 버튼 표시
+  const qrBtn = document.getElementById('qr-gen-btn');
+  if (qrBtn) qrBtn.style.display = 'block';
+
+  // QR 섹션 초기화 (카드 재생성 시)
+  const qrSec = document.getElementById('qr-section');
+  if (qrSec) qrSec.style.display = 'none';
+  if (qrBtn) qrBtn.textContent = '📱 QR코드 생성';
+
+  // QR용 텍스트 데이터 저장
+  window._shareQRData = `[교통사고 당사자 정보]\n성명: ${data.name}\n연락처: ${data.phone}\n차량번호: ${data.plate}\n차종: ${data.car}\n보험사: ${data.insurer}${data.policy?' / '+data.policy:''}\n장소: ${data.location}\n일시: ${data.datetime}`;
+}
+
+function toggleQR() {
+  const sec = document.getElementById('qr-section');
+  const btn = document.getElementById('qr-gen-btn');
+  if (!sec) return;
+
+  if (sec.style.display === 'none') {
+    sec.style.display = 'block';
+    btn.textContent = '📱 QR코드 닫기';
+    renderQR();
+    sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    sec.style.display = 'none';
+    btn.textContent = '📱 QR코드 생성';
+  }
+}
+
+function renderQR() {
+  const container = document.getElementById('qr-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const text = window._shareQRData || '정보 없음';
+
+  // QR 크기
+  const size = 200;
+
+  // qrcode.js 라이브러리 동적 로드
+  if (typeof QRCode === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    script.onload = () => { buildQR(container, text, size); };
+    script.onerror = () => { buildQRFallback(container, text); };
+    document.head.appendChild(script);
+  } else {
+    buildQR(container, text, size);
+  }
+}
+
+function buildQR(container, text, size) {
+  try {
+    new QRCode(container, {
+      text: text,
+      width: size,
+      height: size,
+      colorDark: '#0F4A8A',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    buildQRFallback(container, text);
+  }
+}
+
+function buildQRFallback(container, text) {
+  // Google Charts API 폴백
+  const encoded = encodeURIComponent(text);
+  const img = document.createElement('img');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}&color=0F4A8A`;
+  img.alt = 'QR코드';
+  img.style.cssText = 'width:200px;height:200px;display:block';
+  img.onerror = () => {
+    container.innerHTML = `<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:8px;font-size:13px;color:var(--text3);text-align:center;padding:16px">QR코드 생성 실패<br>인터넷을 확인하세요</div>`;
+  };
+  container.appendChild(img);
 }
 function printShareCard() {
   const card = document.getElementById('share-card');
