@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>교통사고 대응</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   DESIGN SYSTEM — 큰 글씨 / 흰 배경 / 직관적
+   20대~70대 모두 사용 가능
+   ════════════════════════════════════════ */
+:root {
+  --red:      #D62B2B;
+  --red-bg:   #FFF0F0;
+  --red-lt:   rgba(214,43,43,0.1);
+  --blue:     #1A6FD4;
+  --blue-bg:  #EFF6FF;
+  --blue-lt:  rgba(26,111,212,0.1);
+  --green:    #1A9647;
+  --green-bg: #EDFAF3;
+  --green-lt: rgba(26,150,71,0.1);
+  --orange:   #D4720A;
+  --yellow:   #B58A00;
+  --bg:       #FFFFFF;
+  --bg2:      #F5F6F8;
+  --bg3:      #EDEEF1;
+  --border:   #D8DAE0;
+  --border2:  #B0B3BC;
+  --text:     #141418;
+  --text2:    #4A4D5A;
+  --text3:    #8A8D9A;
+  --shadow:   0 2px 12px rgba(0,0,0,0.08);
+  --shadow2:  0 4px 24px rgba(0,0,0,0.12);
+  --radius:   16px;
+  --radius-sm:10px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:rgba(214,43,43,0.1); }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg2);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 공통 입력 요소 ── */
+input, textarea, select {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+input:focus, textarea:focus { border-color: var(--blue); }
+input.err, textarea.err { border-color: var(--red) !important; }
+textarea { resize: vertical; line-height: 1.7; }
+label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); display:block; margin-bottom:7px; }
+
+.field { margin-bottom: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:360px) { .field-row { grid-template-columns:1fr; } }
+
+/* ── 에러 ── */
+.field-err {
+  font-size:13px; color:var(--red); margin-top:5px;
+  padding:6px 10px; background:var(--red-bg);
+  border-radius:6px; border:1px solid rgba(214,43,43,0.25);
+}
+
+/* ════ NAV ════ */
+.nav {
+  position: sticky; top: 0; z-index: 300;
+  background: var(--bg);
+  border-bottom: 2px solid var(--border);
+  display: flex; align-items: center;
+  height: 60px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.nav-logo {
+  font-weight: 900; font-size: 17px; color: var(--red);
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0; padding: 0 14px;
+  height: 100%; border-right: 2px solid var(--border);
+  letter-spacing: -0.5px;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px; background: var(--red);
+  border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 17px;
+  animation: pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(214,43,43,0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(214,43,43,0); }
+}
+.nav-scroll {
+  display: flex; align-items: center;
+  overflow-x: auto; flex: 1; height: 100%;
+  gap: 4px; padding: 0 10px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.nav-scroll::-webkit-scrollbar { display: none; }
+.nav-tab {
+  padding: 8px 14px; border-radius: 10px; border: none;
+  background: none; color: var(--text2);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.nav-tab.active { background: var(--red); color: #fff; }
+.nav-tab:not(.active):hover { background: var(--bg2); color: var(--text); }
+
+/* ════ PAGES ════ */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ════ CONTENT WRAPPER ════ */
+.wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 80px; }
+
+/* ════ SECTION HEADER ════ */
+.page-header {
+  margin-bottom: 24px; padding: 20px;
+  background: var(--bg); border-radius: var(--radius);
+  border: 2px solid var(--border); box-shadow: var(--shadow);
+}
+.page-header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; color: var(--red);
+  background: var(--red-bg); padding: 5px 12px; border-radius: 100px;
+  border: 1px solid rgba(214,43,43,0.2); margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+.page-header h2 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }
+.page-header p { font-size: 15px; color: var(--text2); line-height: 1.6; }
+
+/* ════ CARD ════ */
+.card {
+  background: var(--bg); border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 16px; font-weight: 900; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-sub { font-size: 14px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
+
+/* ════ BUTTONS ════ */
+.btn-primary {
+  width: 100%; padding: 17px; border-radius: var(--radius-sm);
+  border: none; background: var(--red); color: #fff;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 17px; font-weight: 900; cursor: pointer;
+  transition: all 0.15s; letter-spacing: -0.3px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:hover { background: #b82222; }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-secondary {
+  width: 100%; padding: 15px; border-radius: var(--radius-sm);
+  border: 2px solid var(--border); background: var(--bg);
+  color: var(--text2); font-family: 'Noto Sans KR', sans-serif;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-secondary:hover { border-color: var(--border2); color: var(--text); }
+
+.btn-blue {
+  background: var(--blue); color: #fff; border-color: var(--blue);
+}
+.btn-blue:hover { background: #1558aa; }
+.btn-green {
+  background: var(--green); color: #fff; border-color: var(--green);
+}
+.btn-green:hover { background: #157a3c; }
+
+.btn-row { display: flex; gap: 10px; }
+.btn-row > * { flex: 1; }
+
+/* ════ STEP WIZARD ════ */
+.sos-banner {
+  background: var(--red); color: #fff;
+  padding: 16px 20px; border-radius: var(--radius);
+  margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 4px 16px rgba(214,43,43,0.3);
+}
+.sos-icon { font-size: 28px; flex-shrink: 0; }
+.sos-title { font-size: 17px; font-weight: 900; letter-spacing: -0.3px; }
+.sos-sub { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+
+.step-bar {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg); border: 2px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  margin-bottom: 16px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.step-bar::-webkit-scrollbar { display: none; }
+.step-item { display: flex; align-items: center; gap: 0; flex-shrink:0; }
+.step-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg3); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--text3);
+  transition: all 0.2s; flex-shrink: 0;
+}
+.step-dot.active { background: var(--red); border-color: var(--red); color: #fff; }
+.step-dot.done { background: var(--green); border-color: var(--green); color: #fff; font-size: 15px; }
+.step-label { font-size: 12px; color: var(--text3); margin-left: 6px; font-weight: 700; white-space:nowrap; }
+.step-label.active { color: var(--red); }
+.step-label.done  { color: var(--green); }
+.step-line { width: 24px; height: 2px; background: var(--border); margin: 0 4px; flex-shrink:0; }
+.step-line.done { background: var(--green); }
+
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+/* 선택 버튼 그리드 */
+.sel-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 4px;
+}
+.sel-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.sel-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.sel-btn {
+  border: 2px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); padding: 14px 8px;
+  cursor: pointer; text-align: center; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+.sel-btn:active { transform: scale(0.97); }
+.sel-btn.selected { border-color: var(--red); background: var(--red-bg); }
+.sel-btn .sb-icon { font-size: 26px; line-height: 1; }
+.sel-btn .sb-label { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.sel-btn .sb-sub { font-size: 11px; color: var(--text3); }
+.sel-btn.selected .sb-label { color: var(--red); }
+
+/* 인라인 선택 버튼 (날씨, 부상 등) */
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.tag-btn {
+  padding: 10px 16px; border-radius: 100px;
+  border: 2px solid var(--border); background: var(--bg);
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+  font-family: 'Noto Sans KR', sans-serif;
+  display: flex; align-items: center; gap: 6px;
+}
+.tag-btn.sel-none   { border-color: var(--text2); background: #F0F0F4; color: var(--text); }
+.tag-btn.sel-light  { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
+.tag-btn.sel-heavy  { border-color: var(--orange); background: #FFF4E5; color: var(--orange); }
+.tag-btn.sel-critical{ border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+/* 네비 버튼 — 상단 고정 */
+.step-nav {
+  display: flex; gap: 10px;
+  position: sticky; top: 60px; z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  padding: 10px 0 10px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+.step-nav > * { flex: 1; }
+.btn-back {
+  padding: 15px; border-radius: var(--radius-sm);
+  border: 2px solid var(--border); background: var(--bg);
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; color: var(--text2);
+  transition: all 0.15s;
+}
+.btn-back:hover { border-color: var(--border2); }
+.btn-next {
+  padding: 15px; border-radius: var(--radius-sm);
+  border: none; background: var(--red); color: #fff;
+  font-size: 17px; font-weight: 900; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+}
+.btn-next:hover { background: #b82222; }
+
+/* ── 완료 화면 ── */
+.complete-card {
+  text-align: center; padding: 32px 20px;
+}
+.complete-icon { font-size: 56px; margin-bottom: 12px; }
+.complete-title { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+.complete-sub { font-size: 15px; color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
+.complete-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* 즉시전화 */
+.call-section { margin-top: 20px; }
+.call-section-label {
+  font-size: 13px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+.call-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.call-btn {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 2px solid var(--border);
+  border-radius: var(--radius-sm); padding: 13px 14px;
+  text-decoration: none; transition: all 0.15s;
+  cursor: pointer;
+}
+.call-btn:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+.call-btn.call-red { border-color: rgba(214,43,43,0.4); background: var(--red-bg); }
+.call-btn.call-blue { border-color: rgba(26,111,212,0.4); background: var(--blue-bg); }
+.call-btn.call-green { border-color: rgba(26,150,71,0.3); background: var(--green-bg); }
+.call-btn.call-primary {
+  grid-column: span 2;
+  border-color: var(--red); border-width: 3px;
+  background: var(--red-bg); padding: 16px;
+}
+.cb-icon { font-size: 24px; flex-shrink: 0; }
+.cb-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.cb-num  { font-size: 18px; font-weight: 900; color: var(--red); letter-spacing: -0.5px; }
+.call-btn.call-primary .cb-num { font-size: 22px; color: var(--red); }
+
+/* ════ AI 분석 ════ */
+.ai-input-card {
+  background: var(--bg); border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.ai-input-card:focus-within { border-color: var(--blue); }
+.ai-input-card textarea {
+  background: var(--bg2); border: 2px solid var(--border);
+  font-size: 16px; min-height: 100px; line-height: 1.75;
+  border-radius: var(--radius-sm);
+}
+.ai-input-card textarea:focus { border-color: var(--blue); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.chip {
+  padding: 9px 14px; border-radius: 100px;
+  background: var(--bg); border: 2px solid var(--border);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; color: var(--text2);
+}
+.chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+
+.ai-notice {
+  background: var(--blue-bg); border: 2px solid rgba(26,111,212,0.2);
+  border-radius: var(--radius-sm); padding: 13px 16px;
+  font-size: 14px; color: var(--text2); line-height: 1.65;
+  margin-bottom: 14px; display: flex; gap: 10px;
+}
+
+/* AI 로딩 */
+.ai-loading { display:none; }
+.ai-loading.show {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--bg); border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 32px 20px;
+  gap: 16px; margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.spinner {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 4px solid var(--border);
+  border-top-color: var(--red);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 16px; font-weight: 700; color: var(--text2); }
+.loading-steps { display:flex; flex-direction:column; gap:8px; width:100%; }
+.ls-row { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--text3); }
+.ls-dot { width:8px; height:8px; border-radius:50%; background:var(--border); flex-shrink:0; }
+
+/* AI 결과 */
+.ai-result { display: none; }
+.ai-result.show { display: block; }
+
+.r-card {
+  background: var(--bg); border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.r-label {
+  font-size: 12px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+}
+.r-title { font-size: 18px; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.3px; }
+.r-desc { font-size: 15px; color: var(--text2); line-height: 1.7; }
+
+/* 과실 비율 */
+.fault-wrap { }
+.fault-nums { display:flex; justify-content:space-between; margin-bottom:8px; }
+.fault-num { font-size: 36px; font-weight: 900; letter-spacing: -1px; }
+.fault-name { font-size: 12px; color: var(--text3); font-weight: 700; }
+.fault-bar { height: 20px; border-radius: 100px; overflow: hidden; background: var(--bg3); display:flex; }
+.fault-me { height: 100%; background: var(--blue); transition: width 0.8s ease; }
+.fault-op { height: 100%; background: var(--red); transition: width 0.8s ease; }
+.fault-law { font-size: 13px; color: var(--text2); margin-top: 10px; padding: 10px 12px; background: var(--bg2); border-radius: 8px; line-height: 1.65; }
+
+/* 행동 카드 */
+.action-card {
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  margin-bottom: 8px; display: flex; gap: 12px; align-items: flex-start;
+  border: 2px solid var(--border);
+}
+.action-card.pri-now    { border-color: rgba(214,43,43,0.4); background: var(--red-bg); }
+.action-card.pri-soon   { border-color: rgba(212,114,10,0.35); background: #FFF4E5; }
+.action-card.pri-later  { border-color: rgba(26,111,212,0.3); background: var(--blue-bg); }
+.ac-icon { font-size: 22px; flex-shrink: 0; }
+.ac-pri-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 100px; margin-bottom: 4px; display: inline-block;
+}
+.pri-now  .ac-pri-badge { background: rgba(214,43,43,0.15); color: var(--red); }
+.pri-soon .ac-pri-badge { background: rgba(212,114,10,0.15); color: var(--orange); }
+.pri-later .ac-pri-badge { background: rgba(26,111,212,0.15); color: var(--blue); }
+.ac-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.ac-body  { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+.ev-chips { display:flex; flex-wrap:wrap; gap:7px; }
+.ev-chip {
+  padding: 7px 12px; border-radius: 8px; border: 2px solid var(--border);
+  background: var(--bg2); font-size: 13px; color: var(--text2); font-weight: 600;
+}
+
+.key-phrase {
+  background: var(--red-bg); border: 2px solid rgba(214,43,43,0.25);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  font-size: 15px; line-height: 1.75; color: var(--text);
+}
+.key-phrase strong { color: var(--red); }
+
+.warn-card {
+  background: #FFF4E5; border: 2px solid rgba(212,114,10,0.3);
+  border-radius: var(--radius-sm); padding: 13px 16px;
+  font-size: 14px; color: var(--text2); line-height: 1.7;
+  display: flex; gap: 10px;
+}
+
+.reset-btn {
+  width:100%; padding:14px; border-radius:var(--radius-sm);
+  border: 2px solid var(--border); background: var(--bg);
+  font-size:15px; font-weight:700; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; color:var(--text2);
+  margin-top:12px; transition:all 0.15s;
+}
+.reset-btn:hover { border-color:var(--border2); }
+
+/* ════ 서류 생성 ════ */
+.doc-sel-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.doc-sel-btn {
+  flex:1; min-width:130px; padding:13px 10px; border-radius:var(--radius-sm);
+  border:2px solid var(--border); background:var(--bg);
+  font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; text-align:center; transition:all 0.15s; color:var(--text2);
+}
+.doc-sel-btn.active { border-color:var(--red); background:var(--red-bg); color:var(--red); }
+
+.doc-preview {
+  background:#fff; border:2px solid var(--border); border-radius:var(--radius);
+  min-height:200px; padding:24px; font-family:'Noto Sans KR',sans-serif;
+  font-size:14px; color:#222; line-height:1.8; box-shadow:var(--shadow);
+}
+.doc-preview.empty {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:10px; color:var(--text3);
+}
+.doc-preview.empty .doc-empty-icon { font-size:48px; }
+.doc-preview.empty .doc-empty-text { font-size:16px; font-weight:700; }
+.doc-watermark {
+  position:absolute; top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-30deg);
+  font-size:52px; font-weight:900; color:rgba(214,43,43,0.04);
+  pointer-events:none; white-space:nowrap;
+}
+.doc-h1 { font-size:20px; font-weight:900; text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:3px solid var(--red); }
+.doc-h2 { font-size:13px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.5px; margin:16px 0 8px; }
+.doc-tbl { width:100%; border-collapse:collapse; margin-bottom:12px; }
+.doc-tbl td { padding:8px 10px; border:1px solid #ddd; font-size:13px; }
+.doc-tbl td:first-child { background:#f8f8f8; font-weight:600; width:34%; color:#333; }
+.doc-para { padding:12px 14px; background:#fafafa; border-left:3px solid var(--red); border-radius:4px; line-height:1.9; color:#333; }
+.doc-sig { margin-top:28px; text-align:right; font-size:13px; color:#555; }
+.doc-note { margin-top:16px; padding:12px 14px; background:#fff8e1; border-radius:8px; font-size:11px; color:#666; line-height:1.7; }
+
+.no-data-notice {
+  background:#FFF4E5; border:2px solid rgba(212,114,10,0.3);
+  border-radius:var(--radius-sm); padding:12px 14px;
+  font-size:14px; color:var(--orange); margin-bottom:14px;
+  display:flex; gap:10px; align-items:flex-start;
+}
+
+/* ════ 보험사 대응 ════ */
+.danger-card {
+  background:var(--bg); border:2px solid var(--border);
+  border-left:5px solid var(--red); border-radius:var(--radius);
+  padding:18px 20px; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.dc-top { display:flex; gap:12px; align-items:flex-start; margin-bottom:10px; }
+.dc-emoji { font-size:26px; flex-shrink:0; }
+.dc-title { font-size:16px; font-weight:900; margin-bottom:4px; line-height:1.4; }
+.dc-tag {
+  display:inline-block; font-size:11px; font-weight:700;
+  padding:3px 10px; border-radius:100px;
+}
+.tag-red    { background:var(--red-bg); color:var(--red); border:1px solid rgba(214,43,43,0.2); }
+.tag-orange { background:#FFF4E5; color:var(--orange); border:1px solid rgba(212,114,10,0.2); }
+.dc-body { font-size:14px; color:var(--text2); line-height:1.75; margin-bottom:12px; }
+.dc-counter {
+  background:var(--green-bg); border:2px solid rgba(26,150,71,0.2);
+  border-radius:var(--radius-sm); padding:13px 16px;
+}
+.dc-counter-label { font-size:11px; font-weight:700; color:var(--green); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+.dc-counter-text { font-size:14px; color:var(--text); line-height:1.7; font-style:italic; }
+
+.rights-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+@media(max-width:480px) { .rights-grid { grid-template-columns:1fr; } }
+.right-card {
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius-sm); padding:16px;
+  box-shadow:var(--shadow);
+}
+.right-icon { font-size:26px; margin-bottom:8px; }
+.right-title { font-size:15px; font-weight:900; margin-bottom:5px; }
+.right-desc { font-size:13px; color:var(--text2); line-height:1.65; }
+
+.guard-ai-box {
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius); padding:20px; margin-bottom:14px;
+  box-shadow:var(--shadow);
+}
+.guard-ai-box:focus-within { border-color:var(--red); }
+.guard-ai-box textarea { background:var(--bg2); font-size:15px; min-height:80px; }
+.guard-ai-box textarea:focus { border-color:var(--red); }
+
+.gr-card {
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius-sm); padding:16px 18px; margin-bottom:10px;
+}
+.gr-card.warning { border-left:5px solid var(--red); }
+.gr-card.advice  { border-left:5px solid var(--green); }
+.gr-card.legal   { border-left:5px solid var(--blue); }
+.gr-card-title { font-size:15px; font-weight:900; margin-bottom:7px; display:flex; align-items:center; gap:8px; }
+.gr-card-body { font-size:14px; color:var(--text2); line-height:1.75; }
+
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+@media(max-width:400px) { .contact-grid { grid-template-columns:1fr; } }
+.contact-card {
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius-sm); padding:14px 16px;
+  text-decoration:none; color:var(--text); transition:all 0.15s;
+  box-shadow:var(--shadow);
+}
+.contact-card:hover { border-color:var(--border2); box-shadow:var(--shadow2); }
+.cc-icon { font-size:26px; flex-shrink:0; }
+.cc-name { font-size:14px; font-weight:700; }
+.cc-num  { font-size:18px; font-weight:900; color:var(--red); letter-spacing:-0.5px; }
+.cc-desc { font-size:11px; color:var(--text3); margin-top:2px; }
+
+/* ════ 보험 분석 ════ */
+.upload-zone {
+  border:3px dashed var(--border); border-radius:var(--radius);
+  padding:32px 20px; text-align:center; cursor:pointer;
+  background:var(--bg); transition:all 0.2s; box-shadow:var(--shadow);
+}
+.upload-zone:hover  { border-color:var(--blue); background:var(--blue-bg); }
+.upload-zone.has-file { border-color:var(--blue); border-style:solid; background:var(--blue-bg); }
+.uz-icon  { font-size:40px; margin-bottom:10px; }
+.uz-title { font-size:17px; font-weight:900; margin-bottom:4px; }
+.uz-sub   { font-size:14px; color:var(--text2); }
+.uz-filename { margin-top:10px; font-size:13px; color:var(--blue); font-weight:700; }
+
+.divider-or {
+  text-align:center; position:relative; margin:16px 0; color:var(--text3); font-size:14px; font-weight:700;
+}
+.divider-or::before,.divider-or::after { content:''; position:absolute; top:50%; width:calc(50% - 28px); height:2px; background:var(--border); }
+.divider-or::before { left:0; }
+.divider-or::after  { right:0; }
+
+.pcover-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+@media(max-width:400px) { .pcover-grid { grid-template-columns:1fr; } }
+.pcover-card {
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow);
+}
+.pcover-name  { font-size:13px; color:var(--text2); margin-bottom:4px; font-weight:600; }
+.pcover-limit { font-size:22px; font-weight:900; color:var(--blue); margin-bottom:4px; letter-spacing:-0.5px; }
+.pcover-note  { font-size:12px; color:var(--text3); line-height:1.5; }
+
+.p-warn-box {
+  background:#FFF4E5; border:2px solid rgba(212,114,10,0.3);
+  border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:10px;
+  font-size:14px; color:var(--text2); line-height:1.75; display:flex; gap:10px;
+}
+.p-tip-box {
+  background:var(--blue-bg); border:2px solid rgba(26,111,212,0.2);
+  border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:10px;
+}
+.p-tip-title { font-weight:700; font-size:15px; color:var(--blue); margin-bottom:6px; }
+.policy-disclaimer {
+  margin-top:20px; padding:14px 16px; background:var(--bg2);
+  border-radius:var(--radius-sm); font-size:13px; color:var(--text3); line-height:1.7;
+  border:2px solid var(--border);
+}
+
+/* ════ 내 정보 ════ */
+.veh-tab-bar {
+  display:flex; align-items:center;
+  border-bottom:2px solid var(--border);
+  background:var(--bg2); border-radius:var(--radius) var(--radius) 0 0;
+  padding:0 6px; overflow:hidden;
+}
+.veh-tab-item {
+  display:flex; align-items:center; gap:6px;
+  padding:13px 14px; cursor:pointer;
+  font-size:14px; font-weight:700; color:var(--text2);
+  border-bottom:3px solid transparent;
+  white-space:nowrap; transition:all 0.15s; flex-shrink:0;
+}
+.veh-tab-item.active { color:var(--blue); border-bottom-color:var(--blue); }
+.veh-tab-del {
+  width:20px; height:20px; border-radius:50%; background:rgba(214,43,43,0.1);
+  border:none; color:var(--red); font-size:14px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; transition:all 0.15s; line-height:1;
+}
+.veh-tab-del:hover { background:var(--red); color:#fff; }
+.veh-add-btn {
+  padding:8px 14px; background:none; border:none;
+  color:var(--text3); font-size:24px; cursor:pointer;
+  transition:all 0.15s; flex-shrink:0; line-height:1;
+}
+.veh-add-btn:hover { color:var(--blue); }
+
+.mi-save-btn {
+  width:100%; padding:16px; border-radius:var(--radius-sm); border:none;
+  background:var(--green); color:#fff; font-weight:700; font-size:17px;
+  cursor:pointer; font-family:'Noto Sans KR',sans-serif; transition:all 0.18s; margin-bottom:10px;
+}
+.mi-save-btn:hover { background:#157a3c; }
+
+/* 차량 선택 카드 (현장기록) */
+.veh-select-card {
+  background:var(--bg); border:2px solid var(--green);
+  border-radius:var(--radius); padding:16px; margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.vsc-title { font-size:13px; font-weight:700; color:var(--green); letter-spacing:0.5px; margin-bottom:10px; }
+.vsc-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.vsc-btn {
+  flex:1; min-width:130px; padding:12px 14px;
+  background:var(--bg2); border:2px solid var(--border);
+  border-radius:var(--radius-sm); cursor:pointer; text-align:left;
+  transition:all 0.15s; font-family:'Noto Sans KR',sans-serif;
+}
+.vsc-btn.active { border-color:var(--green); background:var(--green-bg); }
+.vsc-plate { font-size:16px; font-weight:900; color:var(--text); letter-spacing:-0.3px; }
+.vsc-car   { font-size:12px; color:var(--text2); margin-top:2px; }
+.vsc-ins   { font-size:11px; color:var(--text3); margin-top:1px; }
+
+/* ════ 설정 ════ */
+.set-section {
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius); margin-bottom:10px; overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.set-section:focus-within { border-color:var(--border2); }
+.set-section-title {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:17px 20px; cursor:pointer; font-weight:700; font-size:16px;
+  user-select:none; transition:background 0.15s; background:var(--bg);
+}
+.set-section-title:hover { background:var(--bg2); }
+.set-toggle-icon { font-size:14px; color:var(--text3); transition:transform 0.2s; }
+.set-toggle-icon.open { transform:rotate(180deg); }
+.set-section-body {
+  display:none; padding:0 20px 20px; border-top:2px solid var(--border);
+}
+.set-section-body.open { display:block; padding-top:16px; }
+
+.set-save-btn {
+  width:100%; padding:16px; border-radius:var(--radius-sm); border:none;
+  background:var(--red); color:#fff; font-weight:900; font-size:17px;
+  cursor:pointer; font-family:'Noto Sans KR',sans-serif; transition:all 0.15s; margin-bottom:0;
+}
+.set-save-btn:hover { background:#b82222; }
+
+.set-summary-card {
+  background:var(--bg); border:2px solid var(--border);
+  border-radius:var(--radius); padding:16px 20px; margin-bottom:20px;
+  box-shadow:var(--shadow); display:flex; flex-wrap:wrap; gap:8px;
+}
+.set-summary-item { font-size:14px; color:var(--text2); }
+
+/* ════ 자동완성 ════ */
+.suggest-box {
+  position:absolute; top:100%; left:0; right:0; z-index:500;
+  background:var(--bg); border:2px solid var(--blue);
+  border-radius:0 0 var(--radius-sm) var(--radius-sm);
+  overflow:hidden; display:none; max-height:220px; overflow-y:auto;
+  box-shadow:var(--shadow2);
+}
+.suggest-box.open { display:block; }
+.suggest-item {
+  padding:13px 16px; font-size:15px; cursor:pointer;
+  color:var(--text); border-bottom:1px solid var(--border);
+  transition:background 0.12s;
+}
+.suggest-item:last-child { border-bottom:none; }
+.suggest-item:hover,.suggest-item:active { background:var(--blue-bg); color:var(--blue); }
+.suggest-item mark { background:none; color:var(--red); font-weight:700; }
+
+/* 체크리스트 */
+.pcl-item {
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg2); border:2px solid var(--border);
+  border-radius:var(--radius-sm); padding:13px 14px;
+  cursor:pointer; transition:all 0.15s; user-select:none; margin-bottom:8px;
+}
+.pcl-item:active { transform:scale(0.99); }
+.pcl-item.checked { background:var(--blue-bg); border-color:rgba(26,111,212,0.35); }
+.pcl-check { font-size:22px; width:28px; flex-shrink:0; text-align:center; transition:all 0.2s; }
+.pcl-info { flex:1; }
+.pcl-label { font-size:15px; font-weight:700; color:var(--text); }
+.pcl-hint  { font-size:12px; color:var(--text2); margin-top:2px; }
+.pcl-imp { font-size:11px; font-weight:700; padding:3px 9px; border-radius:100px; flex-shrink:0; }
+.imp-red    { background:var(--red-bg); color:var(--red); border:1px solid rgba(214,43,43,0.2); }
+.imp-yellow { background:#FFF4E5; color:var(--orange); border:1px solid rgba(212,114,10,0.2); }
+
+.photo-upload-zone {
+  border:3px dashed var(--border); border-radius:var(--radius);
+  padding:20px; text-align:center; cursor:pointer;
+  background:var(--bg2); transition:all 0.2s; margin-top:10px;
+}
+.photo-upload-zone:hover { border-color:var(--blue); background:var(--blue-bg); }
+.photo-thumb { width:72px; height:72px; border-radius:8px; object-fit:cover; border:2px solid var(--border); }
+.photo-vid-thumb {
+  width:72px; height:72px; border-radius:8px;
+  background:var(--bg2); border:2px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-size:22px; gap:3px;
+}
+.photo-vid-thumb span { font-size:10px; color:var(--text2); }
+
+/* 신고여부 버튼 — 대조 명확 */
+.report-btn {
+  width:100%; padding:16px 18px; border-radius:var(--radius-sm);
+  border:3px solid var(--border); background:var(--bg2);
+  font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700;
+  cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px;
+  transition:all 0.15s; color:var(--text2);
+}
+.report-btn.done {
+  border-color:var(--green); background:var(--green);
+  color:#fff; box-shadow:0 4px 16px rgba(26,150,71,0.35);
+}
+.report-btn.done .rb-check { color:#fff; font-size:20px; }
+.rb-check { font-size:20px; width:24px; text-align:center; flex-shrink:0; transition:all 0.15s; }
+.rb-icon  { font-size:22px; flex-shrink:0; }
+.rb-label { font-size:16px; font-weight:700; flex:1; }
+
+/* 온보딩 배너 */
+.onboard-banner {
+  background:var(--green-bg); border:2px solid rgba(26,150,71,0.3);
+  border-radius:var(--radius); padding:16px 18px; margin-bottom:16px;
+  display:flex; gap:12px; align-items:flex-start; box-shadow:var(--shadow);
+}
+
+@media print {
+  .nav, .doc-wrap > *:not(.doc-preview-area) { display:none; }
+  .doc-preview { border:none; box-shadow:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🚨</div>
+    사고대응
+  </div>
+  <div class="nav-scroll" id="nav-scroll">
+    <button class="nav-tab active" onclick="goPage('quick')">📍 현장기록</button>
+    <button class="nav-tab" onclick="goPage('ai')">🤖 AI분석</button>
+    <button class="nav-tab" onclick="goPage('docs')">📄 서류</button>
+    <button class="nav-tab" onclick="goPage('guard')">🛡️ 보험사대응</button>
+    <button class="nav-tab" onclick="goPage('policy')">📑 보험분석</button>
+    <button class="nav-tab" onclick="goPage('myinfo')">👤 내 정보</button>
+    <button class="nav-tab" onclick="goPage('settings')">⚙️ 설정</button>
+  </div>
+</nav>
+
+
+<!-- ═══ PAGE 1: 현장기록 ═══ -->
+<div class="page active" id="page-quick">
+<div class="wrap">
+
+  <div class="sos-banner">
+    <div class="sos-icon">🚨</div>
+    <div>
+      <div class="sos-title">사고 직후 빠른 기록</div>
+      <div class="sos-sub">침착하게 순서대로 진행하세요 — 5단계</div>
+    </div>
+  </div>
+
+  <!-- 단계 표시 -->
+  <div class="step-bar" id="step-bar">
+    <div class="step-item">
+      <div class="step-dot active" id="sd0">1</div>
+      <div class="step-label active" id="sl0">사고유형</div>
+    </div>
+    <div class="step-line" id="sl-1"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd1">2</div>
+      <div class="step-label" id="sl1">내 차량</div>
+    </div>
+    <div class="step-line" id="sl-2"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd2">3</div>
+      <div class="step-label" id="sl2">상대방</div>
+    </div>
+    <div class="step-line" id="sl-3"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd3">4</div>
+      <div class="step-label" id="sl3">부상·피해</div>
+    </div>
+    <div class="step-line" id="sl-4"></div>
+    <div class="step-item">
+      <div class="step-dot" id="sd4">5</div>
+      <div class="step-label" id="sl4">경위·사진</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: 사고유형 -->
+  <div class="step-panel active" id="panel-0">
+    <div class="step-nav">
+      <button class="btn-next" onclick="nextStep(1)">다음 단계 →</button>
+    </div>
+    <div class="card">
+      <div class="card-title">어떤 사고인가요?</div>
+      <div class="card-sub">해당 유형을 선택하세요 (복수 선택 가능)</div>
+      <div class="sel-grid">
+        <div class="sel-btn" onclick="toggleType(this,'정차 중 추돌')"><div class="sb-icon">🛑</div><div class="sb-label">정차 중 추돌</div><div class="sb-sub">멈춰있다 박힘</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'후방 추돌')"><div class="sb-icon">🚗💨</div><div class="sb-label">후방 추돌</div><div class="sb-sub">뒤에서 박힘</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'로터리 사고')"><div class="sb-icon">🔄</div><div class="sb-label">로터리 사고</div><div class="sb-sub">진입 차 충돌</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'교차로 충돌')"><div class="sb-icon">✚</div><div class="sb-label">교차로 충돌</div><div class="sb-sub">신호·무신호</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'끼어들기')"><div class="sb-icon">↙️</div><div class="sb-label">끼어들기</div><div class="sb-sub">차선 위반</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label">측면 충돌</div><div class="sb-sub">옆면 긁힘·충격</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label">주차장 사고</div><div class="sb-sub">후진·주차 중</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'기타')"><div class="sb-icon">❓</div><div class="sb-label">기타</div><div class="sb-sub">직접 입력</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">📅 사고 일시</label>
+        <input type="datetime-local" id="f-datetime">
+      </div>
+      <div class="field">
+        <label class="field-label">🌤️ 날씨</label>
+        <div class="tag-row" id="weather-row">
+          <button class="tag-btn" onclick="selectWeather(this,'맑음')">☀️ 맑음</button>
+          <button class="tag-btn" onclick="selectWeather(this,'흐림')">☁️ 흐림</button>
+          <button class="tag-btn" onclick="selectWeather(this,'비')">🌧 비</button>
+          <button class="tag-btn" onclick="selectWeather(this,'눈')">❄️ 눈</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">📍 사고 장소 <span style="color:var(--red)">*필수</span></label>
+        <!-- GPS 버튼 -->
+        <button type="button" id="gps-btn" onclick="getGPSLocation()" style="
+          width:100%; padding:16px; border-radius:var(--radius-sm);
+          border:3px solid var(--blue); background:var(--blue-bg);
+          font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:900;
+          color:var(--blue); cursor:pointer; margin-bottom:10px;
+          display:flex; align-items:center; justify-content:center; gap:10px;
+          transition:all 0.15s;
+        ">
+          <span style="font-size:22px">📡</span> 현재 위치 자동 가져오기
+        </button>
+        <!-- GPS 상태 메시지 -->
+        <div id="gps-status" style="display:none; margin-bottom:10px; padding:12px 14px; border-radius:var(--radius-sm); font-size:14px; font-weight:700;"></div>
+        <!-- 지도 미리보기 -->
+        <div id="gps-map-wrap" style="display:none; margin-bottom:10px; border-radius:var(--radius-sm); overflow:hidden; border:2px solid var(--blue);">
+          <iframe id="gps-map" style="width:100%; height:200px; border:none;" loading="lazy"></iframe>
+          <div id="gps-addr-bar" style="padding:10px 14px; background:var(--blue); color:#fff; font-size:14px; font-weight:700;"></div>
+        </div>
+        <!-- 직접 입력 -->
+        <input type="text" id="f-location" placeholder="주소를 직접 입력하거나 위 버튼으로 자동 입력">
+        <div style="font-size:12px; color:var(--text3); margin-top:6px;">💡 자동 입력 후 건물명·교차로명 등을 추가하면 더 정확합니다</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: 내 차량 -->
+  <div class="step-panel" id="panel-1">
+    <div class="step-nav">
+      <button class="btn-back" onclick="prevStep(0)">← 이전</button>
+      <button class="btn-next" onclick="nextStep(2)">다음 단계 →</button>
+    </div>
+
+    <!-- 내 정보에 차량 등록된 경우 → 빠른 선택 -->
+    <div id="step2-veh-selector"></div>
+
+    <div class="card">
+      <div class="card-title">🚗 내 차량 정보</div>
+      <div class="card-sub">번호판과 연락처만 입력해도 됩니다</div>
+      <div class="field">
+        <label class="field-label">차량 번호 <span style="color:var(--red)">*필수</span></label>
+        <input type="text" id="f-myplate" placeholder="123가 4567" style="font-size:20px;font-weight:900;letter-spacing:1px">
+      </div>
+      <div class="field field-row">
+        <div style="position:relative">
+          <label class="field-label">차종</label>
+          <input type="text" id="f-mycar" placeholder="현대, 기아…" autocomplete="off" oninput="showCarSuggest('f-mycar','cs-my')">
+          <div class="suggest-box" id="cs-my"></div>
+        </div>
+        <div>
+          <label class="field-label">이름</label>
+          <input type="text" id="f-myname" placeholder="홍길동">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">연락처</label>
+        <input type="tel" id="f-myphone" placeholder="010-0000-0000">
+      </div>
+      <div class="field field-row">
+        <div style="position:relative">
+          <label class="field-label">보험사</label>
+          <input type="text" id="f-myinsurer" placeholder="삼성, KB…" autocomplete="off" oninput="showInsurerSuggest('f-myinsurer','is-my')">
+          <div class="suggest-box" id="is-my"></div>
+        </div>
+        <div>
+          <label class="field-label">증권번호</label>
+          <input type="text" id="f-mypolicy" placeholder="선택사항">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">차량 피해 부위</label>
+        <div class="sel-grid sel-grid-4">
+          <div class="sel-btn" style="padding:10px 6px" onclick="toggleDamage(this,'앞 범퍼')"><div class="sb-icon" style="font-size:22px">⬆️</div><div class="sb-label" style="font-size:12px">앞 범퍼</div></div>
+          <div class="sel-btn" style="padding:10px 6px" onclick="toggleDamage(this,'뒤 범퍼')"><div class="sb-icon" style="font-size:22px">⬇️</div><div class="sb-label" style="font-size:12px">뒤 범퍼</div></div>
+          <div class="sel-btn" style="padding:10px 6px" onclick="toggleDamage(this,'좌측')"><div class="sb-icon" style="font-size:22px">⬅️</div><div class="sb-label" style="font-size:12px">좌측</div></div>
+          <div class="sel-btn" style="padding:10px 6px" onclick="toggleDamage(this,'우측')"><div class="sb-icon" style="font-size:22px">➡️</div><div class="sb-label" style="font-size:12px">우측</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: 상대방 -->
+  <div class="step-panel" id="panel-2">
+    <div class="step-nav">
+      <button class="btn-back" onclick="prevStep(1)">← 이전</button>
+      <button class="btn-next" onclick="nextStep(3)">다음 단계 →</button>
+    </div>
+    <div class="card">
+      <div class="card-title">🚙 상대방 정보</div>
+      <div class="card-sub">차량 번호만이라도 꼭 확보하세요</div>
+      <div class="field">
+        <label class="field-label">상대 차량 번호 <span style="color:var(--red)">*필수</span></label>
+        <input type="text" id="f-opplate" placeholder="456나 7890" style="font-size:20px;font-weight:900;letter-spacing:1px">
+      </div>
+      <div class="field field-row">
+        <div style="position:relative">
+          <label class="field-label">차종</label>
+          <input type="text" id="f-opcar" placeholder="현대, 기아…" autocomplete="off" oninput="showCarSuggest('f-opcar','cs-op')">
+          <div class="suggest-box" id="cs-op"></div>
+        </div>
+        <div>
+          <label class="field-label">운전자 이름</label>
+          <input type="text" id="f-opname" placeholder="김철수">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">연락처</label>
+        <input type="tel" id="f-opphone" placeholder="010-0000-0000">
+      </div>
+      <div class="field field-row">
+        <div style="position:relative">
+          <label class="field-label">보험사</label>
+          <input type="text" id="f-opinsurer" placeholder="삼성, KB…" autocomplete="off" oninput="showInsurerSuggest('f-opinsurer','is-op')">
+          <div class="suggest-box" id="is-op"></div>
+        </div>
+        <div>
+          <label class="field-label">증권번호</label>
+          <input type="text" id="f-oppolicy" placeholder="선택사항">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">목격자 연락처 (있으면)</label>
+        <input type="tel" id="f-witness" placeholder="010-0000-0000">
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: 부상·피해 -->
+  <div class="step-panel" id="panel-3">
+    <div class="step-nav">
+      <button class="btn-back" onclick="prevStep(2)">← 이전</button>
+      <button class="btn-next" onclick="nextStep(4)">다음 단계 →</button>
+    </div>
+    <div class="card">
+      <div class="card-title">🏥 부상 · 피해 정보</div>
+      <div class="card-sub">현재 상태를 선택하세요</div>
+      <div class="field">
+        <label class="field-label">내 부상 상태</label>
+        <div class="tag-row">
+          <button class="tag-btn" onclick="selectInjury('my',this,'없음','none')">😊 없음</button>
+          <button class="tag-btn" onclick="selectInjury('my',this,'경상','light')">😐 경상</button>
+          <button class="tag-btn" onclick="selectInjury('my',this,'중상','heavy')">😣 중상</button>
+          <button class="tag-btn" onclick="selectInjury('my',this,'중태','critical')">🆘 중태</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">상대방 부상 상태</label>
+        <div class="tag-row">
+          <button class="tag-btn" onclick="selectInjury('op',this,'없음','none')">😊 없음</button>
+          <button class="tag-btn" onclick="selectInjury('op',this,'경상','light')">😐 경상</button>
+          <button class="tag-btn" onclick="selectInjury('op',this,'중상','heavy')">😣 중상</button>
+          <button class="tag-btn" onclick="selectInjury('op',this,'중태','critical')">🆘 중태</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">부상 증상 (통증 있는 부위)</label>
+        <input type="text" id="f-injurydetail" placeholder="예: 목 통증, 허리 뻐근함, 두통">
+      </div>
+      <div class="field">
+        <label class="field-label">신고 여부 <span style="font-size:12px;color:var(--text3);font-weight:400">(누른 항목 = 완료)</span></label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+          <button class="report-btn" id="rep112" onclick="selectReport('112')">
+            <span class="rb-check">☐</span><span class="rb-icon">🚔</span><span class="rb-label">112 경찰 신고완료</span>
+          </button>
+          <button class="report-btn" id="rep119" onclick="selectReport('119')">
+            <span class="rb-check">☐</span><span class="rb-icon">🚑</span><span class="rb-label">119 구급 신고완료</span>
+          </button>
+          <button class="report-btn" id="repins" onclick="selectReport('보험')">
+            <span class="rb-check">☐</span><span class="rb-icon">📞</span><span class="rb-label">보험사 사고 접수완료</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: 경위·사진 -->
+  <div class="step-panel" id="panel-4">
+    <div class="step-nav">
+      <button class="btn-back" onclick="prevStep(3)">← 이전</button>
+      <button class="btn-next" onclick="finishRecord()">✅ 기록 완료</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📝 사고 경위</div>
+      <div class="card-sub">짧아도 괜찮습니다. 기억나는 것만 적으세요</div>
+      <div class="field">
+        <label class="field-label">경위 내용 <span style="color:var(--red)">*필수 (10자 이상)</span></label>
+        <textarea id="f-desc" rows="5" placeholder="예: 직진 중 오른쪽에서 차가 갑자기 끼어들었고 피하지 못해 충돌했음. 상대방은 미리 방향지시등을 켜지 않았음."></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">블랙박스 유무</label>
+        <div class="tag-row">
+          <button class="tag-btn" id="bb-yes" onclick="selectBB('있음')">📹 있음 (보존 완료)</button>
+          <button class="tag-btn" id="bb-no" onclick="selectBB('없음')">❌ 없음</button>
+          <button class="tag-btn" id="bb-unk" onclick="selectBB('확인필요')">❓ 확인 필요</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사진·영상 체크리스트 -->
+    <div class="card" style="border-color:rgba(26,111,212,0.4)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div class="card-title" style="margin-bottom:0">📸 현장 사진 · 영상</div>
+        <span class="pcl-imp imp-red">권장</span>
+      </div>
+      <div class="card-sub">체크리스트를 보고 지금 바로 촬영하세요</div>
+
+      <div id="photo-checklist">
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="wide"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">전체 현장 사진</div><div class="pcl-hint">차량 위치·도로 상황 전경 (최소 2장)</div></div><div class="pcl-imp imp-red">필수</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="plate"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">상대 차량 번호판</div><div class="pcl-hint">번호가 선명하게 보이도록</div></div><div class="pcl-imp imp-red">필수</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="damage-my"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">내 차량 피해 부위</div><div class="pcl-hint">긁힘·함몰·파손 근접 촬영</div></div><div class="pcl-imp imp-red">필수</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="damage-op"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">상대 차량 피해 부위</div><div class="pcl-hint">나중에 과실 주장 시 필요</div></div><div class="pcl-imp imp-red">필수</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="road"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">도로 노면 상태</div><div class="pcl-hint">신호등·차선·브레이크 흔적 포함</div></div><div class="pcl-imp imp-yellow">권장</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="blackbox"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">블랙박스 영상 백업</div><div class="pcl-hint">USB/앱으로 즉시 저장 — 덮어쓰기 방지</div></div><div class="pcl-imp imp-red">필수</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="signal"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">신호등·교통표지판</div><div class="pcl-hint">사고 지점 전후 신호체계</div></div><div class="pcl-imp imp-yellow">권장</div></div>
+        <div class="pcl-item" onclick="togglePhotoCheck(this)" data-key="cctv"><div class="pcl-check">□</div><div class="pcl-info"><div class="pcl-label">주변 CCTV 위치 확인</div><div class="pcl-hint">경찰 요청용 — 위치 사진 찍어두기</div></div><div class="pcl-imp imp-yellow">권장</div></div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--text2);margin-bottom:6px">
+          <span>완료</span><span id="pcl-count" style="font-weight:700">0 / 8</span>
+        </div>
+        <div style="height:8px;background:var(--bg3);border-radius:100px;overflow:hidden">
+          <div id="pcl-bar" style="height:100%;background:var(--blue);border-radius:100px;transition:width 0.3s;width:0%"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label class="field-label">파일 첨부 (선택)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <!-- 갤러리에서 선택 -->
+          <div class="photo-upload-zone" onclick="document.getElementById('f-gallery').click()" style="padding:16px">
+            <input type="file" id="f-gallery" multiple accept="image/*,video/*" style="display:none" onchange="handlePhotoUpload(event)">
+            <div style="font-size:28px;margin-bottom:6px">🖼️</div>
+            <div style="font-size:15px;font-weight:900">갤러리</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">사진·영상 선택</div>
+          </div>
+          <!-- 카메라로 촬영 -->
+          <div class="photo-upload-zone" onclick="document.getElementById('f-camera').click()" style="padding:16px">
+            <input type="file" id="f-camera" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(event)">
+            <div style="font-size:28px;margin-bottom:6px">📷</div>
+            <div style="font-size:15px;font-weight:900">카메라</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">지금 바로 촬영</div>
+          </div>
+        </div>
+        <div id="photo-preview-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+        <div id="photo-count-badge" style="display:none;margin-top:8px;font-size:13px;font-weight:700;color:var(--blue)"></div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="prevStep(3)">← 이전</button>
+      <button class="btn-next" onclick="finishRecord()">✅ 기록 완료</button>
+    </div>
+  </div>
+
+  <!-- COMPLETE -->
+  <div class="step-panel" id="panel-complete">
+    <div class="card">
+      <div class="complete-card">
+        <div class="complete-icon">✅</div>
+        <div class="complete-title">현장 기록 완료!</div>
+        <div class="complete-sub">입력하신 정보가 저장되었습니다</div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <button class="btn-secondary" onclick="resetRecord()" style="font-size:14px;padding:12px">↩ 다시 입력하기</button>
+    </div>
+
+    <!-- ① 전화 먼저 -->
+    <div class="call-section">
+      <div class="call-section-label">📞 STEP 1 — 지금 바로 전화하세요</div>
+      <div id="my-insurer-call" style="margin-bottom:10px"></div>
+
+      <!-- 내 보험사 아래 바로 → 다음 단계 버튼 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <button onclick="autoAnalyze()" style="
+          padding:16px 10px; border-radius:var(--radius-sm);
+          border:3px solid var(--red); background:var(--red);
+          font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:900;
+          color:#fff; cursor:pointer; display:flex; flex-direction:column;
+          align-items:center; gap:6px; line-height:1.3;
+        ">
+          <span style="font-size:26px">🤖</span>
+          <span>AI 상황 분석</span>
+          <span style="font-size:11px;opacity:0.85;font-weight:700">과실비율·대응전략</span>
+        </button>
+        <button onclick="goPage('docs')" style="
+          padding:16px 10px; border-radius:var(--radius-sm);
+          border:3px solid var(--blue); background:var(--blue);
+          font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:900;
+          color:#fff; cursor:pointer; display:flex; flex-direction:column;
+          align-items:center; gap:6px; line-height:1.3;
+        ">
+          <span style="font-size:26px">📄</span>
+          <span>서류 발급</span>
+          <span style="font-size:11px;opacity:0.85;font-weight:700">경위서·보험청구서</span>
+        </button>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:10px">🚨 긴급 신고</div>
+        <div class="call-grid">
+          <a href="tel:112" class="call-btn call-red">
+            <div class="cb-icon">🚔</div><div><div class="cb-name">경찰</div><div class="cb-num">112</div></div>
+          </a>
+          <a href="tel:119" class="call-btn call-red">
+            <div class="cb-icon">🚑</div><div><div class="cb-name">소방·구급</div><div class="cb-num">119</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:10px">🏢 보험사 사고 접수 (24시간)</div>
+        <div class="call-grid">
+          <a href="tel:1588-5114" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">삼성화재</div><div class="cb-num">1588-5114</div></div></a>
+          <a href="tel:1588-0123" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">현대해상</div><div class="cb-num">1588-0123</div></div></a>
+          <a href="tel:1588-0070" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">DB손해보험</div><div class="cb-num">1588-0070</div></div></a>
+          <a href="tel:1544-0114" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">KB손해보험</div><div class="cb-num">1544-0114</div></div></a>
+          <a href="tel:1588-7711" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">메리츠화재</div><div class="cb-num">1588-7711</div></div></a>
+          <a href="tel:1588-2100" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">롯데손해보험</div><div class="cb-num">1588-2100</div></div></a>
+          <a href="tel:1566-3000" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">한화손해보험</div><div class="cb-num">1566-3000</div></div></a>
+          <a href="tel:1544-1200" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">흥국화재</div><div class="cb-num">1544-1200</div></div></a>
+          <a href="tel:1588-5656" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">MG손해보험</div><div class="cb-num">1588-5656</div></div></a>
+          <a href="tel:1588-1600" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">AXA손해보험</div><div class="cb-num">1588-1600</div></div></a>
+          <a href="tel:1600-4700" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">캐롯손해보험</div><div class="cb-num">1600-4700</div></div></a>
+          <a href="tel:1800-1543" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">카카오페이손보</div><div class="cb-num">1800-1543</div></div></a>
+          <a href="tel:1544-7653" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">하나손해보험</div><div class="cb-num">1544-7653</div></div></a>
+          <a href="tel:1588-3344" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">NH농협손해보험</div><div class="cb-num">1588-3344</div></div></a>
+          <a href="tel:1688-1688" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">BNP파리바카디프</div><div class="cb-num">1688-1688</div></div></a>
+          <a href="tel:1566-5005" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">교보생명(자동차)</div><div class="cb-num">1566-5005</div></div></a>
+          <a href="tel:1588-1001" class="call-btn"><div class="cb-icon">🏢</div><div><div class="cb-name">삼성생명(자동차)</div><div class="cb-num">1588-1001</div></div></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ═══ PAGE 2: AI 분석 ═══ -->
+<div class="page" id="page-ai">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge">🤖 AI 분석</div>
+    <h2>AI 사고 상황 분석</h2>
+    <p>상황을 짧게 설명하면 최신 교통법 기준으로 과실 비율과 대응 전략을 분석합니다</p>
+  </div>
+  <!-- 상단 고정 분석 버튼 -->
+  <div style="position:sticky;top:60px;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);padding:10px 0;margin-bottom:12px;border-bottom:2px solid var(--border)">
+    <button class="btn-primary" id="ai-btn-top" onclick="runAI()">🔍 AI 분석 시작</button>
+  </div>
+  <div class="ai-notice">
+    <span style="font-size:20px;flex-shrink:0">🔍</span>
+    <span>AI가 <strong>실시간 웹 검색</strong>으로 최신 도로교통법·판례를 확인 후 분석합니다</span>
+  </div>
+  <!-- AI 참고용 안내 -->
+  <div style="display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,#f0f7ff,#e8f5e9);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px">
+    <span style="font-size:22px;flex-shrink:0">💡</span>
+    <div>
+      <div style="font-size:15px;font-weight:900;color:#141418;margin-bottom:4px">분석 결과는 참고용입니다</div>
+      <div style="font-size:13px;color:#4A4D5A;line-height:1.7">AI는 입력된 정보를 바탕으로 최선의 분석을 제공하지만, 실제 과실 판정은 현장 상황·증거·판사 판단에 따라 달라질 수 있습니다. 중요한 결정은 변호사·보험전문가와 함께 확인하세요.</div>
+    </div>
+  </div>
+  <div class="chips">
+    <div class="chip" onclick="fillAI(this.innerText)">정차 중 상대가 박음</div>
+    <div class="chip" onclick="fillAI(this.innerText)">로터리 돌다 진입 차량 충돌</div>
+    <div class="chip" onclick="fillAI(this.innerText)">신호대기 중 후방 추돌</div>
+    <div class="chip" onclick="fillAI(this.innerText)">교차로에서 신호 위반 충돌</div>
+    <div class="chip" onclick="fillAI(this.innerText)">주차장에서 후진 중 접촉</div>
+  </div>
+  <div class="ai-input-card">
+    <div class="field">
+      <label class="field-label">사고 상황 설명</label>
+      <textarea id="ai-input" placeholder="예: 편도 2차로 직진 중, 오른쪽 1차로에서 갑자기 차가 내 차로로 끼어들면서 충돌했습니다. 상대방은 방향지시등을 켜지 않았습니다." rows="5" oninput="document.getElementById('ai-char').textContent=this.value.length+'자'"></textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <span id="ai-char" style="font-size:13px;color:var(--text3)">0자</span>
+    </div>
+    <!-- 현장 사진 첨부 여부 확인 -->
+    <div id="ai-photo-hint" style="margin-bottom:12px;padding:12px 14px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text2);display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">📸</span>
+      <span id="ai-photo-hint-text">현장기록 탭에서 사진을 첨부하면 AI가 사진도 함께 분석합니다</span>
+    </div>
+    <button class="btn-primary" id="ai-btn" onclick="runAI()">🔍 분석 시작</button>
+  </div>
+  <div class="ai-loading" id="ai-loading">
+    <div class="spinner"></div>
+    <div class="loading-text">최신 법령 분석 중...</div>
+    <div class="loading-steps">
+      <div class="ls-row"><div class="ls-dot"></div>도로교통법·판례 실시간 검색</div>
+      <div class="ls-row"><div class="ls-dot"></div>과실비율 기준 적용</div>
+      <div class="ls-row"><div class="ls-dot"></div>대응 전략 수립</div>
+    </div>
+  </div>
+  <div class="ai-result" id="ai-result"></div>
+</div>
+</div>
+
+
+<!-- ═══ PAGE 3: 서류 생성 ═══ -->
+<div class="page" id="page-docs">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge">📄 서류 생성</div>
+    <h2>서류 자동 생성</h2>
+    <p>현장기록 탭에서 입력한 정보로 서류를 자동으로 만듭니다</p>
+  </div>
+  <div class="doc-sel-row">
+    <button class="doc-sel-btn active" id="docbtn-police" onclick="selectDoc('police')">🚔 경찰 제출용 경위서</button>
+    <button class="doc-sel-btn" id="docbtn-insurance" onclick="selectDoc('insurance')">🏢 보험 청구용 확인서</button>
+    <button class="doc-sel-btn" id="docbtn-memo" onclick="selectDoc('memo')">📋 현장 메모</button>
+  </div>
+  <div id="doc-preview" class="doc-preview empty" style="position:relative">
+    <div class="doc-empty-icon">📄</div>
+    <div class="doc-empty-text">위에서 서류 종류를 선택하세요</div>
+  </div>
+  <div class="btn-row" style="margin-top:14px">
+    <button class="btn-primary" onclick="printDoc()">🖨️ 인쇄 / PDF 저장</button>
+    <button class="btn-secondary" onclick="copyDoc()">📋 텍스트 복사</button>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">📋 추가로 직접 발급 필요한 서류</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+
+      <a href="https://www.easypolice.go.kr/main/main.do" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:24px;flex-shrink:0">🚔</span>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:2px">교통사고사실확인원</div>
+          <div style="font-size:13px;color:var(--text2)">경찰청 교통민원24 → 민원신청 → 교통사고사실확인</div>
+        </div>
+        <span style="font-size:18px;color:var(--red)">→</span>
+      </a>
+
+      <a href="https://www.nhis.or.kr" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--orange)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:24px;flex-shrink:0">🏥</span>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:2px">진단서 · 진료비 영수증</div>
+          <div style="font-size:13px;color:var(--text2)">방문 병원에서 직접 발급 — 통증 없어도 방문 권장</div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--orange);background:#FFF4E5;padding:3px 8px;border-radius:6px;flex-shrink:0">병원 방문</span>
+      </a>
+
+      <a href="https://www.손해보험협회.kr" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:24px;flex-shrink:0">🔧</span>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:2px">차량 수리 견적서</div>
+          <div style="font-size:13px;color:var(--text2)">서비스센터 또는 공업사에서 발급</div>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--green);background:var(--green-bg);padding:3px 8px;border-radius:6px;flex-shrink:0">직접 방문</span>
+      </a>
+
+      <a href="https://www.knia.or.kr" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:24px;flex-shrink:0">📄</span>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:2px">보험금 청구서</div>
+          <div style="font-size:13px;color:var(--text2)">가입 보험사 앱·홈페이지 또는 손보협회</div>
+        </div>
+        <span style="font-size:18px;color:var(--blue)">→</span>
+      </a>
+
+      <a href="https://www.bokjiro.go.kr" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;text-decoration:none;transition:all 0.15s" onmouseover="this.style.borderColor='var(--text2)'" onmouseout="this.style.borderColor='var(--border)'">
+        <span style="font-size:24px;flex-shrink:0">⚖️</span>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:2px">무료 법률 구조 신청</div>
+          <div style="font-size:13px;color:var(--text2)">대한법률구조공단 — 무료 법률 서비스</div>
+        </div>
+        <span style="font-size:18px;color:var(--text2)">→</span>
+      </a>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══ PAGE 4: 보험사 대응 ═══ -->
+<div class="page" id="page-guard">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--orange);background:#FFF4E5;border-color:rgba(212,114,10,0.2)">🛡️ 보험사 대응</div>
+    <h2>보험사에 당하지 않는 법</h2>
+    <p>보험사 직원이 자주 쓰는 불리한 말과 올바른 대응법을 알아두세요</p>
+  </div>
+
+  <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border)">⚠️ 보험사가 자주 쓰는 패턴</div>
+
+  <div class="danger-card">
+    <div class="dc-top">
+      <div class="dc-emoji">🎙️</div>
+      <div><div class="dc-title">"지금 바로 합의하시면 빠르게 처리해드릴게요"</div><div class="dc-tag tag-red">조기합의 유도</div></div>
+    </div>
+    <div class="dc-body">치료 중 합의하면 나중에 후유증이 생겨도 추가 보상을 받을 수 없습니다. 치료가 완전히 끝난 후 합의하는 것이 원칙입니다.</div>
+    <div class="dc-counter"><div class="dc-counter-label">✅ 이렇게 말하세요</div><div class="dc-counter-text">"치료가 완전히 종결된 후 합의하겠습니다. 현재 진행 중인 치료가 있습니다."</div></div>
+  </div>
+
+  <div class="danger-card">
+    <div class="dc-top">
+      <div class="dc-emoji">📋</div>
+      <div><div class="dc-title">"이 서류에 서명만 해주시면 됩니다"</div><div class="dc-tag tag-red">포괄합의서 서명 유도</div></div>
+    </div>
+    <div class="dc-body">"향후 어떠한 이의도 제기하지 않겠다"는 문구가 숨어있는 포괄적 합의서입니다. 서명하면 나중에 추가 청구 불가합니다.</div>
+    <div class="dc-counter"><div class="dc-counter-label">✅ 이렇게 말하세요</div><div class="dc-counter-text">"법률구조공단에 확인 후 서명하겠습니다. 팩스 또는 이메일로 먼저 보내주세요."</div></div>
+  </div>
+
+  <div class="danger-card">
+    <div class="dc-top">
+      <div class="dc-emoji">📉</div>
+      <div><div class="dc-title">"과실이 50:50이라 절반밖에 안 됩니다"</div><div class="dc-tag tag-orange">과실비율 임의 조정</div></div>
+    </div>
+    <div class="dc-body">보험사가 임의로 과실비율을 불리하게 제시하는 경우입니다. 과실비율은 보험개발원 기준표와 판례로 결정됩니다.</div>
+    <div class="dc-counter"><div class="dc-counter-label">✅ 이렇게 말하세요</div><div class="dc-counter-text">"과실비율 산정 근거 서류를 서면으로 주세요. 금융감독원에 조정 신청하겠습니다."</div></div>
+  </div>
+
+  <div class="danger-card">
+    <div class="dc-top">
+      <div class="dc-emoji">🏥</div>
+      <div><div class="dc-title">"그 병원 치료비는 인정이 안 됩니다"</div><div class="dc-tag tag-orange">치료비 범위 축소</div></div>
+    </div>
+    <div class="dc-body">사고와 관련된 치료라면 원칙적으로 보상 대상입니다. 보험사가 임의로 특정 의료기관 치료비를 거부하는 것은 부당합니다.</div>
+    <div class="dc-counter"><div class="dc-counter-label">✅ 이렇게 말하세요</div><div class="dc-counter-text">"담당 의사의 소견서를 첨부하겠습니다. 치료 필요성을 의학적으로 입증하겠습니다."</div></div>
+  </div>
+
+  <div class="danger-card">
+    <div class="dc-top">
+      <div class="dc-emoji">⏰</div>
+      <div><div class="dc-title">"오늘까지만 이 금액으로 가능합니다"</div><div class="dc-tag tag-orange">시간 압박 전술</div></div>
+    </div>
+    <div class="dc-body">보험금 청구권 소멸시효는 3년입니다. 오늘이 마지막이라는 말은 사실이 아닙니다. 충분히 검토할 시간이 있습니다.</div>
+    <div class="dc-counter"><div class="dc-counter-label">✅ 이렇게 말하세요</div><div class="dc-counter-text">"보험금 청구권 소멸시효는 3년입니다. 충분히 검토 후 연락드리겠습니다."</div></div>
+  </div>
+
+  <div class="danger-card">
+    <div class="dc-top">
+      <div class="dc-emoji">🔇</div>
+      <div><div class="dc-title">"녹음하면 대화 못 합니다"</div><div class="dc-tag tag-red">녹음 방해</div></div>
+    </div>
+    <div class="dc-body">본인이 참여한 통화는 합법적으로 녹음할 수 있습니다(통신비밀보호법 제3조). 보험사 직원 발언 녹음은 적법합니다.</div>
+    <div class="dc-counter"><div class="dc-counter-label">✅ 이렇게 말하세요</div><div class="dc-counter-text">"본인 참여 통화 녹음은 법적으로 합법입니다. 계속 진행하겠습니다."</div></div>
+  </div>
+
+  <!-- 내 권리 -->
+  <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border)">✅ 내가 가진 권리</div>
+  <div class="rights-grid">
+    <div class="right-card"><div class="right-icon">🏥</div><div class="right-title">치료 선택권</div><div class="right-desc">병원·한의원 등 치료기관을 자유롭게 선택할 권리</div></div>
+    <div class="right-card"><div class="right-icon">📊</div><div class="right-title">과실비율 이의신청</div><div class="right-desc">금융감독원 분쟁조정, 보험개발원 심의 신청 가능</div></div>
+    <div class="right-card"><div class="right-icon">📞</div><div class="right-title">담당자 변경 요청</div><div class="right-desc">불성실한 직원에 대해 교체 요청 가능</div></div>
+    <div class="right-card"><div class="right-icon">⚖️</div><div class="right-title">무료 법률 지원</div><div class="right-desc">법률구조공단(132)에서 무료 법률 상담 가능</div></div>
+    <div class="right-card"><div class="right-icon">🔍</div><div class="right-title">금감원 민원</div><div class="right-desc">부당한 지급 거부 시 금융감독원(1332) 민원 가능</div></div>
+    <div class="right-card"><div class="right-icon">📝</div><div class="right-title">합의 서면화</div><div class="right-desc">구두 합의는 불명확 — 반드시 서면으로 작성</div></div>
+  </div>
+
+  <!-- AI 조언 -->
+  <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border)">🤖 보험사 발언 AI 분석</div>
+  <!-- 참고용 안내 -->
+  <div style="display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,#fff8f0,#fff3e0);border:2px solid rgba(212,114,10,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px">
+    <span style="font-size:22px;flex-shrink:0">💡</span>
+    <div>
+      <div style="font-size:15px;font-weight:900;color:#141418;margin-bottom:4px">분석 결과는 참고용입니다</div>
+      <div style="font-size:13px;color:#4A4D5A;line-height:1.7">보험사 대응 전략은 개인 상황·증거·계약 내용에 따라 달라집니다. 분쟁이 심각할 경우 금감원 분쟁조정(1332) 또는 변호사 상담을 권장드립니다.</div>
+    </div>
+  </div>
+  <div class="guard-ai-box">
+    <div class="field">
+      <label class="field-label">보험사에서 들은 말을 입력하세요</label>
+      <textarea id="guard-input" placeholder="예: 담당자가 '합의금 200만원이 최대입니다. 오늘 사인하면 빠르게 처리해드릴게요'라고 했어요." rows="4"></textarea>
+    </div>
+    <button class="btn-primary" style="background:var(--orange)" onclick="runGuardAI()">🛡️ 대응 방법 분석</button>
+  </div>
+  <div class="ai-loading" id="guard-loading">
+    <div class="spinner"></div>
+    <div class="loading-text">금감원 분쟁사례 검색 중...</div>
+    <div class="loading-steps">
+      <div class="ls-row"><div class="ls-dot"></div>분쟁조정 사례 검색</div>
+      <div class="ls-row"><div class="ls-dot"></div>유사 판례 분석</div>
+      <div class="ls-row"><div class="ls-dot"></div>대응 전략 수립</div>
+    </div>
+  </div>
+  <div id="guard-result"></div>
+
+  <!-- 연락처 -->
+  <div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border)">📞 분쟁 발생 시 연락처</div>
+  <div class="contact-grid">
+    <a href="tel:1332" class="contact-card"><div class="cc-icon">🏛️</div><div><div class="cc-name">금융감독원</div><div class="cc-num">1332</div><div class="cc-desc">보험사 부당행위 민원</div></div></a>
+    <a href="tel:132" class="contact-card"><div class="cc-icon">⚖️</div><div><div class="cc-name">법률구조공단</div><div class="cc-num">132</div><div class="cc-desc">무료 법률 상담</div></div></a>
+    <a href="tel:1372" class="contact-card"><div class="cc-icon">🛡️</div><div><div class="cc-name">소비자원</div><div class="cc-num">1372</div><div class="cc-desc">소비자 피해 구제</div></div></a>
+    <a href="tel:1644-0055" class="contact-card"><div class="cc-icon">🚗</div><div><div class="cc-name">손해보험협회</div><div class="cc-num">1644-0055</div><div class="cc-desc">과실비율 심의 신청</div></div></a>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══ PAGE 5: 보험 분석 ═══ -->
+<div class="page" id="page-policy">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--blue);background:var(--blue-bg);border-color:rgba(26,111,212,0.2)">📑 보험 분석</div>
+    <h2>내 보험 한도 분석</h2>
+    <p>보험 증권 PDF나 내용을 붙여넣으면 AI가 보장 범위와 한도를 알기 쉽게 정리합니다</p>
+  </div>
+  <div class="upload-zone" id="upload-zone" onclick="event.stopPropagation();document.getElementById('policy-file').click()">
+    <input type="file" id="policy-file" accept=".pdf,.txt,.jpg,.jpeg,.png" style="display:none" onchange="handlePolicyFile(event);event.stopPropagation()">
+    <div class="uz-icon">📎</div>
+    <div class="uz-title">보험 증권 파일 업로드</div>
+    <div class="uz-sub">PDF · 이미지 · TXT · 클릭 또는 드래그</div>
+    <div class="uz-filename" id="uz-filename" style="display:none"></div>
+  </div>
+  <div class="divider-or"><span>또는</span></div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label">보험 내용 직접 붙여넣기</label>
+      <textarea id="policy-text" rows="7" placeholder="보험 증권에서 보장 항목, 보험금 한도, 면·부책 조건 등을 복사해서 붙여넣으세요.&#10;&#10;예:&#10;• 대인배상Ⅱ: 1억원/1인&#10;• 대물배상: 5천만원&#10;• 자차손해: 가입금액의 20% 자기부담금"></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label">궁금한 점 (선택)</label>
+      <div class="chips" style="margin-bottom:10px">
+        <div class="chip" onclick="addQuestion(this.innerText)">이 사고에서 내 한도는?</div>
+        <div class="chip" onclick="addQuestion(this.innerText)">자기부담금은 얼마?</div>
+        <div class="chip" onclick="addQuestion(this.innerText)">치료비는 어디까지?</div>
+        <div class="chip" onclick="addQuestion(this.innerText)">면책 조건이 있나요?</div>
+      </div>
+      <textarea id="policy-question" rows="2" placeholder="추가로 궁금한 점 (없으면 공란)"></textarea>
+    </div>
+  </div>
+  <button class="btn-primary" id="policy-btn" style="background:var(--blue)" onclick="runPolicyAI()">📑 보험 내용 분석 시작</button>
+  <div class="ai-loading" id="policy-loading" style="margin-top:14px">
+    <div class="spinner" style="border-top-color:var(--blue)"></div>
+    <div class="loading-text">보험 약관 분석 중...</div>
+    <div class="loading-steps">
+      <div class="ls-row"><div class="ls-dot"></div>보장 항목 및 한도 추출</div>
+      <div class="ls-row"><div class="ls-dot"></div>면·부책 조건 분석</div>
+      <div class="ls-row"><div class="ls-dot"></div>사고 적용 시나리오 계산</div>
+    </div>
+  </div>
+  <div id="policy-result" style="margin-top:14px"></div>
+</div>
+</div>
+
+
+<!-- ═══ PAGE 6: 내 정보 ═══ -->
+<div class="page" id="page-myinfo">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--green);background:var(--green-bg);border-color:rgba(26,150,71,0.2)">👤 내 정보</div>
+    <h2>내 차량 & 정보 등록</h2>
+    <p>한 번 등록하면 사고 시 자동으로 채워집니다. 차량 여러 대 등록 가능합니다.</p>
+  </div>
+
+  <!-- 공통 정보 -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom:14px">👤 공통 정보</div>
+    <div class="field field-row">
+      <div>
+        <label class="field-label">이름</label>
+        <input type="text" id="mi-name" placeholder="홍길동">
+      </div>
+      <div>
+        <label class="field-label">연락처</label>
+        <input type="tel" id="mi-phone" placeholder="010-0000-0000">
+      </div>
+    </div>
+    <div class="field field-row">
+      <div>
+        <label class="field-label">비상연락처 (가족)</label>
+        <input type="tel" id="mi-emergency" placeholder="010-0000-0000">
+      </div>
+      <div>
+        <label class="field-label">보험설계사 연락처</label>
+        <input type="tel" id="mi-agent" placeholder="010-0000-0000">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">자주 가는 수리점/공업사</label>
+      <input type="text" id="mi-garage" placeholder="예: OO카센터 010-1234-5678">
+    </div>
+  </div>
+
+  <!-- 차량 탭 -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="veh-tab-bar">
+      <div id="veh-tabs-row" style="display:flex;flex:1;overflow-x:auto;scrollbar-width:none"></div>
+      <button class="veh-add-btn" onclick="addVehicle()" title="차량 추가">＋</button>
+    </div>
+    <div id="veh-panels" style="padding:18px 20px 20px"></div>
+  </div>
+
+  <button class="mi-save-btn" onclick="saveMyInfo()">💾 전체 저장</button>
+  <div id="mi-save-msg" style="display:none;text-align:center;padding:12px;font-size:15px;color:var(--green);font-weight:700">✅ 저장되었습니다!</div>
+  <div id="veh-select-banner" style="display:none;margin-top:8px"></div>
+</div>
+</div>
+
+
+<!-- ═══ PAGE 7: 설정 ═══ -->
+<div class="page" id="page-settings">
+<div class="wrap">
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--text2);background:var(--bg3);border-color:var(--border)">⚙️ 설정</div>
+    <h2>기록 관리</h2>
+    <p>저장된 사고 기록을 확인하고 수정하거나 PDF로 저장할 수 있습니다</p>
+  </div>
+
+  <!-- ═ 사고 기록 목록 ═ -->
+  <div class="set-section" style="margin-bottom:14px">
+    <div class="set-section-title" onclick="toggleSetSection('set-history')" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)">
+      <span style="color:var(--blue)">📂 저장된 사고 기록 목록</span>
+      <span class="set-toggle-icon" id="set-history-icon">▼</span>
+    </div>
+    <div class="set-section-body open" id="set-history">
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ═ 현재 기록 수정 ═ -->
+  <div id="settings-record-summary"></div>
+  <div id="settings-no-data" style="display:none">
+    <div class="card" style="text-align:center;padding:32px 20px">
+      <div style="font-size:48px;margin-bottom:12px">📋</div>
+      <div style="font-size:18px;font-weight:900;margin-bottom:8px">저장된 기록이 없습니다</div>
+      <div style="font-size:15px;color:var(--text2);margin-bottom:20px">현장기록 탭에서 사고 내용을 먼저 입력하세요</div>
+      <button onclick="goPage('quick')" class="btn-primary" style="width:auto;padding:12px 32px">📍 현장기록으로 이동</button>
+    </div>
+  </div>
+
+  <div id="settings-edit-area" style="display:none">
+
+    <div class="set-section">
+      <div class="set-section-title" onclick="toggleSetSection('set-s1')">
+        <span>📍 사고 기본 정보</span><span class="set-toggle-icon" id="set-s1-icon">▼</span>
+      </div>
+      <div class="set-section-body" id="set-s1">
+        <div class="field">
+          <label class="field-label">사고 유형</label>
+          <div class="sel-grid" id="set-types-grid" style="margin-top:0">
+            <div class="sel-btn" onclick="setToggleType(this,'정차 중 추돌')"><div class="sb-icon">🛑</div><div class="sb-label" style="font-size:12px">정차 중 추돌</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'후방 추돌')"><div class="sb-icon">🚗</div><div class="sb-label" style="font-size:12px">후방 추돌</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'로터리 사고')"><div class="sb-icon">🔄</div><div class="sb-label" style="font-size:12px">로터리</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'교차로 충돌')"><div class="sb-icon">✚</div><div class="sb-label" style="font-size:12px">교차로</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'끼어들기')"><div class="sb-icon">↙️</div><div class="sb-label" style="font-size:12px">끼어들기</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label" style="font-size:12px">측면</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label" style="font-size:12px">주차장</div></div>
+            <div class="sel-btn" onclick="setToggleType(this,'기타')"><div class="sb-icon">❓</div><div class="sb-label" style="font-size:12px">기타</div></div>
+          </div>
+        </div>
+        <div class="field"><label class="field-label">사고 일시</label><input type="datetime-local" id="set-datetime"></div>
+        <div class="field"><label class="field-label">사고 장소</label><input type="text" id="set-location" placeholder="예: 서울 강남구 테헤란로 123"></div>
+        <div class="field">
+          <label class="field-label">날씨</label>
+          <div class="tag-row">
+            <button class="tag-btn" onclick="setWeather(this,'맑음')">☀️ 맑음</button>
+            <button class="tag-btn" onclick="setWeather(this,'흐림')">☁️ 흐림</button>
+            <button class="tag-btn" onclick="setWeather(this,'비')">🌧 비</button>
+            <button class="tag-btn" onclick="setWeather(this,'눈')">❄️ 눈</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-section-title" onclick="toggleSetSection('set-s2')">
+        <span>🚗 내 차량 정보</span><span class="set-toggle-icon" id="set-s2-icon">▼</span>
+      </div>
+      <div class="set-section-body" id="set-s2">
+        <div class="field field-row">
+          <div><label class="field-label">차량 번호</label><input type="text" id="set-myplate" style="font-weight:700"></div>
+          <div style="position:relative"><label class="field-label">차종</label><input type="text" id="set-mycar" autocomplete="off" oninput="showCarSuggest('set-mycar','cs-setmy')"><div class="suggest-box" id="cs-setmy"></div></div>
+        </div>
+        <div class="field field-row">
+          <div><label class="field-label">이름</label><input type="text" id="set-myname"></div>
+          <div><label class="field-label">연락처</label><input type="tel" id="set-myphone"></div>
+        </div>
+        <div class="field field-row">
+          <div style="position:relative"><label class="field-label">보험사</label><input type="text" id="set-myinsurer" autocomplete="off" oninput="showInsurerSuggest('set-myinsurer','is-setmy')"><div class="suggest-box" id="is-setmy"></div></div>
+          <div><label class="field-label">증권번호</label><input type="text" id="set-mypolicy"></div>
+        </div>
+        <div class="field">
+          <label class="field-label">차량 피해 부위</label>
+          <div class="sel-grid sel-grid-4" id="set-damages-grid">
+            <div class="sel-btn" style="padding:10px 6px" onclick="setToggleDamage(this,'앞 범퍼')"><div style="font-size:20px">⬆️</div><div style="font-size:12px;font-weight:700">앞</div></div>
+            <div class="sel-btn" style="padding:10px 6px" onclick="setToggleDamage(this,'뒤 범퍼')"><div style="font-size:20px">⬇️</div><div style="font-size:12px;font-weight:700">뒤</div></div>
+            <div class="sel-btn" style="padding:10px 6px" onclick="setToggleDamage(this,'좌측')"><div style="font-size:20px">⬅️</div><div style="font-size:12px;font-weight:700">좌</div></div>
+            <div class="sel-btn" style="padding:10px 6px" onclick="setToggleDamage(this,'우측')"><div style="font-size:20px">➡️</div><div style="font-size:12px;font-weight:700">우</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-section-title" onclick="toggleSetSection('set-s3')">
+        <span>🚙 상대방 정보</span><span class="set-toggle-icon" id="set-s3-icon">▼</span>
+      </div>
+      <div class="set-section-body" id="set-s3">
+        <div class="field field-row">
+          <div><label class="field-label">차량 번호</label><input type="text" id="set-opplate" style="font-weight:700"></div>
+          <div style="position:relative"><label class="field-label">차종</label><input type="text" id="set-opcar" autocomplete="off" oninput="showCarSuggest('set-opcar','cs-setop')"><div class="suggest-box" id="cs-setop"></div></div>
+        </div>
+        <div class="field field-row">
+          <div><label class="field-label">이름</label><input type="text" id="set-opname"></div>
+          <div><label class="field-label">연락처</label><input type="tel" id="set-opphone"></div>
+        </div>
+        <div class="field field-row">
+          <div style="position:relative"><label class="field-label">보험사</label><input type="text" id="set-opinsurer" autocomplete="off" oninput="showInsurerSuggest('set-opinsurer','is-setop')"><div class="suggest-box" id="is-setop"></div></div>
+          <div><label class="field-label">증권번호</label><input type="text" id="set-oppolicy"></div>
+        </div>
+        <div class="field"><label class="field-label">목격자 연락처</label><input type="tel" id="set-witness"></div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-section-title" onclick="toggleSetSection('set-s4')">
+        <span>🏥 부상 · 피해</span><span class="set-toggle-icon" id="set-s4-icon">▼</span>
+      </div>
+      <div class="set-section-body" id="set-s4">
+        <div class="field">
+          <label class="field-label">내 부상</label>
+          <div class="tag-row" id="set-myinjury-row">
+            <button class="tag-btn" onclick="setInjury('my',this,'없음')">😊 없음</button>
+            <button class="tag-btn" onclick="setInjury('my',this,'경상')">😐 경상</button>
+            <button class="tag-btn" onclick="setInjury('my',this,'중상')">😣 중상</button>
+            <button class="tag-btn" onclick="setInjury('my',this,'중태')">🆘 중태</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">상대방 부상</label>
+          <div class="tag-row" id="set-opinjury-row">
+            <button class="tag-btn" onclick="setInjury('op',this,'없음')">😊 없음</button>
+            <button class="tag-btn" onclick="setInjury('op',this,'경상')">😐 경상</button>
+            <button class="tag-btn" onclick="setInjury('op',this,'중상')">😣 중상</button>
+            <button class="tag-btn" onclick="setInjury('op',this,'중태')">🆘 중태</button>
+          </div>
+        </div>
+        <div class="field"><label class="field-label">부상 상세</label><input type="text" id="set-injurydetail" placeholder="목 통증, 허리 뻐근함"></div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-section-title" onclick="toggleSetSection('set-s5')">
+        <span>📝 사고 경위</span><span class="set-toggle-icon" id="set-s5-icon">▼</span>
+      </div>
+      <div class="set-section-body" id="set-s5">
+        <div class="field"><label class="field-label">경위 내용</label><textarea id="set-desc" rows="5"></textarea></div>
+        <div class="field">
+          <label class="field-label">블랙박스</label>
+          <div class="tag-row" id="set-bb-row">
+            <button class="tag-btn" onclick="setBB(this,'있음')">📹 있음</button>
+            <button class="tag-btn" onclick="setBB(this,'없음')">❌ 없음</button>
+            <button class="tag-btn" onclick="setBB(this,'확인필요')">❓ 확인 필요</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="set-save-btn" onclick="saveSettings()">💾 수정 내용 저장</button>
+    <div id="set-save-msg" style="display:none;text-align:center;padding:12px;font-size:15px;color:var(--green);font-weight:700;margin-top:8px">✅ 저장되었습니다!</div>
+    <button onclick="confirmClearRecord()" style="width:100%;margin-top:10px;padding:14px;border-radius:var(--radius-sm);border:2px solid rgba(214,43,43,0.3);background:none;color:var(--red);font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s">🗑️ 현재 기록 전체 삭제</button>
+  </div>
+
+</div>
+</div>
+
+
+<script>
+/* ══════════════ DATA ══════════════ */
+const D = {
+  types:[], weather:'', datetime:'', location:'',
+  myPlate:'', myCar:'', myName:'', myPhone:'', myInsurer:'', myPolicy:'',
+  damages:[],
+  opPlate:'', opCar:'', opName:'', opPhone:'', opInsurer:'', opPolicy:'', witness:'',
+  myInjury:'', opInjury:'', injuryDetail:'', reports:[],
+  desc:'', blackbox:''
+};
+
+/* ══════════════ NAV ══════════════ */
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const map={quick:0,ai:1,docs:2,guard:3,policy:4,myinfo:5,settings:6};
+  const tab=document.querySelectorAll('.nav-tab')[map[name]];
+  if(tab){
+    tab.classList.add('active');
+    try { setTimeout(()=>tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}),50); } catch(e){}
+  }
+  if(name==='settings') { loadSettings(); renderHistoryList(); }
+  if(name==='ai') updateAIPhotoHint();
+  window.scrollTo(0,0);
+}
+
+function updateAIPhotoHint(){
+  const hint = document.getElementById('ai-photo-hint-text');
+  if(!hint) return;
+  const imgs = getUploadedImages();
+  if(imgs.length > 0){
+    hint.innerHTML = `<strong style="color:var(--green)">📸 사진 ${imgs.length}장이 첨부되어 있습니다</strong> — 분석 시 사진도 함께 참고합니다`;
+    document.getElementById('ai-photo-hint').style.borderColor='var(--green)';
+    document.getElementById('ai-photo-hint').style.background='var(--green-bg)';
+  } else {
+    hint.textContent = '현장기록 탭에서 사진을 첨부하면 AI가 사진도 함께 분석합니다';
+    document.getElementById('ai-photo-hint').style.borderColor='var(--border)';
+    document.getElementById('ai-photo-hint').style.background='var(--bg2)';
+  }
+}
+
+/* ══════════════ CAR / INSURER AUTOCOMPLETE ══════════════ */
+const CAR_LIST = [
+  // 현대
+  '현대 아반떼','현대 아반떼 N','현대 쏘나타','현대 쏘나타 N Line','현대 그랜저','현대 투싼','현대 투싼 N Line',
+  '현대 싼타페','현대 팰리세이드','현대 코나','현대 코나 Electric','현대 베뉴','현대 스타리아','현대 포터 II',
+  '현대 아이오닉5','현대 아이오닉5 N','현대 아이오닉6','현대 아이오닉 N','현대 캐스퍼','현대 캐스퍼 Electric','현대 넥쏘',
+  // 기아
+  '기아 모닝','기아 레이','기아 K3','기아 K5','기아 K8','기아 K9','기아 스포티지','기아 쏘렌토',
+  '기아 카니발','기아 셀토스','기아 니로','기아 니로 EV','기아 니로 플러그인','기아 EV3','기아 EV6','기아 EV6 GT','기아 EV9','기아 봉고3','기아 타스만',
+  // 제네시스
+  '제네시스 G70','제네시스 G70 Shooting Brake','제네시스 G80','제네시스 G80 Electric',
+  '제네시스 G90','제네시스 GV60','제네시스 GV70','제네시스 GV70 Electric','제네시스 GV80','제네시스 GV80 Electrified',
+  // KG모빌리티
+  'KG 토레스','KG 토레스 EVX','KG 코란도','KG 코란도 e-Motion','KG 티볼리','KG 렉스턴','KG 렉스턴 스포츠','KG 무쏘',
+  // 르노
+  '르노 QM6','르노 QM6 GDe','르노 SM6','르노 아르카나','르노 그랑 콜레오스',
+  // 쉐보레
+  '쉐보레 스파크','쉐보레 말리부','쉐보레 트레일블레이저','쉐보레 트랙스','쉐보레 이쿼녹스','쉐보레 볼트EV','쉐보레 볼트EUV',
+  // 테슬라
+  '테슬라 모델3','테슬라 모델3 Performance','테슬라 모델3 Highland','테슬라 모델Y','테슬라 모델Y Performance',
+  '테슬라 모델Y Juniper','테슬라 모델S','테슬라 모델S Plaid','테슬라 모델X','테슬라 모델X Plaid','테슬라 사이버트럭',
+  // BMW
+  'BMW 1시리즈','BMW 2시리즈','BMW 3시리즈','BMW 4시리즈','BMW 5시리즈','BMW 6시리즈','BMW 7시리즈','BMW 8시리즈',
+  'BMW iX','BMW iX1','BMW iX2','BMW iX3','BMW i3','BMW i4','BMW i5','BMW i7',
+  'BMW X1','BMW X2','BMW X3','BMW X4','BMW X5','BMW X6','BMW X7',
+  'BMW M2','BMW M3','BMW M4','BMW M5','BMW M8','BMW XM',
+  // 벤츠(메르세데스-벤츠)
+  '벤츠 A클래스','벤츠 B클래스','벤츠 C클래스','벤츠 E클래스','벤츠 S클래스',
+  '벤츠 CLA','벤츠 CLE','벤츠 GLA','벤츠 GLB','벤츠 GLC','벤츠 GLE','벤츠 GLS','벤츠 G클래스',
+  '벤츠 EQA','벤츠 EQB','벤츠 EQC','벤츠 EQE','벤츠 EQS',
+  '벤츠 AMG GT','벤츠 SL','벤츠 C AMG','벤츠 E AMG','벤츠 S AMG',
+  'Mercedes AMG GT','Mercedes C클래스','Mercedes E클래스','Mercedes S클래스',
+  // 아우디
+  '아우디 A1','아우디 A3','아우디 A4','아우디 A5','아우디 A6','아우디 A7','아우디 A8',
+  '아우디 Q2','아우디 Q3','아우디 Q5','아우디 Q7','아우디 Q8',
+  '아우디 R8','아우디 TT','아우디 RS3','아우디 RS4','아우디 RS5','아우디 RS6','아우디 RS7','아우디 RS Q8',
+  '아우디 e-tron','아우디 e-tron GT','아우디 RS e-tron GT','아우디 Q4 e-tron','아우디 Q6 e-tron','아우디 Q8 e-tron',
+  'Audi R8','Audi TT','Audi RS3','Audi RS4','Audi RS5','Audi RS6','Audi RS7',
+  // 폭스바겐
+  '폭스바겐 폴로','폭스바겐 골프','폭스바겐 Golf GTI','폭스바겐 Golf R',
+  '폭스바겐 파사트','폭스바겐 아테온','폭스바겐 티구안','폭스바겐 티록','폭스바겐 ID.3','폭스바겐 ID.4','폭스바겐 ID.5',
+  // 볼보
+  '볼보 XC40','볼보 XC40 Recharge','볼보 XC60','볼보 XC90',
+  '볼보 C40 Recharge','볼보 EX30','볼보 EX40','볼보 EX90','볼보 S60','볼보 S90','볼보 V60','볼보 V90',
+  // 포르쉐
+  '포르쉐 911','포르쉐 911 카레라','포르쉐 911 터보','포르쉐 911 GT3',
+  '포르쉐 카이엔','포르쉐 카이엔 GTS','포르쉐 카이엔 터보',
+  '포르쉐 마칸','포르쉐 마칸 Electric','포르쉐 파나메라','포르쉐 박스터','포르쉐 케이맨',
+  '포르쉐 타이칸','포르쉐 타이칸 Cross Turismo','포르쉐 타이칸 GTS',
+  'Porsche 911','Porsche Cayenne','Porsche Macan','Porsche Taycan','Porsche Boxster','Porsche Cayman',
+  // 롤스로이스
+  '롤스로이스 팬텀','롤스로이스 고스트','롤스로이스 레이스','롤스로이스 던','롤스로이스 컬리넌','롤스로이스 스펙터',
+  'Rolls-Royce Phantom','Rolls-Royce Ghost','Rolls-Royce Wraith','Rolls-Royce Dawn','Rolls-Royce Cullinan','Rolls-Royce Spectre',
+  // 벤틀리
+  '벤틀리 컨티넨탈 GT','벤틀리 컨티넨탈 GTC','벤틀리 플라잉 스퍼','벤틀리 벤테이가','벤틀리 멀산',
+  'Bentley Continental GT','Bentley Flying Spur','Bentley Bentayga','Bentley Mulsanne',
+  // 람보르기니
+  '람보르기니 우라칸','람보르기니 우라칸 EVO','람보르기니 우라칸 STO',
+  '람보르기니 아벤타도르','람보르기니 레부엘토','람보르기니 우루스','람보르기니 우루스 S',
+  'Lamborghini Huracan','Lamborghini Aventador','Lamborghini Revuelto','Lamborghini Urus',
+  // 페라리
+  '페라리 296 GTB','페라리 296 GTS','페라리 F8','페라리 Roma','페라리 Portofino',
+  '페라리 SF90','페라리 812','페라리 GTC4Lusso','페라리 Purosangue',
+  'Ferrari 296','Ferrari F8','Ferrari Roma','Ferrari SF90','Ferrari 812','Ferrari Purosangue',
+  // 마세라티
+  '마세라티 기블리','마세라티 콰트로포르테','마세라티 르반떼','마세라티 그레칼레','마세라티 MC20',
+  'Maserati Ghibli','Maserati Quattroporte','Maserati Levante','Maserati Grecale','Maserati MC20',
+  // 재규어 랜드로버
+  '재규어 XE','재규어 XF','재규어 F-Type','재규어 I-Pace','재규어 F-Pace','재규어 E-Pace',
+  '랜드로버 디펜더','랜드로버 디스커버리','랜드로버 디스커버리 스포츠',
+  '랜드로버 레인지로버','랜드로버 레인지로버 스포츠','랜드로버 레인지로버 이보크','랜드로버 레인지로버 벨라',
+  'Jaguar F-Type','Jaguar I-Pace','Land Rover Defender','Range Rover','Range Rover Sport',
+  // 미니
+  'MINI 해치백','MINI 컨버터블','MINI 클럽맨','MINI 컨트리맨','MINI 페이스맨','MINI 쿠퍼 SE','MINI 에이스맨',
+  // 도요타·렉서스
+  '도요타 캠리','도요타 캠리 하이브리드','도요타 RAV4','도요타 RAV4 하이브리드',
+  '도요타 하이랜더','도요타 프리우스','도요타 C-HR','도요타 알파드','도요타 벨파이어','도요타 크라운',
+  '렉서스 ES','렉서스 ES 300h','렉서스 IS','렉서스 LS','렉서스 LC','렉서스 LX',
+  '렉서스 RX','렉서스 RX 500h','렉서스 NX','렉서스 NX 350h','렉서스 UX','렉서스 RZ','렉서스 TX',
+  // 혼다·인피니티·닛산
+  '혼다 어코드','혼다 어코드 하이브리드','혼다 CR-V','혼다 HR-V','혼다 ZR-V','혼다 e:Ny1',
+  '인피니티 Q50','인피니티 Q60','인피니티 QX50','인피니티 QX55','인피니티 QX60','인피니티 QX80',
+  // 폴스타·BYD·볼보 전기
+  '폴스타 2','폴스타 3','폴스타 4','폴스타 6',
+  'BYD 아토3','BYD 씰','BYD 돌핀','BYD 한','BYD 탱','BYD 씨걸',
+  // 링컨·지프·포드·GM
+  '링컨 코세어','링컨 노틸러스','링컨 에비에이터','링컨 내비게이터',
+  '지프 랭글러','지프 랭글러 4xe','지프 그랜드 체로키','지프 글래디에이터','지프 컴패스','지프 레니게이드',
+  '포드 머스탱','포드 머스탱 마하-E','포드 F-150','포드 F-150 라이트닝','포드 브롱코','포드 익스플로러',
+  '캐딜락 에스컬레이드','캐딜락 CT5','캐딜락 XT5','캐딜락 XT6','캐딜락 LYRIQ',
+  // 볼보·스카니아 트럭 (업무용)
+  '현대 마이티','현대 메가트럭','현대 파비스','기아 봉고 III','기아 광주트럭',
+  '쌍용 티볼리 에어','쌍용 코란도 스포츠',
+];
+
+const INSURER_DATA = [
+  {name:'삼성화재',    tel:'1588-5114'},
+  {name:'현대해상',    tel:'1588-0123'},
+  {name:'DB손해보험',  tel:'1588-0070'},
+  {name:'KB손해보험',  tel:'1544-0114'},
+  {name:'메리츠화재',  tel:'1588-7711'},
+  {name:'롯데손해보험',tel:'1588-2100'},
+  {name:'한화손해보험',tel:'1566-3000'},
+  {name:'흥국화재',    tel:'1544-1200'},
+  {name:'MG손해보험',  tel:'1588-5656'},
+  {name:'AXA손해보험', tel:'1588-1600'},
+  {name:'캐롯손해보험',tel:'1600-4700'},
+  {name:'카카오페이손해보험',tel:'1800-1543'},
+  {name:'카카오페이손보',    tel:'1800-1543'},
+  {name:'하나손해보험',      tel:'1544-7653'},
+  {name:'NH농협손해보험',    tel:'1588-3344'},
+  {name:'농협손해보험',      tel:'1588-3344'},
+  {name:'BNP파리바카디프',   tel:'1688-1688'},
+  {name:'교보생명',          tel:'1566-5005'},
+  {name:'삼성생명',          tel:'1588-1001'},
+];
+
+function showCarSuggest(inputId, boxId) {
+  const el=document.getElementById(inputId), box=document.getElementById(boxId);
+  if(!el||!box) return;
+  const val=el.value.trim();
+  if(!val){box.className='suggest-box';return;}
+  const q=val.replace(/\s+/g,'').toLowerCase();
+
+  // 1순위: 브랜드+모델 전체 포함 (공백 무시)
+  const full = CAR_LIST.filter(m=>m.replace(/\s+/g,'').toLowerCase().includes(q));
+
+  // 2순위: 모델명만으로 검색 (브랜드 제외한 부분에서 매칭) — "R8" → "아우디 R8"
+  const modelOnly = CAR_LIST.filter(m=>{
+    if(full.includes(m)) return false; // 이미 포함된 건 제외
+    const parts = m.split(' ');
+    const modelPart = parts.slice(1).join('').toLowerCase(); // 브랜드 제외
+    return modelPart.includes(q);
+  });
+
+  const results = [...full, ...modelOnly].slice(0,12);
+  if(!results.length){box.className='suggest-box';return;}
+  box.innerHTML=results.map(r=>{const s=r.replace(/'/g,"\\'");return`<div class="suggest-item" onmousedown="pickSuggest('${inputId}','${boxId}','${s}')">${r}</div>`;}).join('');
+  box.className='suggest-box open';
+}
+
+function showInsurerSuggest(inputId, boxId) {
+  const val=document.getElementById(inputId).value.trim(), box=document.getElementById(boxId);
+  if(!val){box.className='suggest-box';return;}
+  const q=val.toLowerCase();  // 입력값 소문자 변환
+  const results=INSURER_DATA.filter(i=>
+    i.name.toLowerCase().includes(q) || i.tel.includes(q)  // 보험사명도 소문자 비교
+  ).slice(0,6);
+  if(!results.length){box.className='suggest-box';return;}
+  box.innerHTML=results.map(r=>`<div class="suggest-item" onmousedown="pickSuggest('${inputId}','${boxId}','${r.name}')">${r.name} <span style="color:var(--text3);font-size:12px">${r.tel}</span></div>`).join('');
+  box.className='suggest-box open';
+}
+
+function pickSuggest(inputId, boxId, val) {
+  const el=document.getElementById(inputId);
+  if(el) el.value=val;
+  const box=document.getElementById(boxId);
+  if(box) box.className='suggest-box';
+}
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('[id]')||!e.target.closest('[id]').classList?.contains('suggest-box'))
+    document.querySelectorAll('.suggest-box.open').forEach(b=>b.className='suggest-box');
+});
+
+/* ══════════════ VEHICLE MANAGEMENT ══════════════ */
+let vehicles=[{plate:'',car:'',insurer:'',policy:'',insStart:'',insEnd:'',nickname:''}];
+let activeVehIdx=0;
+
+const VEH_COLORS=['#1A6FD4','#1A9647','#D4720A','#9B51E0','#D62B2B','#0891B2'];
+function getVehColor(i){return VEH_COLORS[i%VEH_COLORS.length];}
+
+function renderVehicleTabs() {
+  const row=document.getElementById('veh-tabs-row');
+  if(!row) return;
+  row.innerHTML=vehicles.map((v,i)=>{
+    const color=getVehColor(i);
+    const label=v.nickname||v.plate||(i===0?'내 차':'차량 '+(i+1));
+    // expiry badge
+    let badge='';
+    if(v.insEnd){
+      const diff=Math.ceil((new Date(v.insEnd)-new Date())/86400000);
+      if(diff<0) badge=`<span style="font-size:10px;background:var(--red-bg);color:var(--red);border-radius:4px;padding:1px 5px;margin-left:3px">만료</span>`;
+      else if(diff<=30) badge=`<span style="font-size:10px;background:#FFF4E5;color:var(--orange);border-radius:4px;padding:1px 5px;margin-left:3px">${diff}일</span>`;
+    }
+    return `<div class="veh-tab-item${i===activeVehIdx?' active':''}" onclick="switchVeh(${i})" style="${i===activeVehIdx?'border-bottom-color:'+color+';color:'+color:''}">
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
+      ${label}${badge}
+      ${vehicles.length>1?`<button class="veh-tab-del" onclick="event.stopPropagation();deleteVehicle(${i})">×</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderVehiclePanel(idx) {
+  const panel=document.getElementById('veh-panels');
+  if(!panel) return;
+  const v=vehicles[idx]||{};
+  const vid=`v${idx}`, color=getVehColor(idx);
+  let expWarn='';
+  if(v.insEnd){
+    const diff=Math.ceil((new Date(v.insEnd)-new Date())/86400000);
+    if(diff<0) expWarn=`<div style="margin-top:8px;padding:12px 14px;background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:10px;font-size:14px;color:var(--red)">⚠️ 보험이 ${Math.abs(diff)}일 전 만료되었습니다!</div>`;
+    else if(diff<=30) expWarn=`<div style="margin-top:8px;padding:12px 14px;background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:10px;font-size:14px;color:var(--orange)">⏰ 보험 만료 ${diff}일 전입니다</div>`;
+  }
+  panel.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0"></div>
+      <input type="text" id="${vid}-nick" value="${v.nickname||''}" placeholder="차량 별명 (예: 내 차, 아내 차, 회사 차)"
+        style="border:none;border-bottom:2px solid var(--border);border-radius:0;padding:4px 0;font-size:16px;font-weight:700;flex:1;background:none"
+        onchange="vehicles[${idx}].nickname=this.value;renderVehicleTabs()">
+    </div>
+    <div class="field field-row">
+      <div>
+        <label class="field-label">차량 번호</label>
+        <input type="text" id="${vid}-plate" value="${v.plate||''}" placeholder="123가 4567" style="font-size:18px;font-weight:900;letter-spacing:1px" onchange="vehicles[${idx}].plate=this.value;renderVehicleTabs()">
+      </div>
+      <div style="position:relative">
+        <label class="field-label">차종</label>
+        <input type="text" id="${vid}-car" value="${v.car||''}" placeholder="현대, 기아…" autocomplete="off" oninput="vehicles[${idx}].car=this.value;showCarSuggest('${vid}-car','cs-${vid}')">
+        <div class="suggest-box" id="cs-${vid}"></div>
+      </div>
+    </div>
+    <div class="field field-row">
+      <div style="position:relative">
+        <label class="field-label">보험사</label>
+        <input type="text" id="${vid}-insurer" value="${v.insurer||''}" placeholder="삼성, KB…" autocomplete="off" oninput="vehicles[${idx}].insurer=this.value;showInsurerSuggest('${vid}-insurer','is-${vid}')">
+        <div class="suggest-box" id="is-${vid}"></div>
+      </div>
+      <div>
+        <label class="field-label">증권번호</label>
+        <input type="text" id="${vid}-policy" value="${v.policy||''}" placeholder="선택사항" onchange="vehicles[${idx}].policy=this.value">
+      </div>
+    </div>
+    <div class="field field-row">
+      <div>
+        <label class="field-label">보험 시작일</label>
+        <input type="date" id="${vid}-ins-start" value="${v.insStart||''}" onchange="vehicles[${idx}].insStart=this.value">
+      </div>
+      <div>
+        <label class="field-label">보험 만료일</label>
+        <input type="date" id="${vid}-ins-end" value="${v.insEnd||''}" onchange="vehicles[${idx}].insEnd=this.value;renderVehicleTabs();renderVehiclePanel(${idx})">
+      </div>
+    </div>
+    ${expWarn}`;
+}
+
+function switchVeh(idx){collectCurrentVehicleInputs();activeVehIdx=idx;renderVehicleTabs();renderVehiclePanel(idx);}
+
+function collectCurrentVehicleInputs(){
+  const idx=activeVehIdx;if(!vehicles[idx])return;
+  const vid=`v${idx}`,get=id=>{const e=document.getElementById(id);return e?e.value:'';};
+  vehicles[idx].nickname=get(`${vid}-nick`);vehicles[idx].plate=get(`${vid}-plate`);
+  vehicles[idx].car=get(`${vid}-car`);vehicles[idx].insurer=get(`${vid}-insurer`);
+  vehicles[idx].policy=get(`${vid}-policy`);vehicles[idx].insStart=get(`${vid}-ins-start`);
+  vehicles[idx].insEnd=get(`${vid}-ins-end`);
+}
+
+function addVehicle(){collectCurrentVehicleInputs();vehicles.push({plate:'',car:'',insurer:'',policy:'',insStart:'',insEnd:'',nickname:''});activeVehIdx=vehicles.length-1;renderVehicleTabs();renderVehiclePanel(activeVehIdx);}
+
+function deleteVehicle(idx){
+  if(vehicles.length<=1)return;
+  if(!confirm(`차량 ${idx+1}을 삭제하시겠습니까?`))return;
+  vehicles.splice(idx,1);activeVehIdx=Math.min(activeVehIdx,vehicles.length-1);
+  renderVehicleTabs();renderVehiclePanel(activeVehIdx);
+}
+
+function saveMyInfo(){
+  collectCurrentVehicleInputs();
+  const info={name:document.getElementById('mi-name').value,phone:document.getElementById('mi-phone').value,emergency:document.getElementById('mi-emergency').value,agent:document.getElementById('mi-agent').value,garage:document.getElementById('mi-garage').value,vehicles,activeVehIdx};
+  localStorage.setItem('myInfo',JSON.stringify(info));
+  const msg=document.getElementById('mi-save-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',3000);
+  renderVehicleSelectInQuick();
+  checkFirstRun(); // 저장 즉시 현장기록 배너 갱신
+}
+
+function loadMyInfo(){
+  const raw=localStorage.getItem('myInfo');
+  if(!raw){vehicles=[{plate:'',car:'',insurer:'',policy:'',insStart:'',insEnd:'',nickname:''}];renderVehicleTabs();renderVehiclePanel(0);return;}
+  const info=JSON.parse(raw);
+  const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
+  sv('mi-name',info.name);sv('mi-phone',info.phone);sv('mi-emergency',info.emergency);sv('mi-agent',info.agent);sv('mi-garage',info.garage);
+  if(info.vehicles&&info.vehicles.length){vehicles=info.vehicles;}
+  else if(info.plate){vehicles=[{plate:info.plate,car:info.car,insurer:info.insurer,policy:info.policy,insStart:info.insStart,insEnd:info.insEnd,nickname:'내 차'}];}
+  else{vehicles=[{plate:'',car:'',insurer:'',policy:'',insStart:'',insEnd:'',nickname:''}];}
+  activeVehIdx=Math.min(info.activeVehIdx||0,vehicles.length-1);
+  renderVehicleTabs();renderVehiclePanel(activeVehIdx);
+}
+
+function applyMyInfoToRecord(vehIdx){
+  const raw=localStorage.getItem('myInfo');if(!raw)return;
+  const info=JSON.parse(raw);const idx=vehIdx!==undefined?vehIdx:(info.activeVehIdx||0);
+  const v=(info.vehicles||[])[idx]||{};
+  const s=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
+  if(info.name)s('f-myname',info.name);if(info.phone)s('f-myphone',info.phone);
+  s('f-myplate',v.plate);s('f-mycar',v.car);s('f-myinsurer',v.insurer);s('f-mypolicy',v.policy);
+  if(v.insurer)highlightMyInsurerCall(v.insurer);
+}
+
+function renderVehicleSelectInQuick(){
+  const raw=localStorage.getItem('myInfo');let banner=document.getElementById('veh-quick-selector');
+  if(!raw)return;
+  const info=JSON.parse(raw),vehs=info.vehicles||[];
+  if(vehs.length<2){if(banner)banner.remove();applyMyInfoToRecord(0);return;}
+  if(!banner){banner=document.createElement('div');banner.id='veh-quick-selector';banner.className='veh-select-card';const wrap=document.querySelector('#page-quick .wrap');if(wrap)wrap.insertBefore(banner,wrap.children[1]);}
+  const ai=info.activeVehIdx||0;
+  banner.innerHTML=`<div class="vsc-title">🚗 어느 차량으로 기록하시겠어요?</div><div class="vsc-grid">${vehs.map((v,i)=>`<div class="vsc-btn${i===ai?' active':''}" onclick="selectQuickVeh(${i})"><div class="vsc-plate">${v.plate||'번호 미입력'}</div><div class="vsc-car">${v.nickname||v.car||'차량 '+(i+1)}</div><div class="vsc-ins">${v.insurer||'보험사 미입력'}</div></div>`).join('')}</div>`;
+}
+
+function selectQuickVeh(idx){const raw=localStorage.getItem('myInfo');if(raw){const info=JSON.parse(raw);info.activeVehIdx=idx;localStorage.setItem('myInfo',JSON.stringify(info));}applyMyInfoToRecord(idx);renderVehicleSelectInQuick();}
+
+function highlightMyInsurerCall(insurerName){
+  if(!insurerName)return;
+  const q=insurerName.toLowerCase();
+  const found=INSURER_DATA.find(i=>
+    i.name.toLowerCase().includes(q) || q.includes(i.name.toLowerCase())
+  );
+  const box=document.getElementById('my-insurer-call');if(!box)return;
+
+  // INSURER_DATA에 있으면 전화번호 포함, 없으면 이름만 표시
+  const name = found ? found.name : insurerName;
+  const tel  = found ? found.tel  : null;
+
+  box.style.display='block';
+  box.innerHTML=`
+    <div style="background:var(--red);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.85);margin-bottom:8px">⭐ 내 보험사 — 지금 바로 접수!</div>
+      ${tel
+        ? `<a href="tel:${tel}" style="display:flex;align-items:center;gap:14px;text-decoration:none">
+             <div style="font-size:32px">📞</div>
+             <div>
+               <div style="font-size:18px;font-weight:900;color:#fff">${name}</div>
+               <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:1px">${tel}</div>
+               <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px">탭하면 바로 전화 연결</div>
+             </div>
+           </a>`
+        : `<div style="display:flex;align-items:center;gap:14px">
+             <div style="font-size:32px">📞</div>
+             <div>
+               <div style="font-size:20px;font-weight:900;color:#fff">${name}</div>
+               <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px">보험사 앱 또는 증권서 번호로 접수하세요</div>
+             </div>
+           </div>`
+      }
+    </div>`;
+}
+
+function checkFirstRun(){
+  const wrap = document.querySelector('#page-quick .wrap');
+  if (!wrap) return;
+
+  // 기존 배너 제거 후 재렌더
+  const old = document.getElementById('onboard-banner');
+  if (old) old.remove();
+
+  const raw = localStorage.getItem('myInfo');
+  const banner = document.createElement('div');
+  banner.id = 'onboard-banner';
+
+  if (!raw) {
+    // ── 미등록: 큰 배너 ──
+    banner.style.cssText = 'background:var(--green-bg);border:2px solid rgba(26,150,71,0.3);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;font-size:15px;color:var(--text2);display:flex;gap:12px;align-items:center;box-shadow:var(--shadow)';
+    banner.innerHTML = `
+      <div style="font-size:28px">👤</div>
+      <div style="flex:1">
+        <strong style="color:var(--green);font-size:16px">내 차량 정보를 먼저 등록하세요!</strong><br>
+        한 번 등록하면 사고 시 자동으로 채워집니다.
+        <button onclick="goPage('myinfo')" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;display:block;font-family:'Noto Sans KR',sans-serif">지금 등록하기 →</button>
+      </div>`;
+  } else {
+    // ── 등록됨: 작은 버튼 한 줄 ──
+    let info = {};
+    try { info = JSON.parse(raw); } catch(e){}
+    const vehs = info.vehicles || [];
+    const count = vehs.filter(v => v.plate || v.car).length;
+    const name = info.name ? info.name + '님' : '';
+
+    banner.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm)';
+    banner.innerHTML = `
+      <span style="font-size:18px">✅</span>
+      <span style="font-size:14px;font-weight:700;color:var(--text2);flex:1">${name} 차량 ${count}대 등록됨</span>
+      <button onclick="goPage('myinfo')" style="background:none;border:2px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;white-space:nowrap">수정 →</button>`;
+  }
+
+  wrap.insertBefore(banner, wrap.children[1]);
+}
+
+/* ══════════════ VALIDATION ══════════════ */
+const STEP_VALIDATORS={
+  0:()=>{
+    let ok=true;
+    if(!D.types.length){showStepErr('step0-err','⚠️ 사고 유형을 하나 이상 선택해주세요');ok=false;}else hideStepErr('step0-err');
+    if(!document.getElementById('f-location').value.trim()){showFieldErr('f-location','err-location','⚠️ 사고 장소를 입력해주세요');ok=false;}else hideFieldErr('f-location','err-location');
+    return ok;
+  },
+  1:()=>{if(!document.getElementById('f-myplate').value.trim()){showFieldErr('f-myplate','err-myplate','⚠️ 내 차량 번호를 입력해주세요');return false;}hideFieldErr('f-myplate','err-myplate');return true;},
+  2:()=>{if(!document.getElementById('f-opplate').value.trim()){showFieldErr('f-opplate','err-opplate','⚠️ 상대 차량 번호를 입력해주세요 (분쟁 시 필수)');return false;}hideFieldErr('f-opplate','err-opplate');return true;},
+  3:()=>true,
+  4:()=>{const d=document.getElementById('f-desc').value.trim();if(d.length<10){document.getElementById('f-desc').classList.add('err');showFieldErr('f-desc','err-desc','⚠️ 경위를 10자 이상 입력해주세요');return false;}document.getElementById('f-desc').classList.remove('err');hideFieldErr('f-desc','err-desc');return true;}
+};
+
+function showFieldErr(fid,eid,msg){
+  const f=document.getElementById(fid);if(f){f.classList.add('err');f.scrollIntoView({behavior:'smooth',block:'center'});}
+  let e=document.getElementById(eid);if(!e){e=document.createElement('div');e.id=eid;e.className='field-err';if(f)f.parentNode.insertBefore(e,f.nextSibling);}
+  e.textContent=msg;e.style.display='block';
+}
+function hideFieldErr(fid,eid){const f=document.getElementById(fid);if(f)f.classList.remove('err');const e=document.getElementById(eid);if(e)e.style.display='none';}
+function showStepErr(eid,msg){
+  let e=document.getElementById(eid);
+  if(!e){e=document.createElement('div');e.id=eid;e.className='field-err';e.style.marginBottom='12px';
+  const p=document.getElementById('panel-0');const g=p&&p.querySelector('.sel-grid');if(g)g.parentNode.insertBefore(e,g);}
+  e.textContent=msg;e.style.display='block';
+}
+function hideStepErr(eid){const e=document.getElementById(eid);if(e)e.style.display='none';}
+
+/* ══════════════ PHOTO CHECKLIST ══════════════ */
+const photoChecked=new Set();
+function togglePhotoCheck(el){
+  const k=el.dataset.key;
+  if(photoChecked.has(k)){photoChecked.delete(k);el.classList.remove('checked');el.querySelector('.pcl-check').textContent='□';}
+  else{photoChecked.add(k);el.classList.add('checked');el.querySelector('.pcl-check').textContent='✅';}
+  const total=document.querySelectorAll('.pcl-item').length,done=photoChecked.size,pct=total?Math.round(done/total*100):0;
+  const c=document.getElementById('pcl-count'),b=document.getElementById('pcl-bar');
+  if(c)c.textContent=`${done} / ${total}`;
+  if(b){b.style.width=pct+'%';b.style.background=pct===100?'var(--green)':pct>=50?'var(--blue)':'var(--orange)';}
+}
+function handlePhotoUpload(e){
+  const list=document.getElementById('photo-preview-list');if(!list)return;
+  Array.from(e.target.files).forEach(file=>{
+    if(file.type.startsWith('image/')){const img=document.createElement('img');img.className='photo-thumb';img.title=file.name;const r=new FileReader();r.onload=ev=>{img.src=ev.target.result;};r.readAsDataURL(file);list.appendChild(img);}
+    else if(file.type.startsWith('video/')){const div=document.createElement('div');div.className='photo-vid-thumb';div.innerHTML=`<span style="font-size:22px">🎬</span><span>${file.name.slice(0,8)}…</span>`;list.appendChild(div);}
+  });
+}
+
+/* ══════════════ STEP 2 차량 빠른 선택 ══════════════ */
+function renderStep2VehicleSelector() {
+  const wrap = document.getElementById('step2-veh-selector');
+  if (!wrap) return;
+  const raw = localStorage.getItem('myInfo');
+  if (!raw) { wrap.innerHTML = ''; return; }
+  const info = JSON.parse(raw);
+  const vehs = info.vehicles || [];
+  if (!vehs.length || (vehs.length === 1 && !vehs[0].plate)) { wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = `
+    <div class="card" style="border:3px solid var(--green);margin-bottom:0">
+      <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:10px">
+        ✅ 내 정보에 등록된 차량 — 탭하면 자동 입력
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${vehs.map((v,i) => {
+          if(!v.plate && !v.car) return '';
+          const color = ['#1A6FD4','#1A9647','#D4720A','#9B51E0','#D62B2B','#0891B2'][i%6];
+          const label = v.nickname || v.car || '차량 '+(i+1);
+          return `<button onclick="applyVehicleToStep2(${i})" style="
+            display:flex;align-items:center;gap:12px;
+            padding:14px 16px;border-radius:var(--radius-sm);
+            border:2px solid ${color};background:#fff;
+            font-family:'Noto Sans KR',sans-serif;cursor:pointer;text-align:left;
+            transition:all 0.15s;
+          " onmouseover="this.style.background='${color}10'" onmouseout="this.style.background='#fff'">
+            <span style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0"></span>
+            <div style="flex:1">
+              <div style="font-size:17px;font-weight:900;color:#141418;letter-spacing:0.5px">${v.plate || '번호 미입력'}</div>
+              <div style="font-size:13px;color:#4A4D5A;margin-top:2px">${label}${v.insurer?' · '+v.insurer:''}</div>
+            </div>
+            <span style="font-size:13px;font-weight:700;color:${color}">선택 →</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function applyVehicleToStep2(vehIdx) {
+  const raw = localStorage.getItem('myInfo');
+  if (!raw) return;
+  const info = JSON.parse(raw);
+  const v = (info.vehicles || [])[vehIdx] || {};
+  const s = (id, val) => { const e = document.getElementById(id); if(e && val) e.value = val; };
+  s('f-myplate', v.plate);
+  s('f-mycar',   v.car);
+  s('f-myinsurer', v.insurer);
+  s('f-mypolicy',  v.policy);
+  if(info.name)  s('f-myname',  info.name);
+  if(info.phone) s('f-myphone', info.phone);
+  if(v.insurer)  highlightMyInsurerCall(v.insurer);
+
+  // 선택된 버튼 시각 피드백
+  const btns = document.querySelectorAll('#step2-veh-selector button');
+  btns.forEach((b,i) => {
+    b.style.background = i === vehIdx ? '#e8f5e9' : '#fff';
+    b.style.borderWidth = i === vehIdx ? '3px' : '2px';
+  });
+}
+
+/* ══════════════ STEP WIZARD ══════════════ */
+let currentStep=0;
+
+function updateIndicator(step){
+  for(let i=0;i<5;i++){
+    const dot=document.getElementById('sd'+i),lbl=document.getElementById('sl'+i);
+    if(i<step){dot.className='step-dot done';dot.textContent='✓';lbl.className='step-label done';}
+    else if(i===step){dot.className='step-dot active';dot.textContent=i+1;lbl.className='step-label active';}
+    else{dot.className='step-dot';dot.textContent=i+1;lbl.className='step-label';}
+    if(i<4)document.getElementById('sl-'+(i+1)).className='step-line'+(i<step?' done':'');
+  }
+}
+
+function showPanel(idx){
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  const id=idx==='complete'?'panel-complete':'panel-'+idx;
+  document.getElementById(id).classList.add('active');
+  if(idx!=='complete'){currentStep=idx;updateIndicator(idx);}
+  if(idx===1) renderStep2VehicleSelector();  // 내 차량 단계 진입 시 등록 차량 목록 표시
+}
+
+function nextStep(to){
+  const from=to-1;
+  if(STEP_VALIDATORS[from]&&!STEP_VALIDATORS[from]())return;
+  collectStep(from);showPanel(to);window.scrollTo(0,0);
+}
+function prevStep(to){showPanel(to);window.scrollTo(0,0);}
+
+function collectStep(from){
+  if(from===0){D.datetime=document.getElementById('f-datetime').value;D.location=document.getElementById('f-location').value;}
+  else if(from===1){D.myPlate=document.getElementById('f-myplate').value;D.myCar=document.getElementById('f-mycar').value;D.myName=document.getElementById('f-myname').value;D.myPhone=document.getElementById('f-myphone').value;D.myInsurer=document.getElementById('f-myinsurer').value;D.myPolicy=document.getElementById('f-mypolicy').value;}
+  else if(from===2){D.opPlate=document.getElementById('f-opplate').value;D.opCar=document.getElementById('f-opcar').value;D.opName=document.getElementById('f-opname').value;D.opPhone=document.getElementById('f-opphone').value;D.opInsurer=document.getElementById('f-opinsurer').value;D.opPolicy=document.getElementById('f-oppolicy').value;D.witness=document.getElementById('f-witness').value;}
+  else if(from===3){D.injuryDetail=document.getElementById('f-injurydetail').value;}
+  else if(from===4){D.desc=document.getElementById('f-desc').value;}
+}
+
+function finishRecord(){
+  if(STEP_VALIDATORS[4]&&!STEP_VALIDATORS[4]())return;
+  collectStep(4);
+
+  // 현재 기록에 저장 시각 + 고유 ID 부여
+  const now = new Date();
+  const id = 'acc_' + now.getTime();
+  const record = Object.assign({}, D, {
+    _id: id,
+    _savedAt: now.toISOString(),
+    _label: (D.types.length ? D.types[0] : '교통사고') + ' · ' +
+            (D.location ? D.location.slice(0,15) : '장소 미입력') +
+            (D.datetime ? ' · ' + D.datetime.replace('T',' ').slice(0,16) : '')
+  });
+
+  // 누적 저장 (최대 20건)
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
+  history.unshift(record);
+  if(history.length > 20) history = history.slice(0,20);
+  localStorage.setItem('accidentHistory', JSON.stringify(history));
+  localStorage.setItem('accidentData', JSON.stringify(D));
+
+  showPanel('complete');
+
+  // 완료 화면에 내 보험사 번호 즉시 표시
+  // 우선순위: 1) 방금 입력한 보험사 2) 내 정보에 등록된 차량 보험사
+  const insurerFromInput = D.myInsurer;
+  if (insurerFromInput) {
+    highlightMyInsurerCall(insurerFromInput);
+  } else {
+    try {
+      const info = JSON.parse(localStorage.getItem('myInfo') || '{}');
+      const activeIdx = info.activeVehIdx || 0;
+      const veh = (info.vehicles || [])[activeIdx];
+      if (veh && veh.insurer) highlightMyInsurerCall(veh.insurer);
+    } catch(e){}
+  }
+
+  window.scrollTo(0,0);
+}
+
+function resetRecord(){
+  Object.keys(D).forEach(k=>{if(Array.isArray(D[k]))D[k]=[];else D[k]='';});
+  showPanel(0);
+  document.querySelectorAll('.sel-btn.selected').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.tag-btn').forEach(b=>{b.className='tag-btn';});
+  ['f-datetime','f-location','f-myplate','f-mycar','f-myname','f-myphone','f-myinsurer','f-mypolicy',
+   'f-opplate','f-opcar','f-opname','f-opphone','f-opinsurer','f-oppolicy','f-witness','f-injurydetail','f-desc']
+  .forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+}
+
+/* SELECTORS */
+function toggleType(el,val){el.classList.toggle('selected');if(D.types.includes(val))D.types=D.types.filter(t=>t!==val);else D.types.push(val);}
+function toggleDamage(el,val){el.classList.toggle('selected');if(D.damages.includes(val))D.damages=D.damages.filter(d=>d!==val);else D.damages.push(val);}
+
+function selectWeather(el,val){
+  document.querySelectorAll('#weather-row .tag-btn').forEach(b=>b.className='tag-btn');
+  el.className='tag-btn sel-none';D.weather=val;
+}
+
+function selectInjury(who,el,val,cls){
+  const grp=el.parentElement.querySelectorAll('.tag-btn');grp.forEach(b=>b.className='tag-btn');
+  el.className='tag-btn sel-'+cls;
+  if(who==='my')D.myInjury=val;else D.opInjury=val;
+}
+
+function selectReport(val){
+  const map={112:'rep112',119:'rep119','보험':'repins'};
+  const el=document.getElementById(map[val]);
+  if(D.reports.includes(val)){
+    D.reports=D.reports.filter(r=>r!==val);
+    el.classList.remove('done');
+    el.querySelector('.rb-check').textContent='☐';
+  } else {
+    D.reports.push(val);
+    el.classList.add('done');
+    el.querySelector('.rb-check').textContent='✅';
+  }
+}
+
+function selectBB(val){
+  ['bb-yes','bb-no','bb-unk'].forEach(id=>{const e=document.getElementById(id);if(e)e.className='tag-btn';});
+  const map={있음:'bb-yes',없음:'bb-no',확인필요:'bb-unk'};
+  const el=document.getElementById(map[val]);if(el)el.className='tag-btn sel-none';
+  D.blackbox=val;
+  updatePhotoChecklistForBlackbox(val);
+}
+
+function updatePhotoChecklistForBlackbox(val) {
+  const bbItem   = document.querySelector('.pcl-item[data-key="blackbox"]');
+  const cctvItem = document.querySelector('.pcl-item[data-key="cctv"]');
+  let banner = document.getElementById('pcl-bb-notice');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'pcl-bb-notice';
+    const pcl = document.getElementById('photo-checklist');
+    if (pcl) pcl.parentNode.insertBefore(banner, pcl);
+  }
+  if (!bbItem) return;
+
+  if (val === '있음') {
+    bbItem.style.display = '';
+    bbItem.querySelector('.pcl-imp').textContent = '필수';
+    bbItem.querySelector('.pcl-imp').className = 'pcl-imp imp-red';
+    bbItem.querySelector('.pcl-hint').textContent = 'USB/앱으로 즉시 저장 — 덮어쓰기 전에 백업!';
+    if (cctvItem) {
+      cctvItem.querySelector('.pcl-imp').textContent = '권장';
+      cctvItem.querySelector('.pcl-imp').className = 'pcl-imp imp-yellow';
+      cctvItem.querySelector('.pcl-hint').textContent = '사고 지점 전후 신호체계';
+    }
+    banner.innerHTML = `<div style="background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--orange);display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">⚠️</span><span>블랙박스 있음 — <strong>지금 즉시 영상 백업!</strong><br>시동 끄면 자동 덮어쓰기 될 수 있습니다.</span></div>`;
+
+  } else if (val === '없음') {
+    bbItem.style.display = 'none';
+    if (cctvItem) {
+      cctvItem.querySelector('.pcl-imp').textContent = '필수';
+      cctvItem.querySelector('.pcl-imp').className = 'pcl-imp imp-red';
+      cctvItem.querySelector('.pcl-hint').textContent = '블랙박스 없음 → CCTV가 핵심 증거! 위치 사진 필수';
+    }
+    banner.innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--red);display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">🚨</span><span>블랙박스 없음 — <strong>주변 CCTV 위치 반드시 촬영!</strong><br>목격자 연락처도 꼭 확보하세요. 이것이 핵심 증거입니다.</span></div>`;
+
+  } else if (val === '확인필요') {
+    bbItem.style.display = '';
+    bbItem.querySelector('.pcl-imp').textContent = '확인필요';
+    bbItem.querySelector('.pcl-imp').className = 'pcl-imp imp-yellow';
+    bbItem.querySelector('.pcl-hint').textContent = '작동 여부 확인 후 즉시 백업';
+    if (cctvItem) {
+      cctvItem.querySelector('.pcl-imp').textContent = '권장';
+      cctvItem.querySelector('.pcl-imp').className = 'pcl-imp imp-yellow';
+      cctvItem.querySelector('.pcl-hint').textContent = '사고 지점 전후 신호체계';
+    }
+    banner.innerHTML = `<div style="background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--blue);display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">💡</span><span>블랙박스 작동 여부를 먼저 확인하세요.<br>영상 있으면 즉시 백업, 없으면 CCTV·목격자를 확보하세요.</span></div>`;
+  }
+}
+
+/* ══════════════ AI ANALYSIS ══════════════ */
+const SYSTEM_PROMPT=`당신은 대한민국 교통사고 전문 분석 AI입니다.
+web_search 도구로 최신 도로교통법, 교통사고처리특례법, 보험개발원 과실비율 기준을 실시간 검색 후 분석하세요.
+
+[절대 규칙]
+- 응답은 반드시 JSON 객체 하나만 출력하세요.
+- 설명문, 인사말, 마크다운, 코드블록(` + '```' + `) 일절 금지.
+- 첫 글자는 반드시 { 이어야 합니다.
+- 사진이 첨부된 경우 사진 내용을 summary/faultBasis/immediateActions에 반영하세요.
+
+출력 형식 (이 구조 그대로):
+{"accidentType":"사고유형","summary":"한줄요약","lawUpdates":"법령변경(없으면 특이없음)","myFaultPct":숫자,"opFaultPct":숫자,"faultBasis":"근거 2문장","faultVariables":"가감요소","immediateActions":[{"icon":"이모지","title":"제목","level":"c","priority":"즉시","body":"내용","items":["항목"]}],"legalTips":[{"icon":"이모지","title":"제목","body":"내용","items":["항목"]}],"evidence":[{"icon":"이모지","label":"항목"}],"keyPhrase":"핵심주장","dontDo":"절대금지 1문장"}
+
+immediateActions 3~4개(level: c=즉시/w=5분내/i=나중), legalTips 2~3개, evidence 4~6개.`;
+
+// JSON 파싱 — 여러 방어 방법 순서대로 시도
+function safeParseAI(raw) {
+  // 1) 직접 파싱
+  try { return JSON.parse(raw.trim()); } catch(e){}
+  // 2) 코드블록 제거 후 파싱
+  try { return JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e){}
+  // 3) { } 범위 추출 후 파싱
+  try {
+    const start = raw.indexOf('{');
+    const end   = raw.lastIndexOf('}');
+    if (start !== -1 && end !== -1) return JSON.parse(raw.slice(start, end+1));
+  } catch(e){}
+  // 4) 파싱 실패 → 텍스트를 summary로 감싼 기본 객체 반환 (오류 대신 결과 표시)
+  return {
+    accidentType: '분석 결과',
+    summary: raw.replace(/```json|```/g,'').slice(0,300),
+    myFaultPct: 0, opFaultPct: 0,
+    faultBasis: 'AI 응답 형식 오류 — 아래 내용을 참고하세요.',
+    faultVariables: '',
+    immediateActions: [],
+    legalTips: [],
+    evidence: [],
+    keyPhrase: '',
+    dontDo: '',
+    _parseError: true
+  };
+}
+
+async function runAI(prefilled){
+  const input=prefilled||document.getElementById('ai-input').value.trim();
+  if(!input){alert('상황을 입력해주세요.');return;}
+  if(!prefilled)document.getElementById('ai-input').value=input;
+  document.getElementById('ai-result').className='ai-result';
+  document.getElementById('ai-result').innerHTML='';
+  document.getElementById('ai-loading').className='ai-loading show';
+  document.getElementById('ai-btn').disabled=true;
+  const abt=document.getElementById('ai-btn-top');if(abt)abt.disabled=true;
+
+  // 첨부 이미지 수집
+  const images = getUploadedImages();
+  const imageNote = images.length > 0
+    ? `\n\n[첨부 사진 ${images.length}장] 사진 속 차량 파손 위치, 도로 상황, 번호판 등을 분석에 반영하세요. 반드시 JSON만 출력.`
+    : '';
+  const msgContent = images.length > 0
+    ? [...images, { type:'text', text: input + imageNote }]
+    : input;
+
+  // 이미지 포함 시 web_search 병행 불가
+  const tools = images.length === 0 ? [{type:'web_search_20250305', name:'web_search'}] : undefined;
+
+  try{
+    const body = {
+      model:'claude-sonnet-4-20250514', max_tokens:1500,
+      system:SYSTEM_PROMPT,
+      messages:[{role:'user', content: msgContent}]
+    };
+    if(tools) body.tools = tools;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok)throw new Error('API 오류 '+res.status);
+    const data=await res.json();
+    const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const parsed = safeParseAI(raw);
+    document.getElementById('ai-loading').className='ai-loading';
+    document.getElementById('ai-btn').disabled=false;
+    const abt2=document.getElementById('ai-btn-top');if(abt2)abt2.disabled=false;
+    if(images.length > 0) parsed._photoCount = images.length;
+    renderAI(parsed);
+  }catch(e){
+    document.getElementById('ai-loading').className='ai-loading';
+    document.getElementById('ai-btn').disabled=false;
+    const abt3=document.getElementById('ai-btn-top');if(abt3)abt3.disabled=false;
+    document.getElementById('ai-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ 분석 오류: ${e.message}<br><span style="color:var(--text2)">잠시 후 다시 시도해주세요.</span></div>`;
+    document.getElementById('ai-result').className='ai-result show';
+  }
+}
+
+function fillAI(txt){document.getElementById('ai-input').value=txt;document.getElementById('ai-char').textContent=txt.length+'자';}
+
+function renderAI(d){
+  const myF=d.myFaultPct||0,opF=d.opFaultPct||0;
+  const levelStyle={c:'border-left:5px solid var(--red);background:var(--red-bg)',w:'border-left:5px solid var(--orange);background:#FFF4E5',i:'border-left:5px solid var(--blue);background:var(--blue-bg)',l:'border-left:5px solid var(--green);background:var(--green-bg)'};
+  const priColor={즉시:'var(--red)','5분내':'var(--orange)','24시간내':'var(--blue)'};
+
+  const html=`
+    ${d._parseError ? `<div style="background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--orange)">⚠️ AI 응답 형식이 달라 일부 항목이 표시되지 않을 수 있습니다. 텍스트 설명을 직접 확인하세요.</div>` : ''}
+    ${d._photoCount?`<div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px;font-size:14px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:8px">📸 사진 ${d._photoCount}장을 참고하여 분석했습니다</div>`:''}
+    ${d.lawUpdates&&d.lawUpdates!=='특이 변경사항 없음'?`<div class="r-card" style="border-left:5px solid var(--blue);margin-bottom:12px"><div class="r-label">🔍 법령 업데이트</div><div style="font-size:14px;color:var(--text2);line-height:1.7">${d.lawUpdates}</div></div>`:''}
+    <div class="r-card">
+      <div class="r-label">사고 유형 분석</div>
+      <div class="r-title">🚗 ${d.accidentType}</div>
+      <div class="r-desc">${d.summary}</div>
+    </div>
+    <div class="r-card">
+      <div class="r-label">⚖️ 과실 비율</div>
+      <div class="fault-wrap">
+        <div class="fault-nums">
+          <div><div class="fault-num" style="color:var(--blue)">${myF}%</div><div class="fault-name">내 과실</div></div>
+          <div style="text-align:right"><div class="fault-num" style="color:var(--red)">${opF}%</div><div class="fault-name">상대 과실</div></div>
+        </div>
+        <div class="fault-bar"><div class="fault-me" id="fme" style="width:0%"></div><div class="fault-op" id="fop" style="width:0%"></div></div>
+        <div class="fault-law">📌 ${d.faultBasis}</div>
+        ${d.faultVariables?`<div class="fault-law" style="margin-top:6px">⚡ ${d.faultVariables}</div>`:''}
+      </div>
+    </div>
+    <div class="r-label" style="margin-bottom:8px">⚡ 즉시 행동</div>
+    ${(d.immediateActions||[]).map(a=>`
+      <div class="action-card pri-${a.level==='c'?'now':a.level==='w'?'soon':'later'}">
+        <div class="ac-icon">${a.icon}</div>
+        <div style="flex:1">
+          <div class="ac-pri-badge">${a.priority}</div>
+          <div class="ac-title">${a.title}</div>
+          <div class="ac-body">${a.body}${a.items&&a.items.length?`<ul style="margin:6px 0 0 16px">${a.items.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}</div>
+        </div>
+      </div>`).join('')}
+    <div class="r-card" style="margin-top:12px">
+      <div class="r-label">📸 증거 수집</div>
+      <div class="ev-chips">${(d.evidence||[]).map(e=>`<div class="ev-chip">${e.icon} ${e.label}</div>`).join('')}</div>
+    </div>
+    ${d.keyPhrase?`<div class="key-phrase r-card" style="margin-top:12px"><div class="r-label">💬 핵심 주장 (경찰·보험사에)</div>"${d.keyPhrase}"</div>`:''}
+    <div class="r-label" style="margin:12px 0 8px">⚖️ 법적 대응</div>
+    ${(d.legalTips||[]).map(t=>`
+      <div class="action-card pri-later">
+        <div class="ac-icon">${t.icon}</div>
+        <div style="flex:1"><div class="ac-title">${t.title}</div><div class="ac-body">${t.body}${t.items&&t.items.length?`<ul style="margin:6px 0 0 16px">${t.items.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}</div></div>
+      </div>`).join('')}
+    ${d.dontDo?`<div class="warn-card" style="margin-top:12px"><span style="font-size:20px;flex-shrink:0">🚫</span><div><strong style="color:var(--red)">절대 하면 안 됨:</strong> ${d.dontDo}</div></div>`:''}
+    <button class="reset-btn" onclick="resetAI()">↩ 다른 상황 분석</button>
+    <div style="text-align:center;font-size:12px;color:var(--text3);margin-top:12px;line-height:1.7">
+      ※ 위 분석은 AI가 제공하는 참고 정보입니다.<br>최종 과실 판정은 전문가 또는 보험사와 함께 확인하세요.
+    </div>`;
+
+  const el=document.getElementById('ai-result');el.innerHTML=html;el.className='ai-result show';
+  setTimeout(()=>{const fm=document.getElementById('fme'),fo=document.getElementById('fop');if(fm)fm.style.width=myF+'%';if(fo)fo.style.width=opF+'%';},200);
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetAI(){document.getElementById('ai-result').className='ai-result';document.getElementById('ai-result').innerHTML='';document.getElementById('ai-input').value='';document.getElementById('ai-char').textContent='0자';window.scrollTo(0,0);}
+
+function getUploadedImages() {
+  // 갤러리·카메라에서 첨부된 이미지들 base64 수집 (최대 3장)
+  const imgs = [];
+  const thumbs = document.querySelectorAll('#photo-preview-list img.photo-thumb');
+  thumbs.forEach(img => {
+    if(imgs.length < 3 && img.src && img.src.startsWith('data:image')) {
+      const [meta, data] = img.src.split(',');
+      const mime = meta.match(/:(.*?);/)?.[1] || 'image/jpeg';
+      imgs.push({ type:'image', source:{ type:'base64', media_type:mime, data } });
+    }
+  });
+  return imgs;
+}
+
+function autoAnalyze(){
+  loadSaved();
+  const types=D.types.join(', ')||'교통사고', loc=D.location||'', desc=D.desc||'';
+  const text=`사고유형: ${types}. ${loc?'장소: '+loc+'.':''} ${desc}`.trim();
+  goPage('ai');
+  fillAI(text);
+  setTimeout(()=>runAI(text), 300);
+}
+
+/* ══════════════ DOCUMENTS ══════════════ */
+let currentDocType='police';
+function selectDoc(type){
+  currentDocType=type;
+  ['police','insurance','memo'].forEach(t=>document.getElementById('docbtn-'+t).className='doc-sel-btn'+(t===type?' active':''));
+  loadSaved();renderDoc(type);
+}
+
+function loadSaved(){
+  try{
+    const s=localStorage.getItem('accidentData');
+    if(s){
+      const o=JSON.parse(s);
+      Object.assign(D,o);
+      // 저장된 블랙박스 값이 있으면 체크리스트에 반영
+      if(D.blackbox) updatePhotoChecklistForBlackbox(D.blackbox);
+    }
+  }catch(e){}
+}
+
+function checkData(){return D.myPlate||D.opPlate||D.location||D.desc;}
+
+function renderDoc(type){
+  const prev=document.getElementById('doc-preview');
+  if(!checkData()){prev.className='doc-preview empty';prev.innerHTML='<div class="doc-empty-icon">📋</div><div class="doc-empty-text">현장기록 탭에서 먼저 입력해주세요</div>';return;}
+  const now=new Date().toLocaleDateString('ko-KR'),dtStr=D.datetime?new Date(D.datetime).toLocaleString('ko-KR'):'미입력';
+  prev.className='doc-preview';
+  if(type==='police'){
+    prev.innerHTML=`<div style="position:relative"><div class="doc-watermark">교통사고 경위서</div><div class="doc-h1">교통사고 경위서</div><div class="doc-h2">▪ 사고 개요</div><table class="doc-tbl"><tr><td>사고 일시</td><td>${dtStr}</td></tr><tr><td>사고 장소</td><td>${D.location||'미입력'}</td></tr><tr><td>날씨</td><td>${D.weather||'미입력'}</td></tr><tr><td>사고 유형</td><td>${D.types.join(', ')||'미입력'}</td></tr><tr><td>블랙박스</td><td>${D.blackbox||'미입력'}</td></tr></table><div class="doc-h2">▪ 신청인</div><table class="doc-tbl"><tr><td>성명</td><td>${D.myName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.myPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.myPlate||'미입력'}</td></tr><tr><td>차종</td><td>${D.myCar||'미입력'}</td></tr><tr><td>보험사</td><td>${D.myInsurer||'미입력'}</td></tr><tr><td>차량 피해</td><td>${D.damages.join(', ')||'미입력'}</td></tr><tr><td>부상</td><td>${D.myInjury||'미입력'}</td></tr></table><div class="doc-h2">▪ 상대방</div><table class="doc-tbl"><tr><td>성명</td><td>${D.opName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.opPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.opPlate||'미입력'}</td></tr><tr><td>차종</td><td>${D.opCar||'미입력'}</td></tr><tr><td>보험사</td><td>${D.opInsurer||'미입력'}</td></tr><tr><td>부상</td><td>${D.opInjury||'미입력'}</td></tr></table>${D.witness?`<div class="doc-h2">▪ 목격자</div><table class="doc-tbl"><tr><td>연락처</td><td>${D.witness}</td></tr></table>`:''}<div class="doc-h2">▪ 사고 경위</div><div class="doc-para">${D.desc||'미입력'}</div>${D.injuryDetail?`<div class="doc-h2">▪ 부상 상세</div><div class="doc-para">${D.injuryDetail}</div>`:''}<div class="doc-sig"><p>작성일: ${now}</p><p style="margin-top:8px">작성자: ${D.myName||'　　　　　'} &nbsp;&nbsp; 서명: _______________</p><p style="margin-top:4px">위 내용은 사실과 다름이 없음을 확인합니다.</p></div><div class="doc-note">※ 본 경위서는 교통사고 대응 앱에서 자동 생성되었습니다. 서명 후 제출하세요.</div></div>`;
+  }else if(type==='insurance'){
+    prev.innerHTML=`<div style="position:relative"><div class="doc-watermark">보험청구용</div><div class="doc-h1">교통사고 확인서 (보험 청구용)</div><div class="doc-h2">▪ 사고 정보</div><table class="doc-tbl"><tr><td>사고 일시</td><td>${dtStr}</td></tr><tr><td>사고 장소</td><td>${D.location||'미입력'}</td></tr><tr><td>날씨</td><td>${D.weather||'미입력'}</td></tr><tr><td>사고 유형</td><td>${D.types.join(', ')||'미입력'}</td></tr><tr><td>신고 완료</td><td>${D.reports.join(', ')||'미입력'}</td></tr></table><div class="doc-h2">▪ 보험 계약자</div><table class="doc-tbl"><tr><td>성명</td><td>${D.myName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.myPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.myPlate||'미입력'}</td></tr><tr><td>차종</td><td>${D.myCar||'미입력'}</td></tr><tr><td>가입 보험사</td><td>${D.myInsurer||'미입력'}</td></tr><tr><td>증권번호</td><td>${D.myPolicy||'미입력'}</td></tr><tr><td>차량 피해</td><td>${D.damages.join(', ')||'미입력'}</td></tr><tr><td>인적 피해</td><td>${D.myInjury||'미입력'}${D.injuryDetail?' — '+D.injuryDetail:''}</td></tr></table><div class="doc-h2">▪ 상대방</div><table class="doc-tbl"><tr><td>성명</td><td>${D.opName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.opPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.opPlate||'미입력'}</td></tr><tr><td>보험사</td><td>${D.opInsurer||'미입력'}</td></tr></table><div class="doc-h2">▪ 사고 경위</div><div class="doc-para">${D.desc||'미입력'}</div><div class="doc-note">📌 함께 제출할 서류: 교통사고사실확인원, 진단서, 진료비 영수증, 차량 수리 견적서, 통장 사본, 신분증 사본</div><div class="doc-sig"><p>작성일: ${now}</p><p style="margin-top:8px">청구인: ${D.myName||'　　　　　'} &nbsp;&nbsp; 서명: _______________</p></div></div>`;
+  }else if(type==='memo'){
+    prev.innerHTML=`<div class="doc-h1" style="font-size:18px">사고 현장 메모</div><table class="doc-tbl"><tr><td>일시</td><td><strong>${dtStr}</strong></td></tr><tr><td>장소</td><td><strong>${D.location||'—'}</strong></td></tr><tr><td>날씨</td><td>${D.weather||'—'}</td></tr><tr><td>유형</td><td>${D.types.join(', ')||'—'}</td></tr></table><div class="doc-h2">내 차량</div><table class="doc-tbl"><tr><td>번호</td><td><strong style="font-size:17px">${D.myPlate||'—'}</strong></td></tr><tr><td>이름/연락</td><td>${D.myName||'—'} / ${D.myPhone||'—'}</td></tr><tr><td>보험사</td><td>${D.myInsurer||'—'}</td></tr><tr><td>피해</td><td>${D.damages.join(', ')||'—'} / 부상: ${D.myInjury||'—'}</td></tr></table><div class="doc-h2">상대방</div><table class="doc-tbl"><tr><td>번호</td><td><strong style="font-size:17px">${D.opPlate||'—'}</strong></td></tr><tr><td>이름/연락</td><td>${D.opName||'—'} / ${D.opPhone||'—'}</td></tr><tr><td>보험사</td><td>${D.opInsurer||'—'}</td></tr></table>${D.witness?`<div class="doc-h2">목격자</div><table class="doc-tbl"><tr><td>연락처</td><td><strong>${D.witness}</strong></td></tr></table>`:''}<div class="doc-h2">경위</div><div class="doc-para">${D.desc||'—'}</div><div style="margin-top:16px;font-size:12px;color:#999">블랙박스: ${D.blackbox||'—'} | 작성: ${now}</div>`;
+  }
+}
+
+function printDoc() {
+  const preview = document.getElementById('doc-preview');
+  if (!preview || preview.classList.contains('empty')) {
+    alert('먼저 서류 종류를 선택하고 내용을 확인하세요.');
+    return;
+  }
+  const content = preview.innerHTML;
+  const win = window.open('', '_blank', 'width=800,height=900');
+  win.document.write(`<!DOCTYPE html><html lang="ko"><head>
+    <meta charset="UTF-8">
+    <title>교통사고 서류</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family:'Noto Sans KR',sans-serif; padding:30px; max-width:700px; margin:0 auto; font-size:13px; color:#141418; }
+      table { width:100%; border-collapse:collapse; margin-bottom:12px; }
+      td { padding:8px 10px; border:1px solid #ddd; }
+      td:first-child { background:#f5f7fa; font-weight:700; width:35%; }
+      .doc-h1 { font-size:22px; font-weight:900; text-align:center; margin-bottom:20px; }
+      .doc-h2 { font-size:14px; font-weight:900; margin:16px 0 8px; padding:6px 10px; background:#1A6FD4; color:#fff; border-radius:4px; }
+      .doc-para { background:#f9f9f9; border:1px solid #ddd; border-radius:4px; padding:12px; line-height:1.8; white-space:pre-wrap; }
+      .doc-sig { margin-top:24px; padding-top:16px; border-top:2px solid #ddd; font-size:13px; line-height:2; }
+      .doc-note { margin-top:16px; font-size:12px; color:#888; background:#f5f5f5; padding:10px; border-radius:4px; }
+      .doc-watermark { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-size:80px; color:rgba(0,0,0,0.04); font-weight:900; pointer-events:none; z-index:0; white-space:nowrap; }
+      .doc-tbl td { border:1px solid #ddd; padding:8px 10px; }
+      .doc-tbl td:first-child { background:#f5f7fa; font-weight:700; width:35%; }
+      @media print {
+        .no-print { display:none !important; }
+        body { padding:15px; }
+      }
+    </style>
+  </head><body>
+    ${content}
+    <div class="no-print" style="text-align:center;margin-top:28px">
+      <button onclick="window.print()" style="padding:14px 36px;background:#1A6FD4;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Noto Sans KR',sans-serif">
+        🖨️ 인쇄 / PDF 저장
+      </button>
+      <button onclick="window.close()" style="margin-left:12px;padding:14px 24px;background:#f5f5f5;color:#333;border:2px solid #ddd;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif">
+        닫기
+      </button>
+    </div>
+  </body></html>`);
+  win.document.close();
+  win.focus();
+}
+
+/* ══════════════ GUARD AI ══════════════ */
+async function runGuardAI(){
+  const input=document.getElementById('guard-input').value.trim();
+  if(!input){alert('보험사에서 들은 내용을 입력해주세요.');return;}
+  document.getElementById('guard-result').innerHTML='';document.getElementById('guard-loading').className='ai-loading show';
+  const sys=`당신은 대한민국 보험 분쟁 전문가입니다. 아래 JSON으로만 응답하세요:
+{"isSuspicious":true|false,"suspicionLevel":"high|medium|low","summary":"문제점 한줄","tactics":[{"name":"전술명","desc":"설명"}],"counters":["대응문구1","대응문구2","대응문구3"],"legalBasis":"관련법령","actions":[{"icon":"이모지","title":"제목","body":"방법","priority":"즉시|권장|선택"}],"escalation":"분쟁조정 방법"}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:input}]})});
+    if(!res.ok)throw new Error('API '+res.status);
+    const data=await res.json();const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const lc={high:'var(--red)',medium:'var(--orange)',low:'var(--green)'};const lt={high:'⚠️ 고위험',medium:'⚠️ 주의',low:'✅ 일반'};
+    let html=`<div class="r-card" style="border-left:5px solid ${lc[d.suspicionLevel]}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:15px;font-weight:900;color:${lc[d.suspicionLevel]}">${lt[d.suspicionLevel]}</span>
+      </div>
+      <div style="font-size:15px;color:var(--text2);line-height:1.7">${d.summary}</div>
+    </div>`;
+    if(d.tactics&&d.tactics.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)">🎯 보험사 전술</div>`;d.tactics.forEach(t=>{html+=`<div class="gr-card warning" style="background:var(--red-bg);border-left:5px solid var(--red);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px"><div class="gr-card-title" style="font-size:15px;font-weight:900;margin-bottom:6px;color:var(--red)">🔴 ${t.name}</div><div class="gr-card-body" style="font-size:14px;color:var(--text2);line-height:1.7">${t.desc}</div></div>`;});}
+    if(d.counters&&d.counters.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)">✅ 즉시 쓸 수 있는 대응 문구</div>`;d.counters.forEach(c=>{html+=`<div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.25);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;font-size:15px;color:var(--text);line-height:1.7;font-style:italic">💬 "${c}"</div>`;});}
+    if(d.legalBasis)html+=`<div class="action-card pri-later" style="margin-top:8px"><div class="ac-icon">📚</div><div><div class="ac-title">법적 근거</div><div class="ac-body">${d.legalBasis}</div></div></div>`;
+    if(d.escalation)html+=`<div class="action-card" style="border-left:5px solid var(--orange);background:#FFF4E5;margin-top:8px"><div class="ac-icon">🏛️</div><div><div class="ac-title">분쟁 조정 방법</div><div class="ac-body">${d.escalation}</div></div></div>`;
+    html+=`<button class="reset-btn" onclick="document.getElementById('guard-result').innerHTML='';document.getElementById('guard-input').value=''">↩ 다른 상황 분석</button>`;
+    document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=html;
+  }catch(e){document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ 오류: ${e.message}</div>`;}
+}
+
+/* ══════════════ POLICY AI ══════════════ */
+let policyFileBase64=null,policyFileType=null;
+function addQuestion(q){
+  const e=document.getElementById('policy-question');
+  e.value=(e.value?e.value+'\n':'')+q;
+}
+
+function handlePolicyFile(e){
+  e.stopPropagation();
+  const file=e.target.files[0];
+  if(!file)return;
+  // 현재 페이지 유지
+  const currentPage = document.querySelector('.page.active');
+  const currentTab  = document.querySelector('.nav-tab.active');
+  document.getElementById('uz-filename').style.display='block';
+  document.getElementById('uz-filename').textContent='📎 '+file.name;
+  document.getElementById('upload-zone').classList.add('has-file');
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const r=ev.target.result;
+    policyFileBase64=r.split(',')[1];
+    policyFileType=file.type;
+    if(file.type==='text/plain') document.getElementById('policy-text').value=atob(policyFileBase64);
+    // 페이지가 바뀌었으면 복원
+    if(currentPage && !currentPage.classList.contains('active')){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      currentPage.classList.add('active');
+      document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+      if(currentTab) currentTab.classList.add('active');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function copyDoc(){
+  const e = document.getElementById('doc-preview');
+  if (!e || e.classList.contains('empty')) { alert('먼저 서류를 선택하세요.'); return; }
+  const text = e.innerText;
+  // clipboard API 시도
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => alert('📋 텍스트가 클립보드에 복사되었습니다.'))
+      .catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  // textarea 방식 — 구형 브라우저/파일 직접 열기 환경 대응
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try {
+    document.execCommand('copy');
+    alert('📋 텍스트가 복사되었습니다.');
+  } catch(e) {
+    alert('복사 실패. 서류 내용을 직접 선택해서 복사해주세요.');
+  }
+  document.body.removeChild(ta);
+}
+
+async function runPolicyAI(){
+  const tc=document.getElementById('policy-text').value.trim(),q=document.getElementById('policy-question').value.trim();
+  if(!tc&&!policyFileBase64){alert('보험 내용을 입력하거나 파일을 업로드해주세요.');return;}
+  document.getElementById('policy-result').innerHTML='';document.getElementById('policy-loading').className='ai-loading show';document.getElementById('policy-btn').disabled=true;
+  const sys=`당신은 대한민국 자동차보험 전문가입니다. 아래 JSON으로만 응답:
+{"coverageItems":[{"name":"항목","limit":"한도","selfPay":"자기부담금","note":"주의사항"}],"summary":"총평 2문장","strengths":["강점"],"weaknesses":["취약점"],"blindSpots":[{"title":"제목","desc":"설명"}],"accidentScenarios":[{"scenario":"시나리오","coverage":"적용내용"}],"recommendations":["추천행동"],"questionAnswers":"질문답변"}`;
+  try{
+    let mc;
+    if(policyFileBase64&&(policyFileType==='application/pdf'||policyFileType?.startsWith('image/'))){mc=[{type:policyFileType==='application/pdf'?'document':'image',source:{type:'base64',media_type:policyFileType,data:policyFileBase64}},{type:'text',text:`이 보험 증권을 분석해주세요.${q?'\n\n추가 질문: '+q:''}`}];}
+    else{mc=`보험 내용:\n${tc||'(텍스트 없음)'}${q?'\n\n질문: '+q:''}`;}
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:mc}]})});
+    if(!res.ok)throw new Error('API '+res.status);
+    const data=await res.json();const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    let html='';
+    if(d.coverageItems?.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 보장 항목 & 한도</div><div class="pcover-grid">`;d.coverageItems.forEach(item=>{html+=`<div class="pcover-card"><div class="pcover-name">${item.name}</div><div class="pcover-limit">${item.limit}</div>${item.selfPay?`<div style="font-size:12px;color:var(--orange);margin-bottom:3px">자기부담: ${item.selfPay}</div>`:''}<div class="pcover-note">${item.note||''}</div></div>`;});html+=`</div>`;}
+    if(d.summary)html+=`<div class="card" style="margin-top:12px"><div class="r-label">📋 전체 총평</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${d.summary}</div></div>`;
+    if(d.strengths?.length||d.weaknesses?.length){html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.2);border-radius:var(--radius-sm);padding:14px"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ 강점</div>${(d.strengths||[]).map(s=>`<div style="font-size:14px;color:var(--text2);margin-bottom:5px">• ${s}</div>`).join('')}</div><div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.2);border-radius:var(--radius-sm);padding:14px"><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ 취약점</div>${(d.weaknesses||[]).map(w=>`<div style="font-size:14px;color:var(--text2);margin-bottom:5px">• ${w}</div>`).join('')}</div></div>`;}
+    if(d.blindSpots?.length)d.blindSpots.forEach(b=>{html+=`<div class="p-warn-box">⚠️ <div><strong style="color:var(--orange)">${b.title}</strong><br>${b.desc}</div></div>`;});
+    if(d.accidentScenarios?.length)d.accidentScenarios.forEach(s=>{html+=`<div class="p-tip-box"><div class="p-tip-title">📌 ${s.scenario}</div><div style="font-size:14px;color:var(--text2);line-height:1.7">${s.coverage}</div></div>`;});
+    if(d.questionAnswers)html+=`<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="r-label" style="color:var(--blue)">💬 질문 답변</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${d.questionAnswers}</div></div>`;
+    html+=`<div class="policy-disclaimer">⚠️ AI 참고용 분석입니다. 실제 보험금 지급은 약관 및 사고 상황에 따라 달라집니다.</div><button class="reset-btn" onclick="resetPolicy()">↩ 다른 보험 분석</button>`;
+    document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=html;document.getElementById('policy-result').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ 오류: ${e.message}</div>`;}
+}
+
+function resetPolicy(){document.getElementById('policy-result').innerHTML='';document.getElementById('policy-text').value='';document.getElementById('policy-question').value='';document.getElementById('policy-file').value='';document.getElementById('uz-filename').style.display='none';document.getElementById('upload-zone').classList.remove('has-file');policyFileBase64=null;policyFileType=null;window.scrollTo(0,0);}
+
+/* ══════════════ 사고 기록 목록 ══════════════ */
+function renderHistoryList() {
+  const wrap = document.getElementById('history-list');
+  if (!wrap) return;
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
+
+  if (!history.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2);font-size:15px">
+      아직 저장된 기록이 없습니다.<br>현장기록 완료 후 자동으로 저장됩니다.
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = history.map((rec, i) => {
+    const dt = rec._savedAt ? new Date(rec._savedAt).toLocaleString('ko-KR',{year:'2-digit',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '날짜 미상';
+    const types = (rec.types||[]).join(', ') || '유형 미입력';
+    const loc   = rec.location ? rec.location.slice(0,20) : '장소 미입력';
+    const plate = rec.myPlate || '';
+    const opPlate = rec.opPlate || '';
+    return `
+    <div style="border:2px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:10px">
+      <!-- 헤더 -->
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border-bottom:2px solid var(--border)">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">${history.length - i}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${types}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${dt}</div>
+        </div>
+      </div>
+      <!-- 내용 요약 -->
+      <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text2)">
+        <div>📍 ${loc}</div>
+        ${plate ? `<div>🚗 내 차량: <strong style="color:var(--text)">${plate}</strong></div>` : ''}
+        ${opPlate ? `<div>🚙 상대 차량: <strong style="color:var(--text)">${opPlate}</strong></div>` : ''}
+        ${rec.myInsurer ? `<div>🏢 내 보험사: ${rec.myInsurer}</div>` : ''}
+      </div>
+      <!-- 버튼 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:2px solid var(--border)">
+        <button onclick="loadHistoryRecord(${i})" style="padding:12px 6px;background:#fff;border:none;border-right:1px solid var(--border);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--blue);cursor:pointer">
+          ✏️ 불러오기
+        </button>
+        <button onclick="exportRecordPDF(${i})" style="padding:12px 6px;background:#fff;border:none;border-right:1px solid var(--border);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--green);cursor:pointer">
+          📄 PDF 저장
+        </button>
+        <button onclick="deleteHistoryRecord(${i})" style="padding:12px 6px;background:#fff;border:none;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--red);cursor:pointer">
+          🗑️ 삭제
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadHistoryRecord(idx) {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
+  const rec = history[idx];
+  if (!rec) return;
+  Object.assign(D, rec);
+  localStorage.setItem('accidentData', JSON.stringify(D));
+  loadSettings();
+  // 수정 섹션으로 스크롤
+  const ea = document.getElementById('settings-edit-area');
+  if (ea) { ea.style.display='block'; setTimeout(()=>ea.scrollIntoView({behavior:'smooth'}), 100); }
+  alert(`${rec._label||'기록'} 을 불러왔습니다.\n아래에서 내용을 수정할 수 있습니다.`);
+}
+
+function deleteHistoryRecord(idx) {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
+  const rec = history[idx];
+  if (!confirm(`이 기록을 삭제할까요?\n\n${rec._label||''}`)) return;
+  history.splice(idx, 1);
+  localStorage.setItem('accidentHistory', JSON.stringify(history));
+  renderHistoryList();
+}
+
+function exportRecordPDF(idx) {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
+  const rec = history[idx];
+  if (!rec) return;
+
+  const dt = rec.datetime ? rec.datetime.replace('T',' ') : '미입력';
+  const savedAt = rec._savedAt ? new Date(rec._savedAt).toLocaleString('ko-KR') : '';
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="ko"><head>
+  <meta charset="UTF-8">
+  <title>교통사고 기록 — ${rec._label||dt}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Noto Sans KR',sans-serif; font-size:13px; color:#141418; padding:30px; max-width:700px; margin:0 auto; }
+    h1 { font-size:22px; font-weight:900; text-align:center; margin-bottom:4px; }
+    .sub { text-align:center; color:#666; font-size:12px; margin-bottom:24px; }
+    .section { margin-bottom:20px; }
+    .section-title { font-size:13px; font-weight:900; color:#fff; background:#1A6FD4; padding:7px 12px; border-radius:4px; margin-bottom:8px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    td { padding:8px 10px; border:1px solid #ddd; vertical-align:top; }
+    td:first-child { font-weight:700; background:#f5f7fa; width:35%; white-space:nowrap; }
+    .desc-box { background:#f5f7fa; border:1px solid #ddd; border-radius:4px; padding:12px; line-height:1.8; font-size:13px; white-space:pre-wrap; }
+    .footer { text-align:center; font-size:11px; color:#999; margin-top:32px; padding-top:12px; border-top:1px solid #eee; }
+    @media print { body { padding:15px; } button { display:none; } }
+  </style>
+  </head><body>
+  <h1>🚨 교통사고 현장 기록</h1>
+  <div class="sub">저장일시: ${savedAt}&nbsp;&nbsp;|&nbsp;&nbsp;출력일: ${new Date().toLocaleString('ko-KR')}</div>
+
+  <div class="section">
+    <div class="section-title">📍 사고 기본 정보</div>
+    <table>
+      <tr><td>사고 유형</td><td>${(rec.types||[]).join(', ')||'미입력'}</td></tr>
+      <tr><td>사고 일시</td><td>${dt}</td></tr>
+      <tr><td>사고 장소</td><td>${rec.location||'미입력'}</td></tr>
+      <tr><td>날씨</td><td>${rec.weather||'미입력'}</td></tr>
+      <tr><td>블랙박스</td><td>${rec.blackbox||'미입력'}</td></tr>
+      <tr><td>신고 여부</td><td>${(rec.reports||[]).join(', ')||'미입력'}</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🚗 내 차량 정보</div>
+    <table>
+      <tr><td>차량 번호</td><td>${rec.myPlate||'미입력'}</td></tr>
+      <tr><td>차종</td><td>${rec.myCar||'미입력'}</td></tr>
+      <tr><td>이름</td><td>${rec.myName||'미입력'}</td></tr>
+      <tr><td>연락처</td><td>${rec.myPhone||'미입력'}</td></tr>
+      <tr><td>보험사</td><td>${rec.myInsurer||'미입력'}</td></tr>
+      <tr><td>증권번호</td><td>${rec.myPolicy||'미입력'}</td></tr>
+      <tr><td>차량 피해</td><td>${(rec.damages||[]).join(', ')||'미입력'}</td></tr>
+      <tr><td>부상 여부</td><td>${rec.myInjury||'미입력'}</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🚙 상대방 정보</div>
+    <table>
+      <tr><td>차량 번호</td><td>${rec.opPlate||'미입력'}</td></tr>
+      <tr><td>차종</td><td>${rec.opCar||'미입력'}</td></tr>
+      <tr><td>이름</td><td>${rec.opName||'미입력'}</td></tr>
+      <tr><td>연락처</td><td>${rec.opPhone||'미입력'}</td></tr>
+      <tr><td>보험사</td><td>${rec.opInsurer||'미입력'}</td></tr>
+      <tr><td>부상 여부</td><td>${rec.opInjury||'미입력'}</td></tr>
+      <tr><td>목격자 연락처</td><td>${rec.witness||'없음'}</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📝 사고 경위</div>
+    <div class="desc-box">${rec.desc||'미입력'}</div>
+  </div>
+
+  ${rec.injuryDetail ? `<div class="section">
+    <div class="section-title">🏥 부상 상세</div>
+    <div class="desc-box">${rec.injuryDetail}</div>
+  </div>` : ''}
+
+  <div class="footer">
+    ※ 본 기록은 교통사고 대응 앱에서 자동 생성되었습니다. AI 분석 결과는 참고용이며 법적 효력이 없습니다.
+  </div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button onclick="window.print()" style="padding:12px 32px;background:#1A6FD4;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;font-family:'Noto Sans KR',sans-serif">
+      🖨️ PDF / 인쇄
+    </button>
+  </div>
+  </body></html>`);
+  win.document.close();
+}
+
+/* ══════════════ SETTINGS ══════════════ */
+let setD={};
+function toggleSetSection(id){const b=document.getElementById(id),i=document.getElementById(id+'-icon');if(!b)return;const o=b.classList.contains('open');b.classList.toggle('open',!o);if(i)i.classList.toggle('open',!o);}
+
+function loadSettings(){
+  const raw=localStorage.getItem('accidentData'),sum=document.getElementById('settings-record-summary'),nd=document.getElementById('settings-no-data'),ea=document.getElementById('settings-edit-area');
+  if(!raw){if(nd)nd.style.display='block';if(ea)ea.style.display='none';return;}
+  setD=JSON.parse(raw);if(nd)nd.style.display='none';if(ea)ea.style.display='block';
+  if(sum){const items=[setD.datetime?`🕐 ${setD.datetime.replace('T',' ')}`:null,setD.location?`📍 ${setD.location}`:null,(setD.types&&setD.types.length)?`🚗 ${setD.types.join(', ')}`:null,setD.myPlate?`내 번호: ${setD.myPlate}`:null,setD.opPlate?`상대: ${setD.opPlate}`:null].filter(Boolean);sum.innerHTML=`<div class="set-summary-card">${items.map(i=>`<div class="set-summary-item">${i}</div>`).join('<span style="color:var(--border)"> │ </span>')}</div>`;}
+  const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
+  sv('set-datetime',setD.datetime);sv('set-location',setD.location);
+  if(setD.types&&setD.types.length){document.querySelectorAll('#set-types-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('.sb-label');if(l&&setD.types.some(t=>l.textContent.includes(t.slice(0,4))))btn.classList.add('selected');});}
+  sv('set-myplate',setD.myPlate);sv('set-mycar',setD.myCar);sv('set-myname',setD.myName);sv('set-myphone',setD.myPhone);sv('set-myinsurer',setD.myInsurer);sv('set-mypolicy',setD.myPolicy);
+  if(setD.damages&&setD.damages.length){document.querySelectorAll('#set-damages-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('div:last-child');if(l&&setD.damages.includes(l.textContent.trim()))btn.classList.add('selected');});}
+  sv('set-opplate',setD.opPlate);sv('set-opcar',setD.opCar);sv('set-opname',setD.opName);sv('set-opphone',setD.opPhone);sv('set-opinsurer',setD.opInsurer);sv('set-oppolicy',setD.opPolicy);sv('set-witness',setD.witness);
+  sv('set-injurydetail',setD.injuryDetail);sv('set-desc',setD.desc);
+  if(setD.myInjury){document.querySelectorAll('#set-myinjury-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.myInjury))b.className='tag-btn sel-light';});}
+  if(setD.opInjury){document.querySelectorAll('#set-opinjury-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.opInjury))b.className='tag-btn sel-light';});}
+  if(setD.blackbox){document.querySelectorAll('#set-bb-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.blackbox==='있음'?'있음':setD.blackbox==='없음'?'없음':'확인'))b.className='tag-btn sel-none';});}
+  toggleSetSection('set-s1');
+}
+
+function setToggleType(el,val){el.classList.toggle('selected');if(!setD.types)setD.types=[];if(setD.types.includes(val))setD.types=setD.types.filter(t=>t!==val);else setD.types.push(val);}
+function setToggleDamage(el,val){el.classList.toggle('selected');if(!setD.damages)setD.damages=[];if(setD.damages.includes(val))setD.damages=setD.damages.filter(d=>d!==val);else setD.damages.push(val);}
+function setWeather(el,val){document.querySelectorAll('#set-s1 .tag-btn').forEach(b=>b.className='tag-btn');el.className='tag-btn sel-none';setD.weather=val;}
+function setInjury(who,el,val){const rid=who==='my'?'set-myinjury-row':'set-opinjury-row';document.querySelectorAll(`#${rid} .tag-btn`).forEach(b=>b.className='tag-btn');el.className='tag-btn sel-light';if(who==='my')setD.myInjury=val;else setD.opInjury=val;}
+function setBB(el,val){document.querySelectorAll('#set-bb-row .tag-btn').forEach(b=>b.className='tag-btn');el.className='tag-btn sel-none';setD.blackbox=val;}
+
+function saveSettings(){
+  ['datetime','location','myPlate','myPlate','myCar','myName','myPhone','myInsurer','myPolicy','opPlate','opCar','opName','opPhone','opInsurer','opPolicy','witness','injuryDetail','desc'].forEach(k=>{});
+  const g=id=>document.getElementById(id)?.value;
+  setD.datetime=g('set-datetime')||setD.datetime;setD.location=g('set-location')||setD.location;
+  setD.myPlate=g('set-myplate')||setD.myPlate;setD.myCar=g('set-mycar')||setD.myCar;setD.myName=g('set-myname')||setD.myName;setD.myPhone=g('set-myphone')||setD.myPhone;setD.myInsurer=g('set-myinsurer')||setD.myInsurer;setD.myPolicy=g('set-mypolicy')||setD.myPolicy;
+  setD.opPlate=g('set-opplate')||setD.opPlate;setD.opCar=g('set-opcar')||setD.opCar;setD.opName=g('set-opname')||setD.opName;setD.opPhone=g('set-opphone')||setD.opPhone;setD.opInsurer=g('set-opinsurer')||setD.opInsurer;setD.opPolicy=g('set-oppolicy')||setD.opPolicy;
+  setD.witness=g('set-witness')||setD.witness;setD.injuryDetail=g('set-injurydetail')||setD.injuryDetail;setD.desc=g('set-desc')||setD.desc;
+  Object.assign(D,setD);localStorage.setItem('accidentData',JSON.stringify(setD));
+  const msg=document.getElementById('set-save-msg');if(msg){msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);}
+  loadSettings();
+}
+
+function confirmClearRecord(){
+  if(confirm('현재 저장된 사고 기록을 모두 삭제하시겠습니까?\n(내 정보·차량 등록은 유지됩니다)')){
+    localStorage.removeItem('accidentData');Object.keys(D).forEach(k=>{if(Array.isArray(D[k]))D[k]=[];else D[k]='';});loadSettings();alert('삭제되었습니다.');
+  }
+}
+
+/* ══════════════ GPS 위치 ══════════════ */
+function getGPSLocation() {
+  const btn    = document.getElementById('gps-btn');
+  const status = document.getElementById('gps-status');
+  const mapWrap= document.getElementById('gps-map-wrap');
+
+  if (!navigator.geolocation) {
+    showGpsStatus('error', '❌ 이 기기는 GPS를 지원하지 않습니다. 직접 입력해주세요.');
+    return;
+  }
+
+  // 버튼 로딩 상태
+  btn.innerHTML = '<span style="font-size:22px">⏳</span> 위치 확인 중...';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  mapWrap.style.display = 'none';
+  showGpsStatus('loading', '📡 GPS 신호 수신 중... (최대 15초)');
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy);
+
+      showGpsStatus('loading', '🗺 주소 변환 중...');
+
+      try {
+        // Kakao 역지오코딩 (무료, 한국 주소 최적)
+        const kakaoKey = null; // API 키 없이도 Nominatim 사용
+
+        // OpenStreetMap Nominatim (무료, API 키 불필요)
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`,
+          { headers: { 'User-Agent': 'AccidentApp/1.0' } }
+        );
+        const data = await res.json();
+
+        // 한국 주소 조합
+        const addr = buildKoreanAddress(data, lat, lon);
+
+        // 필드에 자동 입력
+        document.getElementById('f-location').value = addr;
+        D.location = addr;
+
+        // 지도 미리보기 (Google Maps embed)
+        const mapEl  = document.getElementById('gps-map');
+        const addrBar= document.getElementById('gps-addr-bar');
+        mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=17&output=embed&hl=ko`;
+        addrBar.innerHTML = `📍 ${addr} <span style="font-size:11px;opacity:0.8;margin-left:6px">정확도 ±${acc}m</span>`;
+        mapWrap.style.display = 'block';
+
+        showGpsStatus('success', `✅ 위치 확인 완료! 정확도: ±${acc}m — 필요하면 아래 입력창에서 수정하세요`);
+        resetGpsBtn();
+
+      } catch(e) {
+        // Nominatim 실패 시 좌표만 표시
+        const fallback = `위도 ${lat.toFixed(5)}, 경도 ${lon.toFixed(5)}`;
+        document.getElementById('f-location').value = fallback;
+        showGpsStatus('warn', `⚠️ 주소 변환 실패 — 좌표를 입력했습니다. 직접 주소를 입력해주세요.`);
+
+        const mapEl = document.getElementById('gps-map');
+        mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=17&output=embed&hl=ko`;
+        document.getElementById('gps-addr-bar').innerHTML = `📍 ${fallback} ±${acc}m`;
+        document.getElementById('gps-map-wrap').style.display = 'block';
+        resetGpsBtn();
+      }
+    },
+    (err) => {
+      resetGpsBtn();
+      const msgs = {
+        1: '❌ 위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.',
+        2: '❌ GPS 신호를 찾을 수 없습니다. 실외로 이동하거나 직접 입력해주세요.',
+        3: '❌ 위치 확인 시간이 초과됐습니다. 다시 시도하거나 직접 입력해주세요.',
+      };
+      showGpsStatus('error', msgs[err.code] || '❌ 위치를 가져오지 못했습니다. 직접 입력해주세요.');
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+function buildKoreanAddress(data, lat, lon) {
+  const a = data.address || {};
+  // 한국 주소 우선순위 조합
+  const parts = [];
+
+  // 시/도
+  if (a['city'] || a['province'] || a['state'])
+    parts.push(a['city'] || a['province'] || a['state']);
+
+  // 구/군
+  if (a['county'] || a['city_district'] || a['borough'] || a['district'])
+    parts.push(a['county'] || a['city_district'] || a['borough'] || a['district']);
+
+  // 동/읍/면
+  if (a['quarter'] || a['suburb'] || a['neighbourhood'] || a['village'])
+    parts.push(a['quarter'] || a['suburb'] || a['neighbourhood'] || a['village']);
+
+  // 도로명
+  if (a['road'] || a['highway'])
+    parts.push(a['road'] || a['highway']);
+
+  // 번지
+  if (a['house_number'])
+    parts.push(a['house_number']);
+
+  // 건물명 (있으면)
+  if (a['building'] || a['amenity'] || a['shop'])
+    parts.push('(' + (a['building'] || a['amenity'] || a['shop']) + ')');
+
+  if (parts.length > 0) return parts.join(' ');
+
+  // 조합 실패 시 display_name 일부 사용
+  const dn = data.display_name || '';
+  const split = dn.split(', ').reverse(); // 한국 주소는 역순이 더 자연스러움
+  return split.slice(0, 4).join(' ') || `위도 ${lat.toFixed(5)}, 경도 ${lon.toFixed(5)}`;
+}
+
+function showGpsStatus(type, msg) {
+  const el = document.getElementById('gps-status');
+  const colors = {
+    loading: { bg:'var(--blue-bg)',   border:'rgba(26,111,212,0.3)',   color:'var(--blue)' },
+    success: { bg:'var(--green-bg)',  border:'rgba(26,150,71,0.3)',    color:'var(--green)' },
+    warn:    { bg:'#FFF4E5',          border:'rgba(212,114,10,0.3)',   color:'var(--orange)' },
+    error:   { bg:'var(--red-bg)',    border:'rgba(214,43,43,0.3)',    color:'var(--red)' },
+  };
+  const c = colors[type] || colors.error;
+  el.style.cssText = `display:block; padding:12px 14px; border-radius:var(--radius-sm); font-size:14px; font-weight:700; background:${c.bg}; border:2px solid ${c.border}; color:${c.color}; line-height:1.5;`;
+  el.textContent = msg;
+}
+
+function resetGpsBtn() {
+  const btn = document.getElementById('gps-btn');
+  btn.innerHTML = '<span style="font-size:22px">📡</span> 현재 위치 다시 가져오기';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+/* ══════════════ INIT ══════════════ */
+window.addEventListener('load',()=>{
+  loadSaved();loadMyInfo();renderVehicleSelectInQuick();applyMyInfoToRecord();checkFirstRun();
+  const now=new Date(),iso=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  const dt=document.getElementById('f-datetime');if(dt)dt.value=iso;
+});
+</script>
+</body>
+</html>
