@@ -1686,11 +1686,17 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         <input type="tel" id="mi-phone" placeholder="010-0000-0000">
       </div>
     </div>
-    <div class="field field-row">
-      <div>
-        <label class="field-label">비상연락처 (가족)</label>
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label">비상연락처 이름</label>
+        <input type="text" id="mi-emergency-name" placeholder="예: 아내, 엄마, 남편">
+      </div>
+      <div class="field">
+        <label class="field-label">비상연락처 전화번호</label>
         <input type="tel" id="mi-emergency" placeholder="010-0000-0000">
       </div>
+    </div>
+    <div class="field field-row">
       <div>
         <label class="field-label">보험설계사 연락처</label>
         <input type="tel" id="mi-agent" placeholder="010-0000-0000">
@@ -1871,7 +1877,7 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <div class="card-title" style="margin-bottom:0">👥 수신자</div>
       <button onclick="pickContact()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer">
-        📒 연락처 가져오기
+        📒 다른 사람에게 보내기
       </button>
     </div>
     <!-- 저장된 비상연락처 퀵 버튼 -->
@@ -2134,7 +2140,7 @@ function goPage(name) {
   if(name==='settings') { loadSettings(); renderHistoryList(); loadQuotaStatus(); }
   if(name==='timeline') renderTimeline();
   if(name==='share') generateShareCard();
-  if(name==='notify') renderNtfQuickContacts();
+  if(name==='notify') initNotifyPage();
   if(name==='repair') loadQuotaStatus();
   if(name==='settle') loadQuotaStatus();
   if(name==='ai') updateAIPhotoHint();
@@ -2440,7 +2446,8 @@ function deleteVehicle(idx){
 
 function saveMyInfo(){
   collectCurrentVehicleInputs();
-  const info={name:document.getElementById('mi-name').value,phone:document.getElementById('mi-phone').value,emergency:document.getElementById('mi-emergency').value,agent:document.getElementById('mi-agent').value,garage:document.getElementById('mi-garage').value,vehicles,activeVehIdx};
+  const enNameEl=document.getElementById('mi-emergency-name');
+  const info={name:document.getElementById('mi-name').value,phone:document.getElementById('mi-phone').value,emergency:document.getElementById('mi-emergency').value,emergencyName:enNameEl?enNameEl.value.trim():'',agent:document.getElementById('mi-agent').value,garage:document.getElementById('mi-garage').value,vehicles,activeVehIdx};
   localStorage.setItem('myInfo',JSON.stringify(info));
   const msg=document.getElementById('mi-save-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',3000);
   renderVehicleSelectInQuick();
@@ -2452,7 +2459,7 @@ function loadMyInfo(){
   if(!raw){vehicles=[{plate:'',car:'',insurer:'',policy:'',insStart:'',insEnd:'',nickname:''}];renderVehicleTabs();renderVehiclePanel(0);return;}
   const info=JSON.parse(raw);
   const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
-  sv('mi-name',info.name);sv('mi-phone',info.phone);sv('mi-emergency',info.emergency);sv('mi-agent',info.agent);sv('mi-garage',info.garage);
+  sv('mi-name',info.name);sv('mi-phone',info.phone);sv('mi-emergency',info.emergency);const enNmEl=document.getElementById('mi-emergency-name');if(enNmEl&&info.emergencyName)enNmEl.value=info.emergencyName;sv('mi-agent',info.agent);sv('mi-garage',info.garage);
   if(info.vehicles&&info.vehicles.length){vehicles=info.vehicles;}
   else if(info.plate){vehicles=[{plate:info.plate,car:info.car,insurer:info.insurer,policy:info.policy,insStart:info.insStart,insEnd:info.insEnd,nickname:'내 차'}];}
   else{vehicles=[{plate:'',car:'',insurer:'',policy:'',insStart:'',insEnd:'',nickname:''}];}
@@ -4152,7 +4159,7 @@ async function pickContact() {
   // 미지원 기기: 저장된 비상연락처 or 수동 입력 안내
   const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
   const saved = [];
-  if (info.emergency) saved.push({ label: '🆘 비상연락처', phone: info.emergency });
+  if (info.emergency) saved.push({ label: '🆘 ' + (info.emergencyName || '비상연락처'), phone: info.emergency });
   if (info.agent)     saved.push({ label: '🏢 보험설계사', phone: info.agent });
 
   if (saved.length) {
@@ -4193,12 +4200,29 @@ function selectSavedContact(label, phone) {
   generateNotifyMsg();
 }
 
+function initNotifyPage() {
+  // 비상연락처가 있으면 자동으로 첫 번째 수신자로 채움
+  const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
+  const nameEl  = document.getElementById('ntf-name');
+  const phoneEl = document.getElementById('ntf-phone');
+
+  // 이미 입력된 값이 있으면 덮어쓰지 않음
+  if (!nameEl.value && !phoneEl.value) {
+    if (info.emergency) {
+      nameEl.value  = info.emergencyName || '비상연락처(가족)';
+      phoneEl.value = info.emergency;
+      generateNotifyMsg();
+    }
+  }
+  renderNtfQuickContacts();
+}
+
 function renderNtfQuickContacts() {
   const el = document.getElementById('ntf-quick-contacts');
   if (!el) return;
   const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
   const items = [];
-  if (info.emergency) items.push({ label: '🆘 비상연락처', phone: info.emergency });
+  if (info.emergency) items.push({ label: '🆘 ' + (info.emergencyName || '비상연락처'), phone: info.emergency });
   if (info.agent)     items.push({ label: '🏢 보험설계사', phone: info.agent });
   if (!items.length) { el.style.display = 'none'; return; }
 
