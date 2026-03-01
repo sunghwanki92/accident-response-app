@@ -946,7 +946,14 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         <div class="sel-btn" onclick="toggleType(this,'끼어들기')"><div class="sb-icon">↙️</div><div class="sb-label">끼어들기</div><div class="sb-sub">차선 위반</div></div>
         <div class="sel-btn" onclick="toggleType(this,'측면 충돌')"><div class="sb-icon">↔️</div><div class="sb-label">측면 충돌</div><div class="sb-sub">옆면 긁힘·충격</div></div>
         <div class="sel-btn" onclick="toggleType(this,'주차장 사고')"><div class="sb-icon">🅿️</div><div class="sb-label">주차장 사고</div><div class="sb-sub">후진·주차 중</div></div>
-        <div class="sel-btn" onclick="toggleType(this,'기타')"><div class="sb-icon">❓</div><div class="sb-label">기타</div><div class="sb-sub">직접 입력</div></div>
+        <div class="sel-btn" onclick="toggleType(this,'기타')" id="type-btn-other"><div class="sb-icon">❓</div><div class="sb-label">기타</div><div class="sb-sub">직접 입력</div></div>
+      </div>
+      <!-- 기타 직접입력 칸 -->
+      <div id="type-other-input" style="display:none;margin-top:10px">
+        <input type="text" id="f-type-other" placeholder="예: 역주행 충돌, 빙판길 미끄러짐, 야생동물 충돌..."
+          oninput="updateOtherType(this.value)"
+          style="width:100%;padding:12px 14px;border:2px solid var(--orange);border-radius:var(--radius-sm);font-size:15px;font-family:'Noto Sans KR',sans-serif;background:var(--bg2);color:var(--text);box-sizing:border-box">
+      </div>
       </div>
     </div>
     <div class="card">
@@ -2736,7 +2743,30 @@ function resetRecord(){
 }
 
 /* SELECTORS */
-function toggleType(el,val){el.classList.toggle('selected');if(D.types.includes(val))D.types=D.types.filter(t=>t!==val);else D.types.push(val);}
+function toggleType(el,val){
+  el.classList.toggle('selected');
+  if(D.types.includes(val)) D.types=D.types.filter(t=>t!==val&&!t.startsWith('기타:'));
+  else D.types.push(val);
+  // 기타 직접입력 칸 토글
+  if(val==='기타'){
+    const box=document.getElementById('type-other-input');
+    const inp=document.getElementById('f-type-other');
+    if(el.classList.contains('selected')){
+      box.style.display='block';
+      setTimeout(()=>inp.focus(),50);
+    } else {
+      box.style.display='none';
+      inp.value='';
+      D.types=D.types.filter(t=>!t.startsWith('기타'));
+    }
+  }
+}
+function updateOtherType(val){
+  // D.types에서 기타 관련 항목 제거 후 재추가
+  D.types=D.types.filter(t=>t!=='기타'&&!t.startsWith('기타:'));
+  if(val.trim()) D.types.push('기타: '+val.trim());
+  else D.types.push('기타');
+}
 function toggleDamage(el,val){el.classList.toggle('selected');if(D.damages.includes(val))D.damages=D.damages.filter(d=>d!==val);else D.damages.push(val);}
 
 function selectWeather(el,val){
