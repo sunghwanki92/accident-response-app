@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#D62B2B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="사고대응">
+<meta name="description" content="교통사고 현장에서 바로 사용하는 대응 가이드 앱">
+<link rel="manifest" href="/manifest.json">
 <title>교통사고 대응</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -2030,7 +2037,7 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     </div>
     <div class="set-section-body open" id="set-apikey">
       <div style="background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--blue);line-height:1.7">
-        💡 <strong>무료 제공:</strong> AI 분석은 하루 <strong>5회</strong> 무료로 사용 가능합니다.<br>
+        💡 <strong>무료 제공:</strong> AI 분석은 하루 <strong>10회</strong> 무료로 사용 가능합니다.<br>
         더 많이 사용하려면 본인의 Gemini API 키를 입력하세요. (이 기기에만 저장, 무료 발급 가능)
       </div>
       <div id="quota-status-box" style="margin-bottom:12px;padding:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:700"></div>
@@ -2046,6 +2053,56 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         <button class="btn-secondary" onclick="clearApiKey()">🗑️ 키 삭제</button>
       </div>
       <div id="apikey-msg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:14px;font-weight:700"></div>
+    </div>
+  </div>
+
+  <!-- ═ 데이터 백업 / 복원 ═ -->
+  <div class="set-section" style="margin-bottom:14px">
+    <div class="set-section-title" onclick="toggleSetSection('set-backup')" style="background:#F0FDF4;border-color:rgba(26,150,71,0.2)">
+      <span style="color:var(--green)">💾 데이터 백업 · 복원</span>
+      <span class="set-toggle-icon" id="set-backup-icon">▼</span>
+    </div>
+    <div class="set-section-body" id="set-backup">
+      <div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--green);line-height:1.7">
+        📱 브라우저 캐시를 지우거나 기기를 변경할 경우 데이터가 사라질 수 있습니다.<br>
+        중요한 사고 기록은 <strong>백업 파일로 저장</strong>해두세요.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <button class="btn-primary" style="background:var(--green)" onclick="exportData()">📤 데이터 내보내기</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📥 데이터 가져오기</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+      <div id="backup-msg" style="display:none;padding:10px;border-radius:8px;font-size:14px;font-weight:700;margin-top:4px"></div>
+    </div>
+  </div>
+
+  <!-- ═ 앱 설치 안내 ═ -->
+  <div class="set-section" style="margin-bottom:14px" id="pwa-section">
+    <div class="set-section-title" onclick="toggleSetSection('set-pwa')" style="background:#FFF7ED;border-color:rgba(217,119,6,0.2)">
+      <span style="color:#D97706">📲 홈 화면에 앱 추가</span>
+      <span class="set-toggle-icon" id="set-pwa-icon">▼</span>
+    </div>
+    <div class="set-section-body" id="set-pwa">
+      <div style="font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:14px">
+        브라우저 없이 앱처럼 바로 실행할 수 있습니다.
+      </div>
+      <div style="background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
+        <div style="font-weight:800;margin-bottom:8px;font-size:14px">🤖 Android (Chrome)</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.8">
+          1. Chrome 주소창 오른쪽 <strong>⋮ 메뉴</strong> 탭<br>
+          2. <strong>"홈 화면에 추가"</strong> 선택<br>
+          3. <strong>"추가"</strong> 버튼 탭
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-weight:800;margin-bottom:8px;font-size:14px">🍎 iPhone (Safari)</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.8">
+          1. Safari 하단 <strong>공유 버튼 (□↑)</strong> 탭<br>
+          2. <strong>"홈 화면에 추가"</strong> 선택<br>
+          3. <strong>"추가"</strong> 탭
+        </div>
+      </div>
+      <button id="pwa-install-btn" style="display:none;width:100%;margin-top:12px;padding:14px;border-radius:var(--radius-sm);border:none;background:var(--blue);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif" onclick="installPWA()">📲 지금 바로 설치하기</button>
     </div>
   </div>
 
@@ -3216,7 +3273,7 @@ async function runAI(prefilled){
     document.getElementById('ai-loading').className='ai-loading';
     document.getElementById('ai-btn').disabled=false;
     const abt3=document.getElementById('ai-btn-top');if(abt3)abt3.disabled=false;
-    document.getElementById('ai-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ 분석 오류: ${e.message}<br><span style="color:var(--text2)">잠시 후 다시 시도해주세요.</span></div>`;
+    document.getElementById('ai-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;
     document.getElementById('ai-result').className='ai-result show';
   }
 }
@@ -3419,7 +3476,7 @@ async function runGuardAI(){
     if(d.escalation)html+=`<div class="action-card" style="border-left:5px solid var(--orange);background:#FFF4E5;margin-top:8px"><div class="ac-icon">🏛️</div><div><div class="ac-title">분쟁 조정 방법</div><div class="ac-body">${d.escalation}</div></div></div>`;
     html+=`<button class="reset-btn" onclick="document.getElementById('guard-result').innerHTML='';document.getElementById('guard-input').value=''">↩ 다른 상황 분석</button>`;
     document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=html;
-  }catch(e){document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ 오류: ${e.message}</div>`;}
+  }catch(e){document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;}
 }
 
 /* ══════════════ POLICY AI ══════════════ */
@@ -3507,7 +3564,7 @@ async function runPolicyAI(){
     if(d.questionAnswers)html+=`<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="r-label" style="color:var(--blue)">💬 질문 답변</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${d.questionAnswers}</div></div>`;
     html+=`<div class="policy-disclaimer">⚠️ AI 참고용 분석입니다. 실제 보험금 지급은 약관 및 사고 상황에 따라 달라집니다.</div><button class="reset-btn" onclick="resetPolicy()">↩ 다른 보험 분석</button>`;
     document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=html;document.getElementById('policy-result').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(e){document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ 오류: ${e.message}</div>`;}
+  }catch(e){document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;}
 }
 
 function resetPolicy(){document.getElementById('policy-result').innerHTML='';document.getElementById('policy-text').value='';document.getElementById('policy-question').value='';document.getElementById('policy-file').value='';document.getElementById('uz-filename').style.display='none';document.getElementById('upload-zone').classList.remove('has-file');policyFileBase64=null;policyFileType=null;window.scrollTo(0,0);}
@@ -3955,6 +4012,69 @@ function showApiKeyMsg(msg, type) {
   el.textContent = msg;
   setTimeout(() => el.style.display='none', 4000);
 }
+
+/* ══════════════ 💾 데이터 백업/복원 ══════════════ */
+function exportData() {
+  const keys = ['accidentData','myInfo','accidentHistory','accidentTimeline','userApiKey','appSettings'];
+  const backup = { _version: 1, _date: new Date().toISOString(), _appName: '교통사고대응' };
+  keys.forEach(k => { const v = localStorage.getItem(k); if (v) backup[k] = v; });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','-').slice(0,-1);
+  a.href = url; a.download = `사고대응_백업_${date}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showBackupMsg('✅ 백업 파일이 다운로드되었습니다.', 'ok');
+}
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data._appName !== '교통사고대응') { showBackupMsg('⚠️ 올바른 백업 파일이 아닙니다.', 'warn'); return; }
+      const keys = ['accidentData','myInfo','accidentHistory','accidentTimeline','userApiKey','appSettings'];
+      keys.forEach(k => { if (data[k]) localStorage.setItem(k, data[k]); });
+      showBackupMsg('✅ 데이터를 성공적으로 복원했습니다. 앱을 새로고침 해주세요.', 'ok');
+      setTimeout(() => location.reload(), 2000);
+    } catch(e) { showBackupMsg('⚠️ 파일을 읽을 수 없습니다. 올바른 백업 파일인지 확인하세요.', 'warn'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+function showBackupMsg(msg, type) {
+  const el = document.getElementById('backup-msg');
+  if (!el) return;
+  const colors = { ok:'var(--green-bg)', warn:'var(--red-bg)' };
+  const borders = { ok:'rgba(26,150,71,0.3)', warn:'rgba(214,43,43,0.3)' };
+  el.style.cssText = `display:block;padding:12px;border-radius:8px;font-size:14px;font-weight:700;background:${colors[type]};border:2px solid ${borders[type]};color:${type==='ok'?'var(--green)':'var(--red)'}`;
+  el.textContent = msg;
+}
+
+/* ══════════════ 📲 PWA 설치 ══════════════ */
+let _pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); _pwaPrompt = e;
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = 'block';
+});
+async function installPWA() {
+  if (!_pwaPrompt) { alert('이미 설치되어 있거나, 위의 수동 설치 방법을 이용해주세요.'); return; }
+  _pwaPrompt.prompt();
+  const { outcome } = await _pwaPrompt.userChoice;
+  if (outcome === 'accepted') { _pwaPrompt = null; const btn = document.getElementById('pwa-install-btn'); if(btn) btn.style.display='none'; }
+}
+
+/* ══════════════ 오류 메시지 한국어화 ══════════════ */
+function friendlyError(msg) {
+  if (!msg) return 'AI 분석 중 오류가 발생했습니다.';
+  if (msg.includes('quota') || msg.includes('limit') || msg.includes('exceeded')) return '오늘 무료 AI 분석 횟수를 모두 사용했습니다.\n내일 다시 시도하거나 설정에서 Gemini API 키를 입력해주세요.';
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed')) return '네트워크 연결을 확인해주세요.';
+  if (msg.includes('API') || msg.includes('key') || msg.includes('auth')) return 'API 키가 올바르지 않습니다. 설정에서 키를 확인해주세요.';
+  if (msg.includes('timeout') || msg.includes('시간')) return 'AI 응답이 너무 오래 걸립니다. 잠시 후 다시 시도해주세요.';
+  return 'AI 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+}
 async function loadQuotaStatus() {
   const box = document.getElementById('quota-status-box');
   if (!box) return;
@@ -3969,9 +4089,9 @@ async function loadQuotaStatus() {
     const res = await fetch(API_BASE, { method: 'GET' });
     const d = await res.json();
     const remain = d.remaining ?? 3;
-    const color = remain > 0 ? 'var(--green)' : 'var(--red)';
-    box.innerHTML = `<span style="color:${color}">오늘 남은 무료 AI 분석: <strong>${remain}/${d.quota ?? 3}회</strong></span>`;
-    updateAllQuotaBanners(`오늘 AI 분석 ${remain}회 남음 — 무료 제공 (하루 ${d.quota ?? 3}회)`);
+    const color = remain > 2 ? "var(--green)" : remain > 0 ? "var(--orange)" : "var(--red)";
+    box.innerHTML = `<span style="color:${color}">오늘 남은 무료 AI 분석: <strong>${remain}/${d.quota ?? 10}회</strong></span>`;
+    updateAllQuotaBanners(`오늘 AI 분석 ${remain}회 남음 — 무료 제공 (하루 ${d.quota ?? 10}회)`);
   } catch(e) {
     box.innerHTML = `<span style="color:var(--text3)">서버 연결 확인 중...</span>`;
   }
@@ -4429,7 +4549,7 @@ JSON으로만 응답:
     html += `<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">※ AI 참고용 분석입니다. 실제 수리비는 차량 상태에 따라 다를 수 있습니다.</div>`;
     document.getElementById('rep-result').innerHTML = html;
   } catch(e) {
-    document.getElementById('rep-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${e.message}</div>`;
+    document.getElementById('rep-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;
   }
   document.getElementById('rep-loading').className = 'ai-loading';
 }
@@ -4490,7 +4610,7 @@ JSON으로만 응답:
     html += `<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">※ AI 참고용 분석입니다. 실제 합의금은 전문 변호사·손해사정사와 확인하세요.</div>`;
     document.getElementById('stl-result').innerHTML = html;
   } catch(e) {
-    document.getElementById('stl-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${e.message}</div>`;
+    document.getElementById('stl-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;
   }
   document.getElementById('stl-loading').className = 'ai-loading';
 }

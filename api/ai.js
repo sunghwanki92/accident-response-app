@@ -1,8 +1,8 @@
 // api/ai.js — Vercel Serverless Function (Gemini 버전)
-// IP당 하루 5회 무료 + 본인 Gemini API 키 사용 가능
+// IP당 하루 10회 무료 + 본인 Gemini API 키 사용 가능
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const FREE_QUOTA = 5;
+const FREE_QUOTA = 10;
 
 const ipQuota = {};
 
@@ -16,18 +16,39 @@ function incrementQuota(ip) {
   ipQuota[key] = (ipQuota[key] || 0) + 1;
 }
 
-// Anthropic messages 형식 → Gemini contents 형식 변환
-function toGeminiContents(messages, system) {
+// Anthropic messages → Gemini contents 변환
+function toGeminiContents(messages) {
   const contents = [];
-  let systemPrefix = system ? `[시스템 지침]\n${system}\n\n` : '';
   for (const msg of messages) {
     const role = msg.role === 'assistant' ? 'model' : 'user';
     let text = typeof msg.content === 'string' ? msg.content
-      : Array.isArray(msg.content) ? msg.content.filter(b=>b.type==='text').map(b=>b.text).join('\n') : '';
-    if (role === 'user' && systemPrefix) { text = systemPrefix + text; systemPrefix = ''; }
+      : Array.isArray(msg.content) ? msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n') : '';
     contents.push({ role, parts: [{ text }] });
   }
   return contents;
+}
+
+// 서버에서 JSON 추출 시도
+function extractJSON(text) {
+  if (!text) return null;
+  // 직접 파싱
+  try { const r = JSON.parse(text.trim()); if (r && typeof r === 'object') return r; } catch(e){}
+  // 코드블록 제거
+  try { const r = JSON.parse(text.replace(/```json|```/gi, '').trim()); if (r && typeof r === 'object') return r; } catch(e){}
+  // 중첩 괄호 추출
+  try {
+    const start = text.indexOf('{');
+    let depth = 0, end = -1;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++;
+      else if (text[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+    }
+    if (start !== -1 && end !== -1) {
+      const r = JSON.parse(text.slice(start, end + 1));
+      if (r && typeof r === 'object') return r;
+    }
+  } catch(e){}
+  return null;
 }
 
 export default async function handler(req, res) {
@@ -35,15 +56,6 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-Api-Key');
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  // 모델 목록 조회 (디버그용)
-  if (req.method === 'GET' && req.url?.includes('models')) {
-    const testKey = req.headers['x-user-api-key'] || GEMINI_API_KEY;
-    if (!testKey) return res.status(200).json({ error: 'API 키 없음' });
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${testKey}`);
-    const d = await r.json();
-    return res.status(200).json(d);
-  }
 
   if (req.method === 'GET') {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
@@ -59,13 +71,13 @@ export default async function handler(req, res) {
   const apiKey = userApiKey || GEMINI_API_KEY;
   const usingUserKey = !!userApiKey;
 
-  if (!apiKey) return res.status(500).json({ error: 'Gemini API 키가 설정되지 않았습니다.' });
+  if (!apiKey) return res.status(500).json({ error: 'API 키가 설정되지 않았습니다. 관리자에게 문의하세요.' });
 
   if (!usingUserKey) {
     const used = getUsedCount(ip);
     if (used >= FREE_QUOTA) {
       return res.status(429).json({
-        error: `오늘 무료 AI 분석(${FREE_QUOTA}회)을 모두 사용했습니다. 내일 다시 사용하거나 설정에서 본인 Gemini API 키를 입력해 주세요.`,
+        error: `오늘 무료 AI 분석 ${FREE_QUOTA}회를 모두 사용했습니다.\n내일 자정에 초기화되거나, 설정에서 본인 Gemini API 키를 입력하면 무제한 사용 가능합니다.`,
         remaining: 0, quota: FREE_QUOTA
       });
     }
@@ -73,46 +85,66 @@ export default async function handler(req, res) {
 
   try {
     const { messages, system, max_tokens } = body;
-    const contents = toGeminiContents(messages || [], ''); // system은 별도 파라미터로
+    const contents = toGeminiContents(messages || []);
+
     const geminiBody = {
       contents,
       ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
       generationConfig: {
         maxOutputTokens: max_tokens || 1500,
-        temperature: 0.3
+        temperature: 0.2
       }
     };
-    // 모델 순서대로 시도
+
     const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
-    let text = '';
+    let rawText = '';
     let lastError = '';
+
     for (const model of models) {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const response = await fetch(geminiUrl, {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(geminiBody)
       });
       const data = await response.json();
       if (response.ok) {
-        text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log(`[Gemini:${model}] raw:`, text.slice(0, 300));
+        rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
         break;
       }
-      lastError = data.error?.message || 'Gemini API 오류';
+      lastError = data.error?.message || 'AI 서비스 오류';
     }
-    if (!text && lastError) return res.status(400).json({ error: lastError });
+
+    if (!rawText && lastError) {
+      return res.status(400).json({ error: 'AI 분석에 실패했습니다. 잠시 후 다시 시도해주세요.' });
+    }
+
+    // 서버에서 JSON 파싱 시도 — 성공하면 파싱된 객체를, 실패하면 rawText를 그대로 전달
+    const parsed = extractJSON(rawText);
+
     if (!usingUserKey) incrementQuota(ip);
     const used = usingUserKey ? 0 : getUsedCount(ip);
     const remaining = usingUserKey ? 999 : Math.max(0, FREE_QUOTA - used);
 
-    return res.status(200).json({
-      content: [{ type: 'text', text }],
-      _remaining: remaining,
-      _usingUserKey: usingUserKey
-    });
+    if (parsed) {
+      // JSON 파싱 성공 — 구조화된 데이터로 전달
+      return res.status(200).json({
+        content: [{ type: 'text', text: JSON.stringify(parsed) }],
+        _remaining: remaining,
+        _usingUserKey: usingUserKey,
+        _parsed: true
+      });
+    } else {
+      // 파싱 실패 — raw 텍스트 그대로 전달 (클라이언트에서 재시도)
+      return res.status(200).json({
+        content: [{ type: 'text', text: rawText }],
+        _remaining: remaining,
+        _usingUserKey: usingUserKey,
+        _parsed: false
+      });
+    }
+
   } catch (e) {
-    return res.status(500).json({ error: 'AI 서버 연결 오류: ' + e.message });
+    return res.status(500).json({ error: 'AI 서버 연결에 실패했습니다. 네트워크를 확인해주세요.' });
   }
 }
-// force redeploy Mon Mar  2 08:31:31 UTC 2026
