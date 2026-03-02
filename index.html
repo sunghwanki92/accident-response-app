@@ -1756,9 +1756,10 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 6: 내 정보 ═══ -->
 <div class="page" id="page-myinfo">
 <div class="wrap">
-<div style="display:flex;gap:10px;margin-bottom:16px">
-  <button onclick="goPage('myinfo')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" class="_myinfo-tab-btn active-tab-btn" id="tab-btn-myinfo">👤 내 정보</button>
-  <button onclick="goPage('settings')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" id="tab-btn-settings">⚙️ 설정</button>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+  <button onclick="goPage('myinfo')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--green);background:var(--green-bg);font-size:12px;font-weight:800;color:var(--green);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">👤 내 정보</button>
+  <button onclick="goPage('settings')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">⚙️ 설정</button>
+  <button onclick="goPage('history')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">📋 기록관리</button>
 </div>
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--green);background:var(--green-bg);border-color:rgba(26,150,71,0.2)">👤 내 정보</div>
@@ -1998,9 +1999,10 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 7: 설정 ═══ -->
 <div class="page" id="page-settings">
 <div class="wrap">
-<div style="display:flex;gap:10px;margin-bottom:16px">
-  <button onclick="goPage('myinfo')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">👤 내 정보</button>
-  <button onclick="goPage('settings')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--blue-bg);border-color:var(--blue);background:var(--blue-bg);font-size:13px;font-weight:800;color:var(--blue);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">⚙️ 설정</button>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+  <button onclick="goPage('myinfo')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">👤 내 정보</button>
+  <button onclick="goPage('settings')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--blue);background:var(--blue-bg);font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">⚙️ 설정</button>
+  <button onclick="goPage('history')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">📋 기록관리</button>
 </div>
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--text2);background:var(--bg3);border-color:var(--border)">⚙️ 설정</div>
@@ -2032,17 +2034,6 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         <button class="btn-secondary" onclick="clearApiKey()">🗑️ 키 삭제</button>
       </div>
       <div id="apikey-msg" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:14px;font-weight:700"></div>
-    </div>
-  </div>
-
-  <!-- ═ 사고 기록 목록 ═ -->
-  <div class="set-section" style="margin-bottom:14px">
-    <div class="set-section-title" onclick="toggleSetSection('set-history')" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)">
-      <span style="color:var(--blue)">📂 저장된 사고 기록 목록</span>
-      <span class="set-toggle-icon" id="set-history-icon">▼</span>
-    </div>
-    <div class="set-section-body open" id="set-history">
-      <div id="history-list"></div>
     </div>
   </div>
 
@@ -2215,8 +2206,24 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 </div>
 </div>
 
-<script>
+<!-- ═══ PAGE: 기록관리 ═══ -->
+<div class="page" id="page-history">
+<div class="wrap">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+  <button onclick="goPage('myinfo')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">👤 내 정보</button>
+  <button onclick="goPage('settings')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">⚙️ 설정</button>
+  <button onclick="goPage('history')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--blue);background:var(--blue-bg);font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">📋 기록관리</button>
+</div>
+  <div class="page-header">
+    <div class="page-header-badge" style="color:var(--blue);background:var(--blue-bg);border-color:rgba(26,111,212,0.2)">📋 기록관리</div>
+    <h2>저장된 사고 기록 목록</h2>
+    <p>과거 사고 기록을 불러오거나 PDF로 저장할 수 있습니다</p>
+  </div>
+  <div id="history-list"></div>
+</div>
+</div>
 
+<script>
 function showToast(msg, type='error'){
   let t=document.getElementById('_toast');
   if(!t){t=document.createElement('div');t.id='_toast';
@@ -2257,11 +2264,12 @@ function goPage(name) {
   // 페이지 타이틀
   const titles={quick:'현장기록',ai:'AI분석',docs:'서류생성',guard:'보험사대응',
     policy:'보험분석',timeline:'타임라인',share:'공유카드',repair:'수리비',
-    settle:'합의금',notify:'알림공유',myinfo:'내 정보',settings:'설정'};
+    settle:'합의금',notify:'알림공유',myinfo:'내 정보',settings:'설정',history:'기록관리'};
   const titleEl = document.getElementById('nav-page-title');
   if(titleEl) titleEl.textContent = titles[name] || '';
 
-  if(name==='settings') { loadSettings(); renderHistoryList(); loadQuotaStatus(); }
+  if(name==='settings') { loadSettings(); loadQuotaStatus(); }
+  if(name==='history') { renderHistoryList(); }
   if(name==='timeline') renderTimeline();
   if(name==='share') generateShareCard();
   if(name==='notify') initNotifyPage();
