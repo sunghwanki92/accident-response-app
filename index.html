@@ -3169,18 +3169,18 @@ function updatePhotoChecklistForBlackbox(val) {
 
 /* ══════════════ AI ANALYSIS ══════════════ */
 const SYSTEM_PROMPT=`당신은 대한민국 교통사고 전문 분석 AI입니다.
-web_search 도구로 최신 도로교통법, 교통사고처리특례법, 보험개발원 과실비율 기준을 실시간 검색 후 분석하세요.
 
-[절대 규칙]
-- 응답은 반드시 JSON 객체 하나만 출력하세요.
-- 설명문, 인사말, 마크다운, 코드블록(` + '```' + `) 일절 금지.
-- 첫 글자는 반드시 { 이어야 합니다.
-- 사진이 첨부된 경우 사진 내용을 summary/faultBasis/immediateActions에 반영하세요.
+[절대 규칙 — 반드시 준수]
+1. 반드시 아래 JSON 형식 그대로만 출력하세요. 다른 필드명 사용 금지.
+2. 설명문, 인사말, 마크다운, 코드블록 절대 금지.
+3. 첫 글자는 반드시 { 마지막 글자는 반드시 }
+4. 모든 필드는 반드시 포함. 빈 배열 [] 허용.
 
-출력 형식 (이 구조 그대로):
-{"accidentType":"사고유형","summary":"한줄요약","lawUpdates":"법령변경(없으면 특이없음)","myFaultPct":숫자,"opFaultPct":숫자,"faultBasis":"근거 2문장","faultVariables":"가감요소","immediateActions":[{"icon":"이모지","title":"제목","level":"c","priority":"즉시","body":"내용","items":["항목"]}],"legalTips":[{"icon":"이모지","title":"제목","body":"내용","items":["항목"]}],"evidence":[{"icon":"이모지","label":"항목"}],"keyPhrase":"핵심주장","dontDo":"절대금지 1문장"}
+출력 형식 (필드명 절대 변경 금지):
+{"accidentType":"사고유형 한글","summary":"사고 한줄 요약","lawUpdates":"관련 법령 변경사항 (없으면 특이없음)","myFaultPct":내과실숫자0-100,"opFaultPct":상대과실숫자0-100,"faultBasis":"과실 근거 2문장","faultVariables":"과실 가감 요소","immediateActions":[{"icon":"이모지","title":"행동제목","level":"c","priority":"즉시","body":"행동설명","items":["세부항목1","세부항목2"]}],"legalTips":[{"icon":"이모지","title":"법적조언제목","body":"내용","items":["항목"]}],"evidence":[{"icon":"이모지","label":"수집항목"}],"keyPhrase":"경찰보험사에 할말","dontDo":"절대하면안되는것 1문장"}
 
-immediateActions 3~4개(level: c=즉시/w=5분내/i=나중), legalTips 2~3개, evidence 4~6개.`;
+immediateActions 3~4개(level: c=즉시/w=5분내/i=나중에), legalTips 2~3개, evidence 4~6개.
+myFaultPct + opFaultPct = 반드시 100이 되어야 함.`;
 
 // JSON 파싱 — 여러 방어 방법 순서대로 시도
 function safeParseAI(raw) {
@@ -3268,7 +3268,7 @@ async function runAI(prefilled){
     document.getElementById('ai-btn').disabled=false;
     const abt2=document.getElementById('ai-btn-top');if(abt2)abt2.disabled=false;
     if(images.length > 0) parsed._photoCount = images.length;
-    renderAI(parsed);
+    renderAI(normalizeAIResponse(parsed));
   }catch(e){
     document.getElementById('ai-loading').className='ai-loading';
     document.getElementById('ai-btn').disabled=false;
@@ -3279,6 +3279,39 @@ async function runAI(prefilled){
 }
 
 function fillAI(txt){document.getElementById('ai-input').value=txt;document.getElementById('ai-char').textContent=txt.length+'자';}
+
+function normalizeAIResponse(d) {
+  if (!d) return d;
+  // Gemini가 다른 필드명 쓸 경우 매핑
+  if (!d.summary) d.summary = d.description || d.content || d.analysis || '';
+  if (!d.faultBasis) d.faultBasis = (d.faultReasonOp||[]).join(', ') || d.faultReason || d.reason || '';
+  if (!d.faultVariables) d.faultVariables = d.adjustments || d.variables || '';
+  if (!d.immediateActions || !d.immediateActions.length) {
+    const raw = d.actions || d.immediateAction || d.steps || [];
+    d.immediateActions = Array.isArray(raw) ? raw.map(a => typeof a === 'string'
+      ? {icon:'⚡',title:a,level:'c',priority:'즉시',body:a,items:[]}
+      : {...{icon:'⚡',level:'c',priority:'즉시',items:[]}, ...a}) : [];
+  }
+  if (!d.legalTips || !d.legalTips.length) {
+    const raw = d.legal || d.tips || d.legalAdvice || [];
+    d.legalTips = Array.isArray(raw) ? raw.map(a => typeof a === 'string'
+      ? {icon:'⚖️',title:a,body:a,items:[]}
+      : {...{icon:'⚖️',items:[]}, ...a}) : [];
+  }
+  if (!d.evidence || !d.evidence.length) {
+    const raw = d.evidenceList || d.collect || [];
+    d.evidence = Array.isArray(raw) ? raw.map(a => typeof a === 'string'
+      ? {icon:'📸',label:a} : a) : [];
+  }
+  if (!d.keyPhrase) d.keyPhrase = d.key || d.phrase || d.claim || '';
+  if (!d.dontDo) d.dontDo = d.warning || d.avoid || d.dont || '';
+  if (!d.lawUpdates) d.lawUpdates = '';
+  // 숫자 보정 — 합이 100이 안 되면 보정
+  d.myFaultPct = parseInt(d.myFaultPct) || 0;
+  d.opFaultPct = parseInt(d.opFaultPct) || 0;
+  if (d.myFaultPct === 0 && d.opFaultPct === 0) d.opFaultPct = 100;
+  return d;
+}
 
 function renderAI(d){
   const myF = parseInt(d.myFaultPct) || 0;
