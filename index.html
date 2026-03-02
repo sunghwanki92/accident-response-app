@@ -3021,8 +3021,9 @@ function updateOtherType(val){
 function toggleDamage(el,val){el.classList.toggle('selected');if(D.damages.includes(val))D.damages=D.damages.filter(d=>d!==val);else D.damages.push(val);}
 
 function selectWeather(el,val){
-  document.querySelectorAll('#weather-row .tag-btn').forEach(b=>b.className='tag-btn');
-  el.className='tag-btn sel-none';D.weather=val;
+  document.querySelectorAll('#weather-row .tag-btn').forEach(b=>{b.className='tag-btn';b.style.background='';b.style.borderColor='';b.style.color='';});
+  el.style.background='var(--blue)';el.style.borderColor='var(--blue)';el.style.color='#fff';
+  D.weather=val;
 }
 
 function selectInjury(who,el,val,cls){
@@ -3559,14 +3560,12 @@ function restorePanel0UI() {
 
   // 날씨 버튼 복원
   document.querySelectorAll('#weather-row .tag-btn').forEach(b => {
-    b.classList.remove('selected');
     b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
   });
   if (D.weather) {
     document.querySelectorAll('#weather-row .tag-btn').forEach(b => {
       if (b.textContent.includes(D.weather)) {
-        b.classList.add('selected');
-        b.style.background = 'var(--red)'; b.style.borderColor = 'var(--red)'; b.style.color = '#fff';
+        b.style.background = 'var(--blue)'; b.style.borderColor = 'var(--blue)'; b.style.color = '#fff';
       }
     });
   }
