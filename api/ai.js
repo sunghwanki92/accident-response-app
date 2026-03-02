@@ -1,14 +1,10 @@
-// api/ai.js — Vercel Serverless Function (Gemini 버전)
-// IP당 하루 10회 무료 + 본인 Gemini API 키 사용 가능
-
+// api/ai.js — Vercel Serverless Function (Gemini)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const FREE_QUOTA = 10;
-
 const ipQuota = {};
 
 function getQuotaKey(ip) {
-  const today = new Date().toISOString().slice(0, 10);
-  return `${ip}_${today}`;
+  return `${ip}_${new Date().toISOString().slice(0,10)}`;
 }
 function getUsedCount(ip) { return ipQuota[getQuotaKey(ip)] || 0; }
 function incrementQuota(ip) {
@@ -16,39 +12,12 @@ function incrementQuota(ip) {
   ipQuota[key] = (ipQuota[key] || 0) + 1;
 }
 
-// Anthropic messages → Gemini contents 변환
 function toGeminiContents(messages) {
-  const contents = [];
-  for (const msg of messages) {
-    const role = msg.role === 'assistant' ? 'model' : 'user';
-    let text = typeof msg.content === 'string' ? msg.content
-      : Array.isArray(msg.content) ? msg.content.filter(b => b.type === 'text').map(b => b.text).join('\n') : '';
-    contents.push({ role, parts: [{ text }] });
-  }
-  return contents;
-}
-
-// 서버에서 JSON 추출 시도
-function extractJSON(text) {
-  if (!text) return null;
-  // 직접 파싱
-  try { const r = JSON.parse(text.trim()); if (r && typeof r === 'object') return r; } catch(e){}
-  // 코드블록 제거
-  try { const r = JSON.parse(text.replace(/```json|```/gi, '').trim()); if (r && typeof r === 'object') return r; } catch(e){}
-  // 중첩 괄호 추출
-  try {
-    const start = text.indexOf('{');
-    let depth = 0, end = -1;
-    for (let i = start; i < text.length; i++) {
-      if (text[i] === '{') depth++;
-      else if (text[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
-    }
-    if (start !== -1 && end !== -1) {
-      const r = JSON.parse(text.slice(start, end + 1));
-      if (r && typeof r === 'object') return r;
-    }
-  } catch(e){}
-  return null;
+  return messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: typeof msg.content === 'string' ? msg.content
+      : Array.isArray(msg.content) ? msg.content.filter(b=>b.type==='text').map(b=>b.text).join('\n') : '' }]
+  }));
 }
 
 export default async function handler(req, res) {
@@ -71,7 +40,7 @@ export default async function handler(req, res) {
   const apiKey = userApiKey || GEMINI_API_KEY;
   const usingUserKey = !!userApiKey;
 
-  if (!apiKey) return res.status(500).json({ error: 'API 키가 설정되지 않았습니다. 관리자에게 문의하세요.' });
+  if (!apiKey) return res.status(500).json({ error: 'API 키가 설정되지 않았습니다.' });
 
   if (!usingUserKey) {
     const used = getUsedCount(ip);
@@ -86,14 +55,10 @@ export default async function handler(req, res) {
   try {
     const { messages, system, max_tokens } = body;
     const contents = toGeminiContents(messages || []);
-
     const geminiBody = {
       contents,
       ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
-      generationConfig: {
-        maxOutputTokens: max_tokens || 1500,
-        temperature: 0.2
-      }
+      generationConfig: { maxOutputTokens: max_tokens || 1500, temperature: 0.1 }
     };
 
     const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
@@ -112,37 +77,20 @@ export default async function handler(req, res) {
         rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
         break;
       }
-      lastError = data.error?.message || 'AI 서비스 오류';
+      lastError = data.error?.message || 'AI 오류';
     }
 
-    if (!rawText && lastError) {
-      return res.status(400).json({ error: 'AI 분석에 실패했습니다. 잠시 후 다시 시도해주세요.' });
-    }
-
-    // 서버에서 JSON 파싱 시도 — 성공하면 파싱된 객체를, 실패하면 rawText를 그대로 전달
-    const parsed = extractJSON(rawText);
+    if (!rawText && lastError) return res.status(400).json({ error: 'AI 분석에 실패했습니다. 잠시 후 다시 시도해주세요.' });
 
     if (!usingUserKey) incrementQuota(ip);
-    const used = usingUserKey ? 0 : getUsedCount(ip);
-    const remaining = usingUserKey ? 999 : Math.max(0, FREE_QUOTA - used);
+    const remaining = usingUserKey ? 999 : Math.max(0, FREE_QUOTA - getUsedCount(ip));
 
-    if (parsed) {
-      // JSON 파싱 성공 — 구조화된 데이터로 전달
-      return res.status(200).json({
-        content: [{ type: 'text', text: JSON.stringify(parsed) }],
-        _remaining: remaining,
-        _usingUserKey: usingUserKey,
-        _parsed: true
-      });
-    } else {
-      // 파싱 실패 — raw 텍스트 그대로 전달 (클라이언트에서 재시도)
-      return res.status(200).json({
-        content: [{ type: 'text', text: rawText }],
-        _remaining: remaining,
-        _usingUserKey: usingUserKey,
-        _parsed: false
-      });
-    }
+    // 서버는 raw 텍스트만 전달 — 파싱은 클라이언트에서
+    return res.status(200).json({
+      content: [{ type: 'text', text: rawText }],
+      _remaining: remaining,
+      _usingUserKey: usingUserKey
+    });
 
   } catch (e) {
     return res.status(500).json({ error: 'AI 서버 연결에 실패했습니다. 네트워크를 확인해주세요.' });
