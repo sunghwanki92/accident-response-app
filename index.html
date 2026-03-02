@@ -1968,6 +1968,7 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 12: 알림공유 ═══ -->
 <div class="page" id="page-notify">
 <div class="wrap">
+  <button onclick="goPage(window._prevPage||'myinfo')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;padding:4px 0;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif">← 뒤로</button>
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--red);background:var(--red-bg);border-color:rgba(214,43,43,0.2)">📢 알림공유</div>
     <h2>사고 알림 보내기</h2>
@@ -1977,7 +1978,7 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <div class="card-title" style="margin-bottom:0">👥 수신자</div>
       <button onclick="pickContact()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer">
-        📒 다른 사람에게 보내기
+        📒 연락처 가져오기
       </button>
     </div>
     <!-- 저장된 비상연락처 퀵 버튼 -->
@@ -4383,7 +4384,7 @@ JSON으로만 응답:
 
 // 연락처 앱에서 직접 선택 (Contact Picker API - 크롬 안드로이드/iOS Safari 지원)
 async function pickContact() {
-  // Contact Picker API 지원 여부 확인
+  // Contact Picker API 지원 여부 확인 (Android Chrome)
   if ('contacts' in navigator && 'ContactsManager' in window) {
     try {
       const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
@@ -4397,23 +4398,54 @@ async function pickContact() {
       }
       return;
     } catch(e) {
-      // 사용자 취소 또는 오류 → 아래 폴백으로
       if (e.name === 'AbortError') return;
     }
   }
 
-  // 미지원 기기: 저장된 비상연락처 or 수동 입력 안내
+  // 저장된 연락처 확인
   const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
   const saved = [];
-  if (info.emergency) saved.push({ label: '🆘 ' + (info.emergencyName || '비상연락처'), phone: info.emergency });
-  if (info.agent)     saved.push({ label: '🏢 보험설계사', phone: info.agent });
+  if (info.emergency) saved.push({ label: (info.emergencyName || '비상연락처'), phone: info.emergency });
+  if (info.agent)     saved.push({ label: '보험설계사', phone: info.agent });
 
   if (saved.length) {
-    // 저장된 연락처 선택 모달
     showContactModal(saved);
   } else {
-    alert('이 기기는 연락처 직접 가져오기를 지원하지 않습니다.\n내 정보 탭에서 비상연락처를 저장하면 빠르게 불러올 수 있습니다.');
+    // 직접 입력 모달 표시
+    showContactInputModal();
   }
+}
+
+function showContactInputModal() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+      <div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:16px">📒 수신자 입력</div>
+      <div class="field" style="margin-bottom:12px">
+        <label class="field-label">이름</label>
+        <input type="text" id="modal-contact-name" placeholder="예: 아내, 부모님" style="width:100%;padding:12px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);font-size:15px;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box">
+      </div>
+      <div class="field" style="margin-bottom:20px">
+        <label class="field-label">전화번호</label>
+        <input type="tel" id="modal-contact-phone" placeholder="010-0000-0000" style="width:100%;padding:12px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);font-size:15px;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif">취소</button>
+        <button onclick="applyContactModal()" style="padding:12px;border-radius:10px;border:none;background:var(--blue);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif">확인</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('modal-contact-name')?.focus(), 100);
+}
+
+function applyContactModal() {
+  const name = document.getElementById('modal-contact-name')?.value.trim() || '';
+  const phone = document.getElementById('modal-contact-phone')?.value.trim() || '';
+  if (name) document.getElementById('ntf-name').value = name;
+  if (phone) document.getElementById('ntf-phone').value = phone;
+  document.querySelector('div[style*="position:fixed"][style*="z-index:600"]')?.remove();
+  if (name || phone) generateNotifyMsg();
 }
 
 function showContactModal(contacts) {
