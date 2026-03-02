@@ -4474,7 +4474,8 @@ function showRecordSummary() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
         <button onclick="goPage('quick');closeRecordSummary()" style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif">✏️ 수정하기</button>
         <button onclick="goPage('docs');closeRecordSummary()" style="padding:12px;border-radius:10px;border:none;background:var(--blue);font-size:13px;font-weight:800;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif">📄 서류 발급</button>
-      </div>`;
+      </div>
+      <button onclick="shareSummaryRecord()" style="width:100%;margin-top:8px;padding:12px;border-radius:10px;border:none;background:var(--green);font-size:13px;font-weight:800;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">📤 공유하기</button>`;
   }
 
   overlay.style.display = 'block';
@@ -4484,6 +4485,51 @@ function showRecordSummary() {
 function closeRecordSummary() {
   document.getElementById('record-summary-overlay').style.display = 'none';
   document.getElementById('record-summary-popup').style.display = 'none';
+}
+
+function shareSummaryRecord() {
+  let data = D;
+  try { const raw = localStorage.getItem('accidentData'); if(raw) data = JSON.parse(raw); } catch(e){}
+
+  const dt = data.datetime ? data.datetime.replace('T',' ') : '미입력';
+  const lines = [
+    '🚨 교통사고 기록 요약',
+    '─────────────────',
+    `🚗 사고 유형: ${data.types?.join(', ') || '미입력'}`,
+    `🕐 일시: ${dt}`,
+    `📍 장소: ${data.location || '미입력'}`,
+    `🌤 날씨: ${data.weather || '미입력'}`,
+    '',
+    '👤 내 차량',
+    `  번호판: ${data.myPlate || '미입력'}`,
+    `  차종: ${data.myCar || '미입력'}`,
+    `  이름: ${data.myName || '미입력'}`,
+    `  연락처: ${data.myPhone || '미입력'}`,
+    `  보험사: ${data.myInsurer || '미입력'}`,
+  ];
+  if (data.opPlate || data.opName) {
+    lines.push('', '🚙 상대방');
+    lines.push(`  번호판: ${data.opPlate || '미입력'}`);
+    lines.push(`  차종: ${data.opCar || '미입력'}`);
+    lines.push(`  이름: ${data.opName || '미입력'}`);
+    lines.push(`  연락처: ${data.opPhone || '미입력'}`);
+    lines.push(`  보험사: ${data.opInsurer || '미입력'}`);
+  }
+  if (data.desc) { lines.push('', `📝 경위: ${data.desc}`); }
+  lines.push('', '─────────────────');
+  lines.push('📱 교통사고 대응 앱으로 기록됨');
+
+  const text = lines.join('\n');
+
+  if (navigator.share) {
+    navigator.share({ title: '교통사고 기록 요약', text }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('📋 클립보드에 복사됐습니다', 'success');
+    }).catch(() => {
+      showToast('공유 기능을 지원하지 않는 환경입니다', 'error');
+    });
+  }
 }
 
 function toggleMoreMenu(){
