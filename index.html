@@ -3678,6 +3678,7 @@ function loadSettings(){
   if(setD.damages&&setD.damages.length){document.querySelectorAll('#set-damages-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('div:last-child');if(l&&setD.damages.includes(l.textContent.trim()))btn.classList.add('selected');});}
   sv('set-opplate',setD.opPlate);sv('set-opcar',setD.opCar);sv('set-opname',setD.opName);sv('set-opphone',setD.opPhone);sv('set-opinsurer',setD.opInsurer);sv('set-oppolicy',setD.opPolicy);sv('set-witness',setD.witness);
   sv('set-injurydetail',setD.injuryDetail);sv('set-desc',setD.desc);
+  if(setD.weather){document.querySelectorAll('#set-s1 .tag-btn').forEach(b=>{if(b.textContent.includes(setD.weather))b.className='tag-btn sel-none';});}
   if(setD.myInjury){document.querySelectorAll('#set-myinjury-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.myInjury))b.className='tag-btn sel-light';});}
   if(setD.opInjury){document.querySelectorAll('#set-opinjury-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.opInjury))b.className='tag-btn sel-light';});}
   if(setD.blackbox){document.querySelectorAll('#set-bb-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.blackbox==='있음'?'있음':setD.blackbox==='없음'?'없음':'확인'))b.className='tag-btn sel-none';});}
