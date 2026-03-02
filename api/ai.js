@@ -36,6 +36,15 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-Api-Key');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // 모델 목록 조회 (디버그용)
+  if (req.method === 'GET' && req.url?.includes('models')) {
+    const testKey = req.headers['x-user-api-key'] || GEMINI_API_KEY;
+    if (!testKey) return res.status(200).json({ error: 'API 키 없음' });
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${testKey}`);
+    const d = await r.json();
+    return res.status(200).json(d);
+  }
+
   if (req.method === 'GET') {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
     const used = getUsedCount(ip);
