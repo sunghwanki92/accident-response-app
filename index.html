@@ -947,7 +947,6 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <button class="more-btn" onclick="goPage('repair');closeMoreMenu()">🔧<br><span>수리비</span></button>
     <button class="more-btn" onclick="goPage('settle');closeMoreMenu()">💰<br><span>합의금</span></button>
     <button class="more-btn" onclick="goPage('notify');closeMoreMenu()">📢<br><span>알림공유</span></button>
-    <button class="more-btn" onclick="goPage('settings');closeMoreMenu()">⚙️<br><span>설정</span></button>
   </div>
 </div>
 
@@ -1738,6 +1737,10 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 6: 내 정보 ═══ -->
 <div class="page" id="page-myinfo">
 <div class="wrap">
+<div style="display:flex;gap:10px;margin-bottom:16px">
+  <button onclick="goPage('myinfo')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" class="_myinfo-tab-btn active-tab-btn" id="tab-btn-myinfo">👤 내 정보</button>
+  <button onclick="goPage('settings')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px" id="tab-btn-settings">⚙️ 설정</button>
+</div>
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--green);background:var(--green-bg);border-color:rgba(26,150,71,0.2)">👤 내 정보</div>
     <h2>내 차량 & 정보 등록</h2>
@@ -1976,6 +1979,10 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 7: 설정 ═══ -->
 <div class="page" id="page-settings">
 <div class="wrap">
+<div style="display:flex;gap:10px;margin-bottom:16px">
+  <button onclick="goPage('myinfo')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">👤 내 정보</button>
+  <button onclick="goPage('settings')" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--blue-bg);border-color:var(--blue);background:var(--blue-bg);font-size:13px;font-weight:800;color:var(--blue);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">⚙️ 설정</button>
+</div>
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--text2);background:var(--bg3);border-color:var(--border)">⚙️ 설정</div>
     <h2>기록 관리 · 설정</h2>
