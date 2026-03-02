@@ -4144,14 +4144,31 @@ function saveQRImage() {
     link.click();
     return;
   }
-  // img 방식 (fallback)
+  // img 방식 (fallback) — canvas로 변환 후 다운로드
   const img = container.querySelector('img');
   if (img) {
-    const link = document.createElement('a');
-    link.download = '사고_QR코드.png';
-    link.href = img.src;
-    link.target = '_blank';
-    link.click();
+    const cvs = document.createElement('canvas');
+    cvs.width = 200; cvs.height = 200;
+    const ctx = cvs.getContext('2d');
+    const tmpImg = new Image();
+    tmpImg.crossOrigin = 'anonymous';
+    tmpImg.onload = () => {
+      ctx.drawImage(tmpImg, 0, 0, 200, 200);
+      cvs.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = '사고_QR코드.png';
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }, 'image/png');
+    };
+    tmpImg.onerror = () => {
+      // CORS 실패 시 새 탭 열기 안내
+      showToast('다운로드 실패 — 이미지를 길게 눌러 저장해주세요', 'error');
+      window.open(img.src, '_blank');
+    };
+    tmpImg.src = img.src + '&t=' + Date.now(); // 캐시 우회
     return;
   }
   alert('QR코드를 먼저 생성해주세요.');
