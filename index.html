@@ -1848,7 +1848,7 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 9: 공유 카드 ═══ -->
 <div class="page" id="page-share">
 <div class="wrap">
-  <button onclick="history.length>1?history.back():goPage('myinfo')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;padding:4px 0;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif">← 뒤로</button>
+  <button onclick="goPage(window._prevPage||'myinfo')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:700;cursor:pointer;padding:4px 0;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif">← 뒤로</button>
   <div class="page-header">
     <div class="page-header-badge" style="color:#0891B2;background:#E0F7FA;border-color:rgba(8,145,178,0.2)">🪪 공유카드</div>
     <h2>내 정보 공유 카드</h2>
@@ -2254,6 +2254,11 @@ const D = {
 
 /* ══════════════ NAV ══════════════ */
 function goPage(name) {
+  // 이전 페이지 추적
+  const curActive = document.querySelector('.page.active');
+  if (curActive && curActive.id !== 'page-'+name) {
+    window._prevPage = curActive.id.replace('page-','');
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
 
