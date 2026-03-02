@@ -79,7 +79,7 @@ export default async function handler(req, res) {
       generationConfig: { maxOutputTokens: max_tokens || 1500, temperature: 0.7 }
     };
     // 모델 순서대로 시도
-    const models = ['gemini-2.0-flash-lite', 'gemini-pro', 'gemini-1.0-pro'];
+    const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
     let text = '';
     let lastError = '';
     for (const model of models) {
