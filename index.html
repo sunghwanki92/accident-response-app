@@ -1398,6 +1398,22 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         </button>
       </div>
 
+
+      <button class="btn-secondary" onclick="resetRecord()" style="font-size:14px;padding:12px">↩ 다시 입력하기</button>
+    </div>
+  </div>
+
+    <!-- 사고 위치 지도 (하단) -->
+    <div id="complete-map-section" style="display:none;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        📍 <span id="complete-map-addr">사고 위치</span>
+      </div>
+      <div class="complete-map-wrap">
+        <iframe id="complete-map-iframe" src="" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+
       <div class="card" style="padding:16px">
         <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:10px">🏢 보험사 사고 접수 (24시간)</div>
         <div class="call-grid">
@@ -1421,22 +1437,6 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
         </div>
       </div>
     </div>
-
-    <!-- 사고 위치 지도 (하단) -->
-    <div id="complete-map-section" style="display:none;margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-        📍 <span id="complete-map-addr">사고 위치</span>
-      </div>
-      <div class="complete-map-wrap">
-        <iframe id="complete-map-iframe" src="" allowfullscreen loading="lazy"></iframe>
-      </div>
-    </div>
-
-    <div style="margin-bottom:14px">
-      <button class="btn-secondary" onclick="resetRecord()" style="font-size:14px;padding:12px">↩ 다시 입력하기</button>
-    </div>
-  </div>
-</div>
 </div>
 
 
