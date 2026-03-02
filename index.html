@@ -3224,7 +3224,8 @@ async function runAI(prefilled){
 function fillAI(txt){document.getElementById('ai-input').value=txt;document.getElementById('ai-char').textContent=txt.length+'자';}
 
 function renderAI(d){
-  const myF=d.myFaultPct||0,opF=d.opFaultPct||0;
+  const myF = parseInt(d.myFaultPct) || 0;
+  const opF = parseInt(d.opFaultPct) || 0;
   const levelStyle={c:'border-left:5px solid var(--red);background:var(--red-bg)',w:'border-left:5px solid var(--orange);background:#FFF4E5',i:'border-left:5px solid var(--blue);background:var(--blue-bg)',l:'border-left:5px solid var(--green);background:var(--green-bg)'};
   const priColor={즉시:'var(--red)','5분내':'var(--orange)','24시간내':'var(--blue)'};
 
@@ -3276,7 +3277,13 @@ function renderAI(d){
     </div>`;
 
   const el=document.getElementById('ai-result');el.innerHTML=html;el.className='ai-result show';
-  setTimeout(()=>{const fm=document.getElementById('fme'),fo=document.getElementById('fop');if(fm)fm.style.width=myF+'%';if(fo)fo.style.width=opF+'%';},200);
+  setTimeout(()=>{
+    const fm=document.getElementById('fme'),fo=document.getElementById('fop');
+    const myPct = Math.min(100, Math.max(0, parseInt(myF)||0));
+    const opPct = Math.min(100, Math.max(0, parseInt(opF)||0));
+    if(fm) fm.style.width=myPct+'%';
+    if(fo) fo.style.width=opPct+'%';
+  },400);
   el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
