@@ -1989,8 +1989,8 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <div class="card-title" style="margin-bottom:0">👥 수신자</div>
-      <button onclick="pickContact()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer">
-        📒 연락처 가져오기
+      <button onclick="pickContact()" id="pick-contact-btn" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:2px solid var(--blue);background:var(--blue-bg);color:var(--blue);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer">
+        📱 휴대폰 연락처에서 가져오기
       </button>
     </div>
     <!-- 저장된 비상연락처 퀵 버튼 -->
@@ -1998,6 +1998,10 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <div class="field-row">
       <div class="field"><label class="field-label">이름</label><input type="text" id="ntf-name" placeholder="배우자, 부모님..."></div>
       <div class="field"><label class="field-label">전화번호</label><input type="tel" id="ntf-phone" placeholder="010-0000-0000" oninput="autoGenerateIfReady()"></div>
+    </div>
+    <div id="contact-api-notice" style="display:none;margin-top:8px;padding:10px 12px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--text3);line-height:1.7">
+      💡 휴대폰 연락처 직접 가져오기는 <strong>Android Chrome</strong>에서만 지원됩니다.<br>
+      iOS(아이폰)는 위 이름/전화번호를 직접 입력해주세요.
     </div>
   </div>
   <div class="card">
@@ -4640,7 +4644,7 @@ JSON으로만 응답:
 
 // 연락처 앱에서 직접 선택 (Contact Picker API - 크롬 안드로이드/iOS Safari 지원)
 async function pickContact() {
-  // Contact Picker API 지원 여부 확인 (Android Chrome)
+  // Contact Picker API 지원 여부 확인 (Android Chrome만 지원)
   if ('contacts' in navigator && 'ContactsManager' in window) {
     try {
       const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
@@ -4657,6 +4661,10 @@ async function pickContact() {
       if (e.name === 'AbortError') return;
     }
   }
+
+  // iOS / PC — 안내 표시 후 저장된 연락처 팝업
+  const notice = document.getElementById('contact-api-notice');
+  if (notice) { notice.style.display = 'block'; setTimeout(() => notice.style.display='none', 5000); }
 
   // 저장된 연락처 확인
   const info = (() => { try { return JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) { return {}; } })();
