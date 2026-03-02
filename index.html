@@ -2100,6 +2100,19 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 </div>
 
 <script>
+
+function showToast(msg, type='error'){
+  let t=document.getElementById('_toast');
+  if(!t){t=document.createElement('div');t.id='_toast';
+  t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 20px;border-radius:10px;font-size:15px;font-weight:700;font-family:"Noto Sans KR",sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:opacity 0.3s;max-width:320px;text-align:center;';
+  document.body.appendChild(t);}
+  t.style.background = type==='error' ? '#D62B2B' : '#1a7a3a';
+  t.style.color = '#fff';
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.style.opacity='0';},3000);
+}
+
 /* ══════════════ DATA ══════════════ */
 const D = {
   types:[], weather:'', datetime:'', location:'',
@@ -2574,6 +2587,8 @@ function showStepErr(eid,msg){
   if(!e){e=document.createElement('div');e.id=eid;e.className='field-err';e.style.marginBottom='12px';
   const p=document.getElementById('panel-0');const g=p&&p.querySelector('.sel-grid');if(g)g.parentNode.insertBefore(e,g);}
   e.textContent=msg;e.style.display='block';
+  setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'center'}),50);
+  showToast(msg,'error');
 }
 function hideStepErr(eid){const e=document.getElementById(eid);if(e)e.style.display='none';}
 
