@@ -3516,19 +3516,21 @@ function loadHistoryRecord(idx) {
   restorePanel0UI();
 
   loadSettings();
+
+  // loadSettings 이후 panel-0 버튼 상태 재복원 (loadSettings가 덮어쓰는 경우 방지)
+  setTimeout(() => restorePanel0UI(), 50);
   const ea = document.getElementById('settings-edit-area');
   if (ea) { ea.style.display='block'; setTimeout(()=>ea.scrollIntoView({behavior:'smooth'}), 100); }
   alert(`${rec._label||'기록'} 을 불러왔습니다.\n아래에서 내용을 수정할 수 있습니다.`);
 }
 
 function restorePanel0UI() {
-  // 사고유형 버튼 복원
+  // 사고유형 버튼 복원 — onclick 값으로 정확히 매칭
   document.querySelectorAll('#panel-0 .sel-btn').forEach(btn => {
-    const label = btn.querySelector('.sb-label');
-    if (!label) return;
-    const btnText = label.textContent.trim();
-    const matched = D.types && D.types.some(t => t === btnText || t.startsWith(btnText) || btnText.startsWith(t.slice(0,5)));
-    btn.classList.toggle('selected', !!matched);
+    const onclick = btn.getAttribute('onclick') || '';
+    const match = onclick.match(/toggleType\(this,'([^']+)'\)/);
+    const val = match ? match[1] : null;
+    btn.classList.toggle('selected', !!(val && D.types && D.types.includes(val)));
   });
 
   // 날씨 버튼 복원
@@ -3667,7 +3669,7 @@ function loadSettings(){
   if(sum){const items=[setD.datetime?`🕐 ${setD.datetime.replace('T',' ')}`:null,setD.location?`📍 ${setD.location}`:null,(setD.types&&setD.types.length)?`🚗 ${setD.types.join(', ')}`:null,setD.myPlate?`내 번호: ${setD.myPlate}`:null,setD.opPlate?`상대: ${setD.opPlate}`:null].filter(Boolean);sum.innerHTML=`<div class="set-summary-card">${items.map(i=>`<div class="set-summary-item">${i}</div>`).join('<span style="color:var(--border)"> │ </span>')}</div>`;}
   const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
   sv('set-datetime',setD.datetime);sv('set-location',setD.location);
-  if(setD.types&&setD.types.length){document.querySelectorAll('#set-types-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('.sb-label');if(l&&setD.types.some(t=>l.textContent.trim()===t||t.startsWith(l.textContent.trim())||l.textContent.trim().startsWith(t.slice(0,5))))btn.classList.add('selected');});}
+  if(setD.types&&setD.types.length){document.querySelectorAll('#set-types-grid .sel-btn').forEach(btn=>{const onclick=btn.getAttribute('onclick')||'';const match=onclick.match(/setToggleType\(this,'([^']+)'\)/);if(match&&setD.types.includes(match[1]))btn.classList.add('selected');});}
   sv('set-myplate',setD.myPlate);sv('set-mycar',setD.myCar);sv('set-myname',setD.myName);sv('set-myphone',setD.myPhone);sv('set-myinsurer',setD.myInsurer);sv('set-mypolicy',setD.myPolicy);
   if(setD.damages&&setD.damages.length){document.querySelectorAll('#set-damages-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('div:last-child');if(l&&setD.damages.includes(l.textContent.trim()))btn.classList.add('selected');});}
   sv('set-opplate',setD.opPlate);sv('set-opcar',setD.opCar);sv('set-opname',setD.opName);sv('set-opphone',setD.opPhone);sv('set-opinsurer',setD.opInsurer);sv('set-oppolicy',setD.opPolicy);sv('set-witness',setD.witness);
