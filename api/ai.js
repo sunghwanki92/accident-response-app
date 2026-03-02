@@ -76,7 +76,11 @@ export default async function handler(req, res) {
     const contents = toGeminiContents(messages || [], system || '');
     const geminiBody = {
       contents,
-      generationConfig: { maxOutputTokens: max_tokens || 1500, temperature: 0.7 }
+      generationConfig: {
+        maxOutputTokens: max_tokens || 1500,
+        temperature: 0.7,
+        responseMimeType: 'application/json'
+      }
     };
     // 모델 순서대로 시도
     const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];

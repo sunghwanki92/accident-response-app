@@ -3127,20 +3127,33 @@ immediateActions 3~4개(level: c=즉시/w=5분내/i=나중), legalTips 2~3개, e
 
 // JSON 파싱 — 여러 방어 방법 순서대로 시도
 function safeParseAI(raw) {
+  if (!raw) return null;
   // 1) 직접 파싱
   try { return JSON.parse(raw.trim()); } catch(e){}
   // 2) 코드블록 제거 후 파싱
-  try { return JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e){}
-  // 3) { } 범위 추출 후 파싱
+  try { return JSON.parse(raw.replace(/```json|```/gi,'').trim()); } catch(e){}
+  // 3) { } 범위 추출 — 중첩 괄호 고려해서 가장 바깥 { } 찾기
   try {
     const start = raw.indexOf('{');
-    const end   = raw.lastIndexOf('}');
+    let depth = 0, end = -1;
+    for (let i = start; i < raw.length; i++) {
+      if (raw[i] === '{') depth++;
+      else if (raw[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
+    }
     if (start !== -1 && end !== -1) return JSON.parse(raw.slice(start, end+1));
   } catch(e){}
-  // 4) 파싱 실패 → 텍스트를 summary로 감싼 기본 객체 반환 (오류 대신 결과 표시)
+  // 4) 줄바꿈/특수문자 정리 후 재시도
+  try {
+    const cleaned = raw.replace(/[\u0000-\u001F\u007F]/g, ' ')
+      .replace(/```json|```/gi,'').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end !== -1) return JSON.parse(cleaned.slice(start, end+1));
+  } catch(e){}
+  // 5) 파싱 실패 → 텍스트를 summary로 감싼 기본 객체 반환
   return {
     accidentType: '분석 결과',
-    summary: raw.replace(/```json|```/g,'').slice(0,300),
+    summary: raw.replace(/```json|```/gi,'').slice(0,300),
     myFaultPct: 0, opFaultPct: 0,
     faultBasis: 'AI 응답 형식 오류 — 아래 내용을 참고하세요.',
     faultVariables: '',
