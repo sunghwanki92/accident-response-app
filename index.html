@@ -3190,11 +3190,10 @@ async function runAI(prefilled){
 
   try{
     const body = {
-      model:'claude-sonnet-4-20250514', max_tokens:1500,
-      system:SYSTEM_PROMPT,
+      system: SYSTEM_PROMPT,
+      max_tokens: 1500,
       messages:[{role:'user', content: msgContent}]
     };
-    if(tools) body.tools = tools;
 
     const data = await callAI(body);
     const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
