@@ -903,13 +903,27 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo">
+  <div class="nav-logo" onclick="showRecordSummary()" style="cursor:pointer">
     <div class="nav-logo-icon">🚨</div>
     사고대응
   </div>
   <div id="nav-page-title" style="flex:1;text-align:center;font-size:15px;font-weight:800;color:var(--text)">현장기록</div>
   <div style="width:80px"></div>
 </nav>
+
+
+<!-- 기록 요약 팝업 -->
+<div id="record-summary-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.5)" onclick="closeRecordSummary()"></div>
+<div id="record-summary-popup" style="display:none;position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:501;width:calc(100% - 32px);max-width:480px;background:var(--bg);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden">
+  <div style="background:var(--red);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:20px">📋</span>
+      <span style="font-size:15px;font-weight:900;color:#fff">현재 사고 기록 요약</span>
+    </div>
+    <button onclick="closeRecordSummary()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:18px;width:32px;height:32px;border-radius:50%;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center">✕</button>
+  </div>
+  <div id="record-summary-body" style="padding:16px;max-height:70vh;overflow-y:auto"></div>
+</div>
 
 <!-- 하단 탭바 -->
 <div class="bottom-nav" id="bottom-nav">
@@ -4401,6 +4415,76 @@ function generateNotifyMsg() {
   };
 }
 
+
+
+function showRecordSummary() {
+  const body = document.getElementById('record-summary-body');
+  const overlay = document.getElementById('record-summary-overlay');
+  const popup = document.getElementById('record-summary-popup');
+
+  // 저장된 데이터 우선, 없으면 현재 D 사용
+  let data = D;
+  try {
+    const raw = localStorage.getItem('accidentData');
+    if (raw) data = JSON.parse(raw);
+  } catch(e) {}
+
+  const hasData = data.types?.length || data.location || data.myPlate || data.opPlate;
+
+  if (!hasData) {
+    body.innerHTML = `
+      <div style="text-align:center;padding:32px 16px;color:var(--text3)">
+        <div style="font-size:48px;margin-bottom:12px">📭</div>
+        <div style="font-size:15px;font-weight:700">저장된 사고 기록이 없습니다</div>
+        <div style="font-size:13px;margin-top:6px">현장기록 탭에서 사고를 기록해 주세요</div>
+      </div>`;
+  } else {
+    const dt = data.datetime ? data.datetime.replace('T',' ') : '미입력';
+    const row = (label, val, color='') => val
+      ? `<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+           <span style="font-size:12px;font-weight:700;color:var(--text3);width:72px;flex-shrink:0">${label}</span>
+           <span style="font-size:14px;font-weight:700;color:${color||'var(--text)'};flex:1">${val}</span>
+         </div>` : '';
+
+    body.innerHTML = `
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;font-weight:900;color:var(--red);letter-spacing:1px;margin-bottom:6px">🚗 사고 기본</div>
+        ${row('유형', data.types?.join(', '))}
+        ${row('일시', dt)}
+        ${row('장소', data.location)}
+        ${row('날씨', data.weather)}
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;font-weight:900;color:var(--blue);letter-spacing:1px;margin-bottom:6px">👤 내 차량</div>
+        ${row('번호판', data.myPlate, 'var(--blue)')}
+        ${row('차종', data.myCar)}
+        ${row('이름', data.myName)}
+        ${row('연락처', data.myPhone)}
+        ${row('보험사', data.myInsurer)}
+      </div>
+      ${(data.opPlate||data.opName) ? `
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;font-weight:900;color:var(--orange);letter-spacing:1px;margin-bottom:6px">🚙 상대방</div>
+        ${row('번호판', data.opPlate, 'var(--orange)')}
+        ${row('차종', data.opCar)}
+        ${row('이름', data.opName)}
+        ${row('연락처', data.opPhone)}
+        ${row('보험사', data.opInsurer)}
+      </div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+        <button onclick="goPage('quick');closeRecordSummary()" style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif">✏️ 수정하기</button>
+        <button onclick="goPage('docs');closeRecordSummary()" style="padding:12px;border-radius:10px;border:none;background:var(--blue);font-size:13px;font-weight:800;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif">📄 서류 발급</button>
+      </div>`;
+  }
+
+  overlay.style.display = 'block';
+  popup.style.display = 'block';
+}
+
+function closeRecordSummary() {
+  document.getElementById('record-summary-overlay').style.display = 'none';
+  document.getElementById('record-summary-popup').style.display = 'none';
+}
 
 function toggleMoreMenu(){
   const menu=document.getElementById('more-menu');
