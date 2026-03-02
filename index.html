@@ -1861,8 +1861,9 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   <div id="share-card-wrap" style="margin-bottom:14px"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
     <button class="btn-primary" style="background:#0891B2" onclick="generateShareCard()">🔄 카드 생성</button>
-    <button class="btn-secondary" onclick="printShareCard()">🖨️ 인쇄/저장</button>
+    <button class="btn-secondary" onclick="printShareCard()">🖨️ 인쇄</button>
   </div>
+  <button class="btn-primary" style="background:#D6564A;margin-bottom:10px" onclick="saveShareCardPDF()">📄 PDF 만들기</button>
   <button id="qr-gen-btn" class="btn-primary" style="background:#7C3AED;display:none" onclick="toggleQR()">📱 QR코드 생성</button>
   <div id="qr-section" style="display:none;margin-top:10px">
     <div class="card" style="text-align:center;padding:16px">
@@ -4210,6 +4211,41 @@ function printShareCard() {
   <div class="no-print"><button onclick="window.print()" style="padding:12px 32px;background:#1A6FD4;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;margin-top:16px">🖨️ 인쇄 / 저장</button></div>
   </body></html>`);
   win.document.close(); win.focus();
+}
+
+function saveShareCardPDF() {
+  const card = document.getElementById('share-card');
+  if (!card) { alert('먼저 카드를 생성하세요.'); return; }
+  const win = window.open('', '_blank', 'width=500,height=750');
+  win.document.write(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>사고 공유 카드 PDF</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; padding: 24px; }
+    .card-wrap { width: 100%; max-width: 360px; }
+    .guide { margin-top: 20px; padding: 14px 18px; background: #F0F7FF; border-radius: 10px; font-size: 13px; color: #555; line-height: 1.8; width: 100%; max-width: 360px; }
+    .guide b { color: #1A6FD4; }
+    .pdf-btn { margin-top: 16px; width: 100%; max-width: 360px; padding: 14px; background: #D6564A; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+    @media print {
+      .guide, .pdf-btn { display: none; }
+      body { padding: 10px; }
+      @page { margin: 10mm; size: A4; }
+    }
+  </style></head><body>
+  <div class="card-wrap">${card.outerHTML}</div>
+  <div class="guide">
+    <b>📄 PDF로 저장하는 방법</b><br>
+    아래 버튼을 누른 후<br>
+    • Android: 프린터 → <b>PDF로 저장</b> 선택<br>
+    • iPhone: 공유 → <b>파일에 저장</b> 선택<br>
+    • PC: 대상 프린터 → <b>PDF로 저장</b>
+  </div>
+  <button class="pdf-btn" onclick="window.print()">📄 PDF 저장하기</button>
+  </body></html>`);
+  win.document.close();
+  win.focus();
+  // 약간의 딜레이 후 자동으로 print 다이얼로그 오픈
+  setTimeout(() => { try { win.print(); } catch(e) {} }, 600);
 }
 
 /* ══════════════ 🔧 수리비 AI ══════════════ */
