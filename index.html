@@ -1756,10 +1756,14 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 <!-- ═══ PAGE 6: 내 정보 ═══ -->
 <div class="page" id="page-myinfo">
 <div class="wrap">
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
   <button onclick="goPage('myinfo')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--green);background:var(--green-bg);font-size:12px;font-weight:800;color:var(--green);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">👤 내 정보</button>
   <button onclick="goPage('settings')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">⚙️ 설정</button>
   <button onclick="goPage('history')" style="padding:11px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px">📋 기록관리</button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+  <button onclick="goPage('share')" style="padding:12px 6px;border-radius:10px;border:2px solid #0891B2;background:#E0F7FA;font-size:13px;font-weight:800;color:#0891B2;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">🪪 공유카드</button>
+  <button onclick="goPage('notify')" style="padding:12px 6px;border-radius:10px;border:2px solid var(--red);background:var(--red-bg);font-size:13px;font-weight:800;color:var(--red);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">📢 알림공유</button>
 </div>
   <div class="page-header">
     <div class="page-header-badge" style="color:var(--green);background:var(--green-bg);border-color:rgba(26,150,71,0.2)">👤 내 정보</div>
@@ -4489,6 +4493,10 @@ function showRecordSummary() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
         <button onclick="goPage('quick');closeRecordSummary()" style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif">✏️ 수정하기</button>
         <button onclick="goPage('docs');closeRecordSummary()" style="padding:12px;border-radius:10px;border:none;background:var(--blue);font-size:13px;font-weight:800;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif">📄 서류 발급</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <button onclick="goPage('share');closeRecordSummary()" style="padding:12px;border-radius:10px;border:2px solid #0891B2;background:#E0F7FA;font-size:13px;font-weight:800;color:#0891B2;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">🪪 공유카드</button>
+        <button onclick="goPage('notify');closeRecordSummary()" style="padding:12px;border-radius:10px;border:2px solid var(--red);background:var(--red-bg);font-size:13px;font-weight:800;color:var(--red);cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">📢 알림공유</button>
       </div>
       <button onclick="shareSummaryRecord()" style="width:100%;margin-top:8px;padding:12px;border-radius:10px;border:none;background:var(--green);font-size:13px;font-weight:800;color:#fff;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px">📤 공유하기</button>`;
   }
