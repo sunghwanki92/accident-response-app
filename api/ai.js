@@ -73,12 +73,14 @@ export default async function handler(req, res) {
 
   try {
     const { messages, system, max_tokens } = body;
-    const contents = toGeminiContents(messages || [], system || '');
+    const contents = toGeminiContents(messages || [], ''); // system은 별도 파라미터로
     const geminiBody = {
       contents,
+      ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
       generationConfig: {
         maxOutputTokens: max_tokens || 1500,
-        temperature: 0.3
+        temperature: 0.3,
+        responseMimeType: 'application/json'
       }
     };
     // 모델 순서대로 시도
@@ -95,6 +97,7 @@ export default async function handler(req, res) {
       const data = await response.json();
       if (response.ok) {
         text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        console.log(`[Gemini:${model}] raw:`, text.slice(0, 300));
         break;
       }
       lastError = data.error?.message || 'Gemini API 오류';
