@@ -92,3 +92,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'AI 서버 연결 오류: ' + e.message });
   }
 }
+// force redeploy Mon Mar  2 08:31:31 UTC 2026
