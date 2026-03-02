@@ -325,15 +325,11 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 .tag-btn.sel-heavy  { border-color: var(--orange); background: #FFF4E5; color: var(--orange); }
 .tag-btn.sel-critical{ border-color: var(--red); background: var(--red-bg); color: var(--red); }
 
-/* 네비 버튼 — 상단 고정 */
+/* 네비 버튼 */
 .step-nav {
   display: flex; gap: 10px;
-  position: sticky; top: 60px; z-index: 100;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(8px);
-  padding: 10px 0 10px;
   margin-bottom: 16px;
-  border-bottom: 2px solid var(--border);
+  padding: 0;
 }
 .step-nav > * { flex: 1; }
 .btn-back {
@@ -932,9 +928,6 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 
   <!-- STEP 1: 사고유형 -->
   <div class="step-panel active" id="panel-0">
-    <div class="step-nav">
-      <button class="btn-next" onclick="nextStep(1)">다음 단계 →</button>
-    </div>
     <div class="card">
       <div class="card-title">어떤 사고인가요?</div>
       <div class="card-sub">해당 유형을 모두 선택하세요 (복수 선택 가능)</div>
@@ -1039,13 +1032,13 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     </div>
   </div>
 
+    <div class="step-nav">
+      <button class="btn-next" onclick="nextStep(1)">다음 단계 →</button>
+    </div>
+  </div>
+
   <!-- STEP 2: 내 차량 -->
   <div class="step-panel" id="panel-1">
-    <div class="step-nav">
-      <button class="btn-back" onclick="prevStep(0)">← 이전</button>
-      <button class="btn-next" onclick="nextStep(2)">다음 단계 →</button>
-    </div>
-
     <!-- 내 정보에 차량 등록된 경우 → 빠른 선택 -->
     <div id="step2-veh-selector"></div>
 
@@ -1094,12 +1087,14 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     </div>
   </div>
 
+    <div class="step-nav">
+      <button class="btn-back" onclick="nextStep(0)">← 이전</button>
+      <button class="btn-next" onclick="nextStep(2)">다음 단계 →</button>
+    </div>
+  </div>
+
   <!-- STEP 3: 상대방 -->
   <div class="step-panel" id="panel-2">
-    <div class="step-nav">
-      <button class="btn-back" onclick="prevStep(1)">← 이전</button>
-      <button class="btn-next" onclick="nextStep(3)">다음 단계 →</button>
-    </div>
     <div class="card">
       <div class="card-title">🚙 상대방 정보</div>
       <div class="card-sub">차량 번호만이라도 꼭 확보하세요</div>
@@ -1140,12 +1135,14 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     </div>
   </div>
 
+    <div class="step-nav">
+      <button class="btn-back" onclick="nextStep(1)">← 이전</button>
+      <button class="btn-next" onclick="nextStep(3)">다음 단계 →</button>
+    </div>
+  </div>
+
   <!-- STEP 4: 부상·피해 -->
   <div class="step-panel" id="panel-3">
-    <div class="step-nav">
-      <button class="btn-back" onclick="prevStep(2)">← 이전</button>
-      <button class="btn-next" onclick="nextStep(4)">다음 단계 →</button>
-    </div>
     <div class="card">
       <div class="card-title">🏥 부상 · 피해 정보</div>
       <div class="card-sub">현재 상태를 선택하세요</div>
@@ -1188,12 +1185,14 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     </div>
   </div>
 
+    <div class="step-nav">
+      <button class="btn-back" onclick="nextStep(2)">← 이전</button>
+      <button class="btn-next" onclick="nextStep(4)">다음 단계 →</button>
+    </div>
+  </div>
+
   <!-- STEP 5: 경위·사진 -->
   <div class="step-panel" id="panel-4">
-    <div class="step-nav">
-      <button class="btn-back" onclick="prevStep(3)">← 이전</button>
-      <button class="btn-next" onclick="finishRecord()">✅ 기록 완료</button>
-    </div>
     <div class="card">
       <div class="card-title">📝 사고 경위</div>
       <div class="card-sub">짧아도 괜찮습니다. 기억나는 것만 적으세요</div>
