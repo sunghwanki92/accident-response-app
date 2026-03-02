@@ -69,16 +69,25 @@ export default async function handler(req, res) {
       contents,
       generationConfig: { maxOutputTokens: max_tokens || 1500, temperature: 0.7 }
     };
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-    const response = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody)
-    });
-    const data = await response.json();
-    if (!response.ok) return res.status(response.status).json({ error: data.error?.message || 'Gemini API 오류' });
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // 모델 순서대로 시도
+    const models = ['gemini-2.0-flash-lite', 'gemini-pro', 'gemini-1.0-pro'];
+    let text = '';
+    let lastError = '';
+    for (const model of models) {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiBody)
+      });
+      const data = await response.json();
+      if (response.ok) {
+        text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        break;
+      }
+      lastError = data.error?.message || 'Gemini API 오류';
+    }
+    if (!text && lastError) return res.status(400).json({ error: lastError });
     if (!usingUserKey) incrementQuota(ip);
     const used = usingUserKey ? 0 : getUsedCount(ip);
     const remaining = usingUserKey ? 999 : Math.max(0, FREE_QUOTA - used);
