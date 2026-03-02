@@ -1886,7 +1886,12 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <p>공업사 2~3곳 견적을 입력하면 AI가 적정 수리비와 과다 청구 여부를 분석합니다</p>
   </div>
   <div class="card">
-    <div class="card-title">🚗 차량 정보</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="card-title" style="margin-bottom:0">🚗 차량 정보</div>
+      <button onclick="clearRepairCar()" style="font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif">✏️ 직접 입력</button>
+    </div>
+    <!-- 차량 자동선택 버튼 -->
+    <div id="rep-veh-btns" style="display:none;margin-bottom:10px"></div>
     <div class="field-row">
       <div class="field"><label class="field-label">차종</label><input type="text" id="rep-car" placeholder="현대 아반떼 2021"></div>
       <div class="field"><label class="field-label">주행거리</label><input type="text" id="rep-mileage" placeholder="5만 km"></div>
@@ -2285,7 +2290,7 @@ function goPage(name) {
   if(name==='timeline') renderTimeline();
   if(name==='share') generateShareCard();
   if(name==='notify') initNotifyPage();
-  if(name==='repair') loadQuotaStatus();
+  if(name==='repair') { loadQuotaStatus(); initRepairPage(); }
   if(name==='settle') loadQuotaStatus();
   if(name==='ai') updateAIPhotoHint();
   window.scrollTo(0,0);
@@ -4277,6 +4282,68 @@ function saveShareCardPDF() {
 }
 
 /* ══════════════ 🔧 수리비 AI ══════════════ */
+function initRepairPage() {
+  let info = {};
+  try { info = JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) {}
+  const vehicles = info.vehicles || [];
+  const btnWrap = document.getElementById('rep-veh-btns');
+  if (!btnWrap) return;
+
+  if (vehicles.length === 0) {
+    // 저장된 차량 없음 — 직접 입력 모드
+    btnWrap.style.display = 'none';
+    return;
+  }
+
+  // 차량 선택 버튼 렌더링
+  btnWrap.style.display = 'flex';
+  btnWrap.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px';
+  btnWrap.innerHTML = vehicles.map((v, i) => `
+    <button onclick="selectRepairVeh(${i})" id="rep-veh-btn-${i}"
+      style="padding:10px 14px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;text-align:left;min-width:120px">
+      <div style="font-size:14px;font-weight:900;letter-spacing:1px">${v.plate||'번호없음'}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">${v.car||'차종미입력'}</div>
+    </button>`).join('') +
+    `<button onclick="clearRepairCar()" id="rep-veh-btn-manual"
+      style="padding:10px 14px;border-radius:10px;border:2px dashed var(--border);background:none;font-size:13px;font-weight:700;color:var(--text3);cursor:pointer;font-family:'Noto Sans KR',sans-serif">
+      ✏️ 직접입력
+    </button>`;
+
+  // 기본: 첫 번째 차량 자동 선택
+  selectRepairVeh(info.activeVehIdx || 0);
+}
+
+function selectRepairVeh(idx) {
+  let info = {};
+  try { info = JSON.parse(localStorage.getItem('myInfo') || '{}'); } catch(e) {}
+  const veh = (info.vehicles || [])[idx];
+  if (!veh) return;
+
+  // 버튼 하이라이트
+  document.querySelectorAll('[id^="rep-veh-btn-"]').forEach(b => {
+    b.style.background = 'var(--bg2)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text)';
+  });
+  const activeBtn = document.getElementById(`rep-veh-btn-${idx}`);
+  if (activeBtn) { activeBtn.style.background = 'var(--blue-bg)'; activeBtn.style.borderColor = 'var(--blue)'; activeBtn.style.color = 'var(--blue)'; }
+  const manualBtn = document.getElementById('rep-veh-btn-manual');
+  if (manualBtn) { manualBtn.style.background = 'none'; manualBtn.style.borderColor = 'var(--border)'; manualBtn.style.color = 'var(--text3)'; }
+
+  // 차량 정보 자동 입력
+  const carEl = document.getElementById('rep-car');
+  if (carEl && veh.car) carEl.value = veh.car;
+}
+
+function clearRepairCar() {
+  document.getElementById('rep-car').value = '';
+  document.getElementById('rep-mileage').value = '';
+  // 버튼 하이라이트 초기화
+  document.querySelectorAll('[id^="rep-veh-btn-"]').forEach(b => {
+    b.style.background = 'var(--bg2)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text)';
+  });
+  const manualBtn = document.getElementById('rep-veh-btn-manual');
+  if (manualBtn) { manualBtn.style.background = 'var(--blue-bg)'; manualBtn.style.borderColor = 'var(--blue)'; manualBtn.style.color = 'var(--blue)'; }
+  document.getElementById('rep-car').focus();
+}
 async function runRepairAI() {
   const car = document.getElementById('rep-car').value.trim();
   const damage = document.getElementById('rep-damage').value.trim();
