@@ -3497,11 +3497,45 @@ function loadHistoryRecord(idx) {
   if (!rec) return;
   Object.assign(D, rec);
   localStorage.setItem('accidentData', JSON.stringify(D));
+
+  // 현장기록 panel-0 UI 복원
+  restorePanel0UI();
+
   loadSettings();
-  // 수정 섹션으로 스크롤
   const ea = document.getElementById('settings-edit-area');
   if (ea) { ea.style.display='block'; setTimeout(()=>ea.scrollIntoView({behavior:'smooth'}), 100); }
   alert(`${rec._label||'기록'} 을 불러왔습니다.\n아래에서 내용을 수정할 수 있습니다.`);
+}
+
+function restorePanel0UI() {
+  // 사고유형 버튼 복원
+  document.querySelectorAll('#panel-0 .sel-btn').forEach(btn => {
+    const label = btn.querySelector('.sb-label');
+    if (!label) return;
+    const btnText = label.textContent.trim();
+    const matched = D.types && D.types.some(t => t === btnText || t.startsWith(btnText) || btnText.startsWith(t.slice(0,5)));
+    btn.classList.toggle('selected', !!matched);
+  });
+
+  // 날씨 버튼 복원
+  document.querySelectorAll('#weather-row .tag-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+  });
+  if (D.weather) {
+    document.querySelectorAll('#weather-row .tag-btn').forEach(b => {
+      if (b.textContent.includes(D.weather)) {
+        b.classList.add('selected');
+        b.style.background = 'var(--red)'; b.style.borderColor = 'var(--red)'; b.style.color = '#fff';
+      }
+    });
+  }
+
+  // 사고일시·장소 복원
+  const dt = document.getElementById('f-datetime');
+  if (dt && D.datetime) dt.value = D.datetime;
+  const loc = document.getElementById('f-location');
+  if (loc && D.location) loc.value = D.location;
 }
 
 function deleteHistoryRecord(idx) {
@@ -3619,7 +3653,7 @@ function loadSettings(){
   if(sum){const items=[setD.datetime?`🕐 ${setD.datetime.replace('T',' ')}`:null,setD.location?`📍 ${setD.location}`:null,(setD.types&&setD.types.length)?`🚗 ${setD.types.join(', ')}`:null,setD.myPlate?`내 번호: ${setD.myPlate}`:null,setD.opPlate?`상대: ${setD.opPlate}`:null].filter(Boolean);sum.innerHTML=`<div class="set-summary-card">${items.map(i=>`<div class="set-summary-item">${i}</div>`).join('<span style="color:var(--border)"> │ </span>')}</div>`;}
   const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
   sv('set-datetime',setD.datetime);sv('set-location',setD.location);
-  if(setD.types&&setD.types.length){document.querySelectorAll('#set-types-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('.sb-label');if(l&&setD.types.some(t=>l.textContent.includes(t.slice(0,4))))btn.classList.add('selected');});}
+  if(setD.types&&setD.types.length){document.querySelectorAll('#set-types-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('.sb-label');if(l&&setD.types.some(t=>l.textContent.trim()===t||t.startsWith(l.textContent.trim())||l.textContent.trim().startsWith(t.slice(0,5))))btn.classList.add('selected');});}
   sv('set-myplate',setD.myPlate);sv('set-mycar',setD.myCar);sv('set-myname',setD.myName);sv('set-myphone',setD.myPhone);sv('set-myinsurer',setD.myInsurer);sv('set-mypolicy',setD.myPolicy);
   if(setD.damages&&setD.damages.length){document.querySelectorAll('#set-damages-grid .sel-btn').forEach(btn=>{const l=btn.querySelector('div:last-child');if(l&&setD.damages.includes(l.textContent.trim()))btn.classList.add('selected');});}
   sv('set-opplate',setD.opPlate);sv('set-opcar',setD.opCar);sv('set-opname',setD.opName);sv('set-opphone',setD.opPhone);sv('set-opinsurer',setD.opInsurer);sv('set-oppolicy',setD.opPolicy);sv('set-witness',setD.witness);
