@@ -111,6 +111,65 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   gap: 4px; padding: 0 10px;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
+
+/* ── 하단 탭바 ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: var(--bg);
+  border-top: 2px solid var(--border);
+  display: flex; align-items: center;
+  height: 64px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bnav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; background: none; border: none;
+  cursor: pointer; padding: 6px 0;
+  color: var(--text3); transition: color 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.bnav-btn.active { color: var(--red); }
+.bnav-btn.more-active { color: var(--blue); }
+.bnav-icon { font-size: 22px; line-height: 1; }
+.bnav-label { font-size: 10px; font-weight: 700; }
+
+/* ── 더보기 슬라이드업 ── */
+.more-menu-overlay {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.4);
+}
+.more-menu-overlay.show { display: block; }
+.more-menu {
+  position: fixed; bottom: -100%; left: 0; right: 0; z-index: 401;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 16px 24px;
+  transition: bottom 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+}
+.more-menu.show { bottom: 64px; }
+.more-menu-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 0 auto 16px;
+}
+.more-menu-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.more-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 14px 8px; border-radius: 12px;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  cursor: pointer; font-size: 22px;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s; color: var(--text);
+}
+.more-btn span { font-size: 11px; font-weight: 700; color: var(--text2); }
+.more-btn:active { transform: scale(0.95); background: var(--border); }
+
+/* 콘텐츠 하단 패딩 (하단바 가려지지 않게) */
+.wrap { padding-bottom: 80px !important; }
 .nav-scroll::-webkit-scrollbar { display: none; }
 .nav-tab {
   padding: 8px 14px; border-radius: 10px; border: none;
@@ -848,21 +907,49 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
     <div class="nav-logo-icon">🚨</div>
     사고대응
   </div>
-  <div class="nav-scroll" id="nav-scroll">
-    <button class="nav-tab active" onclick="goPage('quick')">📍 현장기록</button>
-    <button class="nav-tab" onclick="goPage('ai')">🤖 AI분석</button>
-    <button class="nav-tab" onclick="goPage('docs')">📄 서류</button>
-    <button class="nav-tab" onclick="goPage('guard')">🛡️ 보험사대응</button>
-    <button class="nav-tab" onclick="goPage('policy')">📑 보험분석</button>
-    <button class="nav-tab" onclick="goPage('timeline')">⏱️ 타임라인</button>
-    <button class="nav-tab" onclick="goPage('share')">🪪 공유카드</button>
-    <button class="nav-tab" onclick="goPage('repair')">🔧 수리비</button>
-    <button class="nav-tab" onclick="goPage('settle')">💰 합의금</button>
-    <button class="nav-tab" onclick="goPage('notify')">📢 알림공유</button>
-    <button class="nav-tab" onclick="goPage('myinfo')">👤 내 정보</button>
-    <button class="nav-tab" onclick="goPage('settings')">⚙️ 설정</button>
-  </div>
+  <div id="nav-page-title" style="flex:1;text-align:center;font-size:15px;font-weight:800;color:var(--text)">현장기록</div>
+  <div style="width:80px"></div>
 </nav>
+
+<!-- 하단 탭바 -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="bnav-btn active" id="bnav-quick" onclick="goPage('quick')">
+    <span class="bnav-icon">📍</span>
+    <span class="bnav-label">현장기록</span>
+  </button>
+  <button class="bnav-btn" id="bnav-ai" onclick="goPage('ai')">
+    <span class="bnav-icon">🤖</span>
+    <span class="bnav-label">AI분석</span>
+  </button>
+  <button class="bnav-btn" id="bnav-docs" onclick="goPage('docs')">
+    <span class="bnav-icon">📄</span>
+    <span class="bnav-label">서류</span>
+  </button>
+  <button class="bnav-btn" id="bnav-myinfo" onclick="goPage('myinfo')">
+    <span class="bnav-icon">👤</span>
+    <span class="bnav-label">내 정보</span>
+  </button>
+  <button class="bnav-btn" id="bnav-more" onclick="toggleMoreMenu()">
+    <span class="bnav-icon">☰</span>
+    <span class="bnav-label">더보기</span>
+  </button>
+</div>
+
+<!-- 더보기 메뉴 (슬라이드업) -->
+<div class="more-menu-overlay" id="more-overlay" onclick="closeMoreMenu()"></div>
+<div class="more-menu" id="more-menu">
+  <div class="more-menu-handle"></div>
+  <div class="more-menu-grid">
+    <button class="more-btn" onclick="goPage('guard');closeMoreMenu()">🛡️<br><span>보험사대응</span></button>
+    <button class="more-btn" onclick="goPage('policy');closeMoreMenu()">📑<br><span>보험분석</span></button>
+    <button class="more-btn" onclick="goPage('timeline');closeMoreMenu()">⏱️<br><span>타임라인</span></button>
+    <button class="more-btn" onclick="goPage('share');closeMoreMenu()">🪪<br><span>공유카드</span></button>
+    <button class="more-btn" onclick="goPage('repair');closeMoreMenu()">🔧<br><span>수리비</span></button>
+    <button class="more-btn" onclick="goPage('settle');closeMoreMenu()">💰<br><span>합의금</span></button>
+    <button class="more-btn" onclick="goPage('notify');closeMoreMenu()">📢<br><span>알림공유</span></button>
+    <button class="more-btn" onclick="goPage('settings');closeMoreMenu()">⚙️<br><span>설정</span></button>
+  </div>
+</div>
 
 <!-- ═══ SOS 고정 버튼 ═══ -->
 <div class="sos-fab" id="sos-fab">
@@ -2126,14 +2213,25 @@ const D = {
 /* ══════════════ NAV ══════════════ */
 function goPage(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
-  const map={quick:0,ai:1,docs:2,guard:3,policy:4,timeline:5,share:6,repair:7,settle:8,notify:9,myinfo:10,settings:11};
-  const tab=document.querySelectorAll('.nav-tab')[map[name]];
-  if(tab){
-    tab.classList.add('active');
-    try { setTimeout(()=>tab.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}),50); } catch(e){}
+
+  // 하단탭 active
+  const bnavIds = ['quick','ai','docs','myinfo'];
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active','more-active'));
+  const bnavBtn = document.getElementById('bnav-'+name);
+  if(bnavBtn) bnavBtn.classList.add('active');
+  else {
+    const moreBtn = document.getElementById('bnav-more');
+    if(moreBtn) moreBtn.classList.add('more-active');
   }
+
+  // 페이지 타이틀
+  const titles={quick:'현장기록',ai:'AI분석',docs:'서류생성',guard:'보험사대응',
+    policy:'보험분석',timeline:'타임라인',share:'공유카드',repair:'수리비',
+    settle:'합의금',notify:'알림공유',myinfo:'내 정보',settings:'설정'};
+  const titleEl = document.getElementById('nav-page-title');
+  if(titleEl) titleEl.textContent = titles[name] || '';
+
   if(name==='settings') { loadSettings(); renderHistoryList(); loadQuotaStatus(); }
   if(name==='timeline') renderTimeline();
   if(name==='share') generateShareCard();
@@ -4258,6 +4356,18 @@ function generateNotifyMsg() {
   };
 }
 
+
+function toggleMoreMenu(){
+  const menu=document.getElementById('more-menu');
+  const overlay=document.getElementById('more-overlay');
+  const isOpen=menu.classList.contains('show');
+  if(isOpen){ closeMoreMenu(); }
+  else { menu.classList.add('show'); overlay.classList.add('show'); }
+}
+function closeMoreMenu(){
+  document.getElementById('more-menu').classList.remove('show');
+  document.getElementById('more-overlay').classList.remove('show');
+}
 /* ══════════════ INIT ══════════════ */
 window.addEventListener('load',()=>{
   loadSaved();loadMyInfo();renderVehicleSelectInQuick();applyMyInfoToRecord();checkFirstRun();updateSOSInsurer();
