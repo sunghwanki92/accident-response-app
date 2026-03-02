@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     const geminiBody = {
       contents,
       ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
-      generationConfig: { maxOutputTokens: max_tokens || 1500, temperature: 0.1 }
+      generationConfig: { maxOutputTokens: max_tokens || 2500, temperature: 0.1 }
     };
 
     const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-2.5-flash'];
