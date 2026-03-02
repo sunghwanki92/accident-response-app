@@ -79,8 +79,7 @@ export default async function handler(req, res) {
       ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
       generationConfig: {
         maxOutputTokens: max_tokens || 1500,
-        temperature: 0.3,
-        responseMimeType: 'application/json'
+        temperature: 0.3
       }
     };
     // 모델 순서대로 시도
