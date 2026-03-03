@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#D62B2B">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -92,6 +92,8 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   border-bottom: 2px solid var(--border);
   display: flex; align-items: center;
   height: 60px;
+  padding-top: env(safe-area-inset-top);
+  height: calc(60px + env(safe-area-inset-top));
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 .nav-logo {
@@ -2660,8 +2662,9 @@ function saveMyInfo(){
   const info={name:document.getElementById('mi-name').value,phone:document.getElementById('mi-phone').value,emergency:document.getElementById('mi-emergency').value,emergencyName:enNameEl?enNameEl.value.trim():'',agent:document.getElementById('mi-agent').value,garage:document.getElementById('mi-garage').value,vehicles,activeVehIdx};
   localStorage.setItem('myInfo',JSON.stringify(info));
   const msg=document.getElementById('mi-save-msg');msg.style.display='block';setTimeout(()=>msg.style.display='none',3000);
+  showToast('✅ 내 정보가 저장되었습니다!', 'success');
   renderVehicleSelectInQuick();
-  checkFirstRun(); // 저장 즉시 현장기록 배너 갱신
+  checkFirstRun();
 }
 
 function loadMyInfo(){
@@ -3855,6 +3858,7 @@ function saveSettings(){
   setD.witness=g('set-witness')||setD.witness;setD.injuryDetail=g('set-injurydetail')||setD.injuryDetail;setD.desc=g('set-desc')||setD.desc;
   Object.assign(D,setD);localStorage.setItem('accidentData',JSON.stringify(setD));
   const msg=document.getElementById('set-save-msg');if(msg){msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);}
+  showToast('✅ 수정 내용이 저장되었습니다!', 'success');
   loadSettings();
 }
 
