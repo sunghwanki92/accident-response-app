@@ -3869,88 +3869,81 @@ function confirmClearRecord(){
 }
 
 /* ══════════════ GPS 위치 ══════════════ */
-function getGPSLocation() {
+async function getGPSLocation() {
   const btn    = document.getElementById('gps-btn');
-  const status = document.getElementById('gps-status');
   const mapWrap= document.getElementById('gps-map-wrap');
 
-  if (!navigator.geolocation) {
-    showGpsStatus('error', '❌ 이 기기는 GPS를 지원하지 않습니다. 직접 입력해주세요.');
-    return;
-  }
-
-  // 버튼 로딩 상태
   btn.innerHTML = '<span style="font-size:22px">⏳</span> 위치 확인 중...';
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
+  btn.disabled = true; btn.style.opacity = '0.7';
   mapWrap.style.display = 'none';
   showGpsStatus('loading', '📡 GPS 신호 수신 중... (최대 15초)');
 
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      const acc = Math.round(pos.coords.accuracy);
+  try {
+    let lat, lon, acc;
 
-      showGpsStatus('loading', '🗺 주소 변환 중...');
-
-      try {
-        // Kakao 역지오코딩 (무료, 한국 주소 최적)
-        const kakaoKey = null; // API 키 없이도 Nominatim 사용
-
-        // OpenStreetMap Nominatim (무료, API 키 불필요)
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`,
-          { headers: { 'User-Agent': 'AccidentApp/1.0' } }
+    // Capacitor 네이티브 앱 환경
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const CapGeo = window.CapacitorGeolocation || null;
+      if (CapGeo) {
+        await CapGeo.requestPermissions();
+        const pos = await CapGeo.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+        lat = pos.coords.latitude; lon = pos.coords.longitude; acc = Math.round(pos.coords.accuracy);
+      } else {
+        // Capacitor plugin 없으면 navigator 시도
+        const pos = await new Promise((res, rej) =>
+          navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
         );
-        const data = await res.json();
-
-        // 한국 주소 조합
-        const addr = buildKoreanAddress(data, lat, lon);
-
-        // 필드에 자동 입력
-        const locEl = document.getElementById('f-location');
-        locEl.value = addr;
-        locEl._gpsLat = lat;  // 좌표 저장 (완료 화면 지도용)
-        locEl._gpsLng = lon;
-        D.location = addr;
-        D._gpsLat  = lat;
-        D._gpsLng  = lon;
-
-        // 지도 미리보기 (Google Maps embed)
-        const mapEl  = document.getElementById('gps-map');
-        const addrBar= document.getElementById('gps-addr-bar');
-        mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=17&output=embed&hl=ko`;
-        addrBar.innerHTML = `📍 ${addr} <span style="font-size:11px;opacity:0.8;margin-left:6px">정확도 ±${acc}m</span>`;
-        mapWrap.style.display = 'block';
-
-        showGpsStatus('success', `✅ 위치 확인 완료! 정확도: ±${acc}m — 필요하면 아래 입력창에서 수정하세요`);
-        resetGpsBtn();
-
-      } catch(e) {
-        // Nominatim 실패 시 좌표만 표시
-        const fallback = `위도 ${lat.toFixed(5)}, 경도 ${lon.toFixed(5)}`;
-        document.getElementById('f-location').value = fallback;
-        showGpsStatus('warn', `⚠️ 주소 변환 실패 — 좌표를 입력했습니다. 직접 주소를 입력해주세요.`);
-
-        const mapEl = document.getElementById('gps-map');
-        mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=17&output=embed&hl=ko`;
-        document.getElementById('gps-addr-bar').innerHTML = `📍 ${fallback} ±${acc}m`;
-        document.getElementById('gps-map-wrap').style.display = 'block';
-        resetGpsBtn();
+        lat = pos.coords.latitude; lon = pos.coords.longitude; acc = Math.round(pos.coords.accuracy);
       }
-    },
-    (err) => {
-      resetGpsBtn();
-      const msgs = {
-        1: '❌ 위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.',
-        2: '❌ GPS 신호를 찾을 수 없습니다. 실외로 이동하거나 직접 입력해주세요.',
-        3: '❌ 위치 확인 시간이 초과됐습니다. 다시 시도하거나 직접 입력해주세요.',
-      };
-      showGpsStatus('error', msgs[err.code] || '❌ 위치를 가져오지 못했습니다. 직접 입력해주세요.');
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-  );
+    } else {
+      // 웹 브라우저 환경
+      if (!navigator.geolocation) {
+        showGpsStatus('error', '❌ 이 기기는 GPS를 지원하지 않습니다.'); resetGpsBtn(); return;
+      }
+      const pos = await new Promise((res, rej) =>
+        navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
+      );
+      lat = pos.coords.latitude; lon = pos.coords.longitude; acc = Math.round(pos.coords.accuracy);
+    }
+
+    showGpsStatus('loading', '🗺 주소 변환 중...');
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`,
+        { headers: { 'User-Agent': 'AccidentApp/1.0' } }
+      );
+      const data = await res.json();
+      const addr = buildKoreanAddress(data, lat, lon);
+      const locEl = document.getElementById('f-location');
+      locEl.value = addr; locEl._gpsLat = lat; locEl._gpsLng = lon;
+      D.location = addr; D._gpsLat = lat; D._gpsLng = lon;
+
+      const mapEl = document.getElementById('gps-map');
+      mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=17&output=embed&hl=ko`;
+      const addrBar = document.getElementById('gps-addr-bar');
+      addrBar.innerHTML = `📍 ${addr} <span style="font-size:11px;opacity:0.8;margin-left:6px">정확도 ±${acc}m</span>`;
+      mapWrap.style.display = 'block';
+      showGpsStatus('success', `✅ 위치 확인 완료! 정확도: ±${acc}m`);
+    } catch(e) {
+      const fallback = `위도 ${lat.toFixed(5)}, 경도 ${lon.toFixed(5)}`;
+      document.getElementById('f-location').value = fallback;
+      showGpsStatus('warn', '⚠️ 주소 변환 실패 — 직접 주소를 입력해주세요.');
+    }
+    resetGpsBtn();
+
+  } catch(err) {
+    resetGpsBtn();
+    if (err.code === 1 || (err.message||'').toLowerCase().includes('denied')) {
+      showGpsStatus('error', '❌ 위치 권한이 거부되었습니다.\n📱 설정 → 앱 → 사고대응 → 권한 → 위치 → 허용');
+    } else if (err.code === 2) {
+      showGpsStatus('error', '❌ GPS 신호 없음. 실외로 이동 후 다시 시도하세요.');
+    } else if (err.code === 3) {
+      showGpsStatus('error', '❌ 위치 확인 시간 초과. 다시 시도해주세요.');
+    } else {
+      showGpsStatus('error', '❌ 위치를 가져오지 못했습니다. 직접 입력해주세요.');
+    }
+  }
 }
 
 function buildKoreanAddress(data, lat, lon) {
