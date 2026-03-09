@@ -2,11 +2,20 @@
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const FREE_QUOTA = 10;
 const ipQuota = {};
+let lastCleanup = '';
 
 function getQuotaKey(ip) {
   return `${ip}_${new Date().toISOString().slice(0,10)}`;
 }
-function getUsedCount(ip) { return ipQuota[getQuotaKey(ip)] || 0; }
+function cleanupOldQuota() {
+  const today = new Date().toISOString().slice(0,10);
+  if (lastCleanup === today) return;
+  for (const key of Object.keys(ipQuota)) {
+    if (!key.endsWith(today)) delete ipQuota[key];
+  }
+  lastCleanup = today;
+}
+function getUsedCount(ip) { cleanupOldQuota(); return ipQuota[getQuotaKey(ip)] || 0; }
 function incrementQuota(ip) {
   const key = getQuotaKey(ip);
   ipQuota[key] = (ipQuota[key] || 0) + 1;
@@ -21,7 +30,8 @@ function toGeminiContents(messages) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-User-Api-Key');
   if (req.method === 'OPTIONS') return res.status(200).end();

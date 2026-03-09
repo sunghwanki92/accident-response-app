@@ -1,4 +1,5 @@
-const CACHE_NAME = 'accident-app-v1';
+const APP_VERSION = '1.1.0';
+const CACHE_NAME = `accident-app-v${APP_VERSION}`;
 const ASSETS = [
   '/',
   '/index.html',
