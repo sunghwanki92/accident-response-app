@@ -4994,6 +4994,12 @@ function showSharedCard(params) {
   </div>`;
 }
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>
-<!-- cache bust Mon Mar  2 01:05:37 UTC 2026 -->
