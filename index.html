@@ -55,6 +55,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* 접근성: 시니어/고가독성 모드 */
+body.senior-mode { font-size: 18px; }
+body.senior-mode .field-label,
+body.senior-mode .bnav-label,
+body.senior-mode .nav-tab { font-size: 15px; }
+body.senior-mode input,
+body.senior-mode textarea,
+body.senior-mode select,
+body.senior-mode .btn-primary,
+body.senior-mode .btn-secondary,
+body.senior-mode .tag-btn,
+body.senior-mode .sel-btn,
+body.senior-mode .nav-tab,
+body.senior-mode .bnav-btn,
+body.senior-mode .more-btn { min-height: 52px; }
+body.high-contrast {
+  --bg:#FFFFFF; --bg2:#FFFFFF; --bg3:#F4F4F4;
+  --border:#555; --text:#000; --text2:#111; --text3:#333;
+}
+
 /* ── 공통 입력 요소 ── */
 input, textarea, select {
   font-family: 'Noto Sans KR', sans-serif;
@@ -244,6 +264,18 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   box-shadow: 0 3px 12px rgba(0,0,0,0.18);
   white-space: nowrap;
   text-decoration: none;
+}
+/* 시니어 긴급 간편 모드: 1화면 핵심 버튼 */
+.easy-emergency-panel{
+  display:none; position:fixed; left:12px; right:12px; bottom:78px; z-index:350;
+  background:#fff; border:2px solid var(--border); border-radius:14px; box-shadow:var(--shadow2); padding:10px;
+}
+.easy-emergency-panel.show{ display:block; }
+.eep-title{ font-size:13px; font-weight:900; color:var(--text2); margin-bottom:8px; }
+.eep-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.eep-btn{
+  min-height:56px; border:none; border-radius:12px; font-size:16px; font-weight:900; color:#fff; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif;
 }
 
 /* ════ 완료 화면 지도 ════ */
@@ -992,6 +1024,16 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   <button class="sos-main-btn" onclick="toggleSOS()" title="긴급 SOS">
     🆘
   </button>
+</div>
+
+<div class="easy-emergency-panel" id="easy-emergency-panel">
+  <div class="eep-title">⚡ 긴급 간편 모드 — 꼭 필요한 버튼만</div>
+  <div class="eep-grid">
+    <a href="tel:112"><button class="eep-btn" style="width:100%;background:#1A6FD4">🚓 112</button></a>
+    <a href="tel:119"><button class="eep-btn" style="width:100%;background:var(--red)">🚑 119</button></a>
+    <a href="tel:1588-5114" id="easy-my-insurer" style="text-decoration:none"><button class="eep-btn" id="easy-insurer-btn" style="width:100%;background:var(--orange)">📞 내 보험사</button></a>
+    <button class="eep-btn" style="background:var(--green)" onclick="quickOpenCamera()">📸 사진촬영</button>
+  </div>
 </div>
 
 
@@ -2064,6 +2106,31 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
 
   <!-- ═ 데이터 백업 / 복원 ═ -->
   <div class="set-section" style="margin-bottom:14px">
+    <div class="set-section-title" onclick="toggleSetSection('set-accessibility')" style="background:#EEF6FF;border-color:rgba(26,111,212,0.2)">
+      <span style="color:var(--blue)">👵👴 쉬운 사용 모드 (가독성)</span>
+      <span class="set-toggle-icon" id="set-accessibility-icon">▼</span>
+    </div>
+    <div class="set-section-body" id="set-accessibility">
+      <div style="font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:12px">
+        글자를 크게 하고 버튼을 넓혀 <strong>나이드신 분들도 누르기 쉽게</strong> 바꿉니다.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <button class="btn-primary" id="btn-senior-on" onclick="setAccessibilityMode(true)">🔎 큰 글씨 켜기</button>
+        <button class="btn-secondary" id="btn-senior-off" onclick="setAccessibilityMode(false)">기본 크기</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <button class="btn-primary" id="btn-easy-on" style="background:var(--green)" onclick="setEasyEmergencyMode(true)">⚡ 긴급 간편 ON</button>
+        <button class="btn-secondary" id="btn-easy-off" onclick="setEasyEmergencyMode(false)">긴급 간편 OFF</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="btn-primary" id="btn-contrast-on" style="background:#111" onclick="setHighContrast(true)">🌓 고대비 켜기</button>
+        <button class="btn-secondary" id="btn-contrast-off" onclick="setHighContrast(false)">일반 대비</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═ 데이터 백업 / 복원 ═ -->
+  <div class="set-section" style="margin-bottom:14px">
     <div class="set-section-title" onclick="toggleSetSection('set-backup')" style="background:#F0FDF4;border-color:rgba(26,150,71,0.2)">
       <span style="color:var(--green)">💾 데이터 백업 · 복원</span>
       <span class="set-toggle-icon" id="set-backup-icon">▼</span>
@@ -2910,7 +2977,10 @@ function updateSOSInsurer() {
       if (veh) insurerName = veh.insurer;
     } catch(e) {}
   }
-  if (!insurerName) return;
+  if (!insurerName) {
+    syncEasyEmergencyInsurer('', '');
+    return;
+  }
   const q = insurerName.toLowerCase();
   const found = INSURER_DATA.find(i =>
     i.name.toLowerCase().includes(q) || q.includes(i.name.toLowerCase())
@@ -2921,7 +2991,18 @@ function updateSOSInsurer() {
     btn.href = 'tel:' + found.tel;
     lbl.textContent = found.name + ' ' + found.tel;
     btn.style.display = 'flex';
+    syncEasyEmergencyInsurer(found.name, found.tel);
+    return;
   }
+  syncEasyEmergencyInsurer(insurerName, '1588-5114');
+}
+function syncEasyEmergencyInsurer(name, tel){
+  const easyLink = document.getElementById('easy-my-insurer');
+  const easyBtn = document.getElementById('easy-insurer-btn');
+  if (!easyLink || !easyBtn) return;
+  const safeTel = (tel || '1588-5114').replace(/[^0-9]/g,'');
+  easyLink.href = `tel:${safeTel}`;
+  easyBtn.textContent = name ? `📞 ${name}` : '📞 내 보험사';
 }
 
 /* ══════════════ 완료 화면 지도 ══════════════ */
@@ -3841,6 +3922,7 @@ function loadSettings(){
   if(setD.opInjury){document.querySelectorAll('#set-opinjury-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.opInjury)){b.style.background='var(--blue-bg)';b.style.borderColor='var(--blue)';b.style.color='var(--blue)';}});}
   if(setD.blackbox){document.querySelectorAll('#set-bb-row .tag-btn').forEach(b=>{if(b.textContent.includes(setD.blackbox==='있음'?'있음':setD.blackbox==='없음'?'없음':'확인')){b.style.background='var(--blue)';b.style.borderColor='var(--blue)';b.style.color='#fff';}});}
   toggleSetSection('set-s1');
+  refreshAccessibilityButtons();
 }
 
 function setToggleType(el,val){el.classList.toggle('selected');if(!setD.types)setD.types=[];if(setD.types.includes(val))setD.types=setD.types.filter(t=>t!==val);else setD.types.push(val);}
@@ -4072,6 +4154,68 @@ function showBackupMsg(msg, type) {
   const borders = { ok:'rgba(26,150,71,0.3)', warn:'rgba(214,43,43,0.3)' };
   el.style.cssText = `display:block;padding:12px;border-radius:8px;font-size:14px;font-weight:700;background:${colors[type]};border:2px solid ${borders[type]};color:${type==='ok'?'var(--green)':'var(--red)'}`;
   el.textContent = msg;
+}
+
+/* ══════════════ 접근성 모드 ══════════════ */
+function getAppSettings() {
+  try { return JSON.parse(localStorage.getItem('appSettings') || '{}'); } catch(e) { return {}; }
+}
+function saveAppSettings(next) {
+  localStorage.setItem('appSettings', JSON.stringify(next || {}));
+}
+function applyAccessibilitySettings() {
+  const s = getAppSettings();
+  document.body.classList.toggle('senior-mode', !!s.seniorMode);
+  document.body.classList.toggle('high-contrast', !!s.highContrast);
+  syncEasyEmergencyPanel();
+  refreshAccessibilityButtons();
+}
+function setAccessibilityMode(on) {
+  const s = getAppSettings();
+  s.seniorMode = !!on;
+  saveAppSettings(s);
+  applyAccessibilitySettings();
+  showToast(on ? '✅ 큰 글씨 모드를 켰습니다.' : '✅ 기본 글자 크기로 변경했습니다.', 'success');
+}
+function setHighContrast(on) {
+  const s = getAppSettings();
+  s.highContrast = !!on;
+  saveAppSettings(s);
+  applyAccessibilitySettings();
+  showToast(on ? '✅ 고대비 모드를 켰습니다.' : '✅ 일반 대비로 변경했습니다.', 'success');
+}
+function setEasyEmergencyMode(on) {
+  const s = getAppSettings();
+  s.easyEmergencyMode = !!on;
+  saveAppSettings(s);
+  applyAccessibilitySettings();
+  showToast(on ? '✅ 긴급 간편 모드를 켰습니다.' : '✅ 긴급 간편 모드를 껐습니다.', 'success');
+}
+function refreshAccessibilityButtons() {
+  const s = getAppSettings();
+  const onBtn = document.getElementById('btn-senior-on');
+  const offBtn = document.getElementById('btn-senior-off');
+  const cOnBtn = document.getElementById('btn-contrast-on');
+  const cOffBtn = document.getElementById('btn-contrast-off');
+  const eOnBtn = document.getElementById('btn-easy-on');
+  const eOffBtn = document.getElementById('btn-easy-off');
+  if (onBtn) onBtn.style.opacity = s.seniorMode ? '1' : '0.75';
+  if (offBtn) offBtn.style.opacity = s.seniorMode ? '0.75' : '1';
+  if (cOnBtn) cOnBtn.style.opacity = s.highContrast ? '1' : '0.75';
+  if (cOffBtn) cOffBtn.style.opacity = s.highContrast ? '0.75' : '1';
+  if (eOnBtn) eOnBtn.style.opacity = s.easyEmergencyMode ? '1' : '0.75';
+  if (eOffBtn) eOffBtn.style.opacity = s.easyEmergencyMode ? '0.75' : '1';
+}
+function syncEasyEmergencyPanel() {
+  const s = getAppSettings();
+  const panel = document.getElementById('easy-emergency-panel');
+  if (!panel) return;
+  panel.classList.toggle('show', !!s.easyEmergencyMode);
+}
+function quickOpenCamera() {
+  goPage('quick');
+  const input = document.getElementById('f-camera');
+  if (input) input.click();
 }
 
 /* ══════════════ 📲 PWA 설치 ══════════════ */
@@ -4938,6 +5082,7 @@ window.addEventListener('load',()=>{
     showSharedCard(urlParams);
     return;
   }
+  applyAccessibilitySettings();
   loadSaved();loadMyInfo();renderVehicleSelectInQuick();applyMyInfoToRecord();checkFirstRun();updateSOSInsurer();
   const now=new Date(),iso=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
   const dt=document.getElementById('f-datetime');if(dt)dt.value=iso;
