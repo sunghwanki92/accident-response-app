@@ -1,0 +1,41 @@
+name: Weekly official law metadata
+on:
+  schedule:
+    - cron: '20 0 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: law-watch
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Test server and backup security
+        run: node --test tests/*.cjs tests/*.mjs
+      - name: Test law parser and date transitions
+        run: python3 -m unittest discover -s tests -p 'test_law_watch.py'
+      - name: Read official metadata (no AI)
+        id: scan
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/law_watch.py
+          result=$?
+          echo "code=$result" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Preserve result and publish status
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add law-updates.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update official law check status (no AI)'
+            git push origin HEAD:main
+          fi
+      - name: Mark source failure clearly
+        if: steps.scan.outputs.code != '0'
+        run: exit 1

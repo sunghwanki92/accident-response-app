@@ -1040,6 +1040,7 @@ body{padding-top:60px!important}
     <button class="simple-secondary" onclick="startNewSimpleRecord()">새 사고 기록 시작</button><button class="simple-secondary" onclick="startStage(2)">이전 · 보험사 연락</button>
   </section>
   <details class="simple-info"><summary>저장한 기록 · 내 정보 · 설정</summary><button class="simple-secondary" onclick="goPage('history')">저장한 기록 보기</button><button class="simple-secondary" onclick="goPage('myinfo')">내 정보 미리 등록</button><button class="simple-secondary" onclick="goPage('settings')">백업 · AI 사용 설정</button><button class="simple-secondary" onclick="goPage('ai')">AI 참고 분석 (선택)</button></details>
+  <details class="simple-info" id="law-watch-panel"><summary>법규 변경 확인 · 공식 원문</summary><div id="law-watch-body" role="status">공식 목록 확인 정보를 불러옵니다.</div><p><a href="https://www.law.go.kr/LSW/nwRvsLsPop.do" target="_blank" rel="noopener noreferrer">국가법령정보센터 최근 공포목록</a></p></details>
   <details class="simple-info"><summary>저장·개인정보·안내 출처</summary>
     <p>로그인 없이 사용합니다. 기록은 이 기기의 현재 브라우저에 저장됩니다. 다른 폰과 자동 공유되지 않으며, 브라우저 데이터 삭제 시 사라질 수 있습니다. 중요한 기록은 설정에서 백업하세요. 백업에는 API 키와 사진·영상 원본이 포함되지 않습니다.</p>
     <p>AI는 선택 기능이며 본인 Gemini 키가 필요합니다. 직접 요청할 때만 입력 내용·첨부파일이 서비스 서버를 거쳐 Google로 전달됩니다. 위치 조회·지도는 위치 서비스를 사용하며, QR은 이 기기에서 만듭니다.</p>
@@ -2349,6 +2350,7 @@ body{padding-top:60px!important}
 </div>
 </div>
 
+<script defer src="/law-updates.js"></script>
 <script src="/vendor/qrcode.js"></script>
 <script src="/vendor/qrcode_UTF8.js"></script>
 <script>
@@ -5115,6 +5117,7 @@ function showSharedCard(params) {
       </div>
     </div>
   </div>`;
+  if(!safePhone(params.get('p')))document.querySelectorAll('a[href="tel:"]').forEach(a=>{a.removeAttribute('href');a.setAttribute('aria-disabled','true');if(a.textContent.includes('바로'))a.textContent='연락처가 없거나 올바르지 않습니다';});
 }
 </script>
 <script>
