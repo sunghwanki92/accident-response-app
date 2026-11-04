@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#D62B2B">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -906,6 +907,8 @@ label, .field-label { font-size: 14px; font-weight: 700; color: var(--text2); di
   .nav, .doc-wrap > *:not(.doc-preview-area) { display:none; }
   .doc-preview { border:none; box-shadow:none; }
 }
+
+.simple-start{max-width:620px}.simple-start h1{font-size:28px;line-height:1.35;margin:10px 0 16px;outline:none}.simple-start p{font-size:17px;line-height:1.65;margin:12px 0}.simple-kicker{font-weight:800;color:#174c8c}.simple-warning,.simple-script{padding:16px;background:#fff4df;border-left:5px solid #a85400;border-radius:8px}.simple-calls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.simple-calls a{background:#b62020;color:white;text-align:center;font-size:15px;padding:18px 8px;border-radius:12px;text-decoration:none}.simple-calls a:nth-child(2){background:#174c8c}.simple-calls strong{display:block;font-size:23px;margin-top:4px}.simple-primary,.simple-secondary{display:block;text-align:center;text-decoration:none;width:100%;min-height:52px;padding:14px 12px;border-radius:12px;margin:12px 0;font-family:inherit;font-size:18px;font-weight:700;cursor:pointer}.simple-primary{border:2px solid #174c8c;background:#174c8c;color:white}.simple-secondary{background:white;color:#174c8c;border:2px solid #c7d3df}.simple-start label{font-size:18px;margin:18px 0 8px;color:#222}.simple-start summary{padding:14px 0;font-size:17px;cursor:pointer}.simple-info{margin-top:24px;border-top:1px solid #ccd5df}.simple-info p{font-size:15px}.simple-start [hidden]{display:none!important}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #835600;outline-offset:3px}.nav{top:60px}.sos-main-btn{animation:none}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body><style id="tomki-workshop-return-style">
@@ -926,7 +929,7 @@ body{padding-top:60px!important}
     <div class="nav-logo-icon">🚨</div>
     사고대응
   </div>
-  <div id="nav-page-title" style="flex:1;text-align:center;font-size:15px;font-weight:800;color:var(--text)">현장기록</div>
+  <div id="nav-page-title" style="flex:1;text-align:center;font-size:15px;font-weight:800;color:var(--text)">지금 할 일</div>
   <div style="width:80px"></div>
 </nav>
 
@@ -946,9 +949,9 @@ body{padding-top:60px!important}
 
 <!-- 하단 탭바 -->
 <div class="bottom-nav" id="bottom-nav">
-  <button class="bnav-btn active" id="bnav-quick" onclick="goPage('quick')">
+  <button class="bnav-btn active" id="bnav-start" onclick="goPage('start')">
     <span class="bnav-icon">📍</span>
-    <span class="bnav-label">현장기록</span>
+    <span class="bnav-label">지금 할 일</span>
   </button>
   <button class="bnav-btn" id="bnav-ai" onclick="goPage('ai')">
     <span class="bnav-icon">🤖</span>
@@ -1005,8 +1008,46 @@ body{padding-top:60px!important}
 </div>
 
 
+<div class="page active" id="page-start"><main class="wrap simple-start">
+  <section id="start-safety" aria-labelledby="start-title">
+    <p class="simple-kicker">사고가 났다면 · 1 / 3</p><h1 id="start-title" tabindex="-1">기록보다 안전이 먼저예요</h1>
+    <p class="simple-lead">비상등을 켜고, 다친 사람이 있는지 확인하세요.</p>
+    <p class="simple-warning">고속도로에서는 탑승자도 가드레일 밖 등 안전한 곳으로 대피하세요. 사진을 찍으려고 차도로 나가지 마세요.</p>
+    <div class="simple-calls"><a href="tel:119">다쳤어요 / 구급<br><strong>119 전화</strong></a><a href="tel:112">경찰 도움이 필요해요<br><strong>112 전화</strong></a></div>
+    <p>부상자는 119 안내에 따라 도와주세요. 통화는 휴대폰의 전화 화면에서 시작합니다.</p>
+    <button class="simple-primary" onclick="startStage(2)">안전한 곳이에요 · 다음</button>
+    <button class="simple-secondary" onclick="shareAppLink()">가족에게 이 앱 링크 보내기</button>
+  </section>
+  <section id="start-contact" hidden aria-labelledby="contact-title">
+    <p class="simple-kicker">보험사에 알리기 · 2 / 3</p><h1 id="contact-title" tabindex="-1">이 문장만 읽으세요</h1>
+    <p class="simple-script">“교통사고가 났습니다. 위치는 ___이고, 다친 사람은 ___입니다. 사고 접수와 출동 안내를 부탁드립니다.”</p>
+    <label for="start-insurer">내 자동차 보험사 (모르면 건너뛰세요)</label><select id="start-insurer" onchange="updateStartInsurerCall()"><option value="">보험사 선택</option></select>
+    <a id="start-insurer-call" class="simple-primary" hidden>보험사 사고 접수 전화</a>
+    <p>모르는 내용은 “아직 확인하지 못했습니다”라고 말해도 됩니다.</p>
+    <button class="simple-primary" onclick="startStage(3)">간단 기록으로 이동</button><button class="simple-secondary" onclick="startStage(1)">이전 · 안전 안내</button>
+  </section>
+  <section id="start-record" hidden aria-labelledby="record-title">
+    <p class="simple-kicker">아는 것만 기록 · 3 / 3</p><h1 id="record-title" tabindex="-1">세 가지만 남겨요</h1>
+    <p>모르는 칸은 비워두세요. 안전한 곳에서 차량 전체·파손 부위·번호판을 촬영하고 블랙박스 원본도 보관하세요.</p>
+    <label for="simple-location">1. 어디에서 났나요?</label><input id="simple-location" maxlength="500" placeholder="도로명·주변 건물·표지판">
+    <label for="simple-plate">2. 상대 차량 번호 (선택)</label><input id="simple-plate" maxlength="50" placeholder="모르면 비워두세요">
+    <label for="simple-desc">3. 어떤 일이 있었나요? (선택)</label><textarea id="simple-desc" maxlength="3000" rows="3" placeholder="예: 신호를 기다리던 중 뒤에서 충격"></textarea>
+    <p id="simple-draft-status" role="status" aria-live="polite">이 브라우저에 임시 저장합니다.</p>
+    <button class="simple-primary" onclick="saveSimpleRecord()">기록 저장</button>
+    <p id="simple-save-status" role="status" aria-live="polite"></p>
+    <button class="simple-secondary" onclick="copySimpleRecord()">기록 요약 복사</button>
+    <details><summary>사진·내 차량 등 자세히 기록하기</summary><p>저장한 간단 기록을 불러와 이어서 적습니다.</p><button class="simple-secondary" onclick="openDetailedRecord()">상세 입력 열기</button><button class="simple-secondary" onclick="goPage('history')">저장한 기록 보기</button></details>
+    <button class="simple-secondary" onclick="startNewSimpleRecord()">새 사고 기록 시작</button><button class="simple-secondary" onclick="startStage(2)">이전 · 보험사 연락</button>
+  </section>
+  <details class="simple-info"><summary>저장·개인정보·안내 출처</summary>
+    <p>로그인 없이 사용합니다. 기록은 이 기기의 현재 브라우저에 저장됩니다. 다른 폰과 자동 공유되지 않으며, 브라우저 데이터 삭제 시 사라질 수 있습니다. 중요한 기록은 설정에서 백업하세요. 백업에는 API 키와 사진·영상 원본이 포함되지 않습니다.</p>
+    <p>AI는 선택 기능이며 본인 Gemini 키가 필요합니다. 직접 요청할 때만 입력 내용·첨부파일이 서비스 서버를 거쳐 Google로 전달됩니다. 위치 조회·지도는 위치 서비스를 사용하며, QR은 이 기기에서 만듭니다.</p>
+    <p>안전 확보·부상자 구호·현장 기록 안내는 <a href="https://accident.knia.or.kr/fault-ratio" target="_blank" rel="noopener noreferrer">손해보험협회 교통사고 대응요령</a>을 참고해 짧게 정리했습니다. 확인: 2026-11-05. 과실·법률·합의금은 확정 판단이 아닙니다.</p>
+  </details>
+</main></div>
+
 <!-- ═══ PAGE 1: 현장기록 ═══ -->
-<div class="page active" id="page-quick">
+<div class="page" id="page-quick">
 <div class="wrap">
 
   <div class="sos-banner">
@@ -1364,7 +1405,7 @@ body{padding-top:60px!important}
             <div style="font-size:12px;color:var(--text2);margin-top:2px">지금 바로 촬영</div>
           </div>
         </div>
-        <div id="photo-preview-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+        <p style="font-size:14px;margin-top:12px">첨부 사진·영상은 이 화면에서만 미리 봅니다. 기록·백업 파일에는 포함되지 않으니 원본을 휴대폰에 따로 보관하세요.</p><div id="photo-preview-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
         <div id="photo-count-badge" style="display:none;margin-top:8px;font-size:13px;font-weight:700;color:var(--blue)"></div>
       </div>
     </div>
@@ -1480,12 +1521,12 @@ body{padding-top:60px!important}
   <div class="page-header">
     <div class="page-header-badge">🤖 AI 분석</div>
     <h2>AI 사고 상황 분석</h2>
-    <p>상황을 짧게 설명하면 최신 교통법 기준으로 과실 비율과 대응 전략을 분석합니다</p>
+    <p>상황을 짧게 설명하면 일반 참고정보로 상황을 정리합니다. 법령·과실은 공식 출처와 전문가에게 확인하세요</p>
   </div>
 
   <div class="ai-notice">
     <span style="font-size:20px;flex-shrink:0">🔍</span>
-    <span>AI가 <strong>실시간 웹 검색</strong>으로 최신 도로교통법·판례를 확인 후 분석합니다</span>
+    <span>AI는 <strong>실시간 웹 검색을 하지 않습니다.</strong> 최신 법령·판례 확인은 별도로 필요합니다</span>
   </div>
   <!-- AI 참고용 안내 -->
   <div style="display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,#f0f7ff,#e8f5e9);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px">
@@ -1519,9 +1560,9 @@ body{padding-top:60px!important}
   </div>
   <div class="ai-loading" id="ai-loading">
     <div class="spinner"></div>
-    <div class="loading-text">최신 법령 분석 중...</div>
+    <div class="loading-text">입력 내용 정리 중...</div>
     <div class="loading-steps">
-      <div class="ls-row"><div class="ls-dot"></div>도로교통법·판례 실시간 검색</div>
+      <div class="ls-row"><div class="ls-dot"></div>도로교통법·판례 참고정보 분석</div>
       <div class="ls-row"><div class="ls-dot"></div>과실비율 기준 적용</div>
       <div class="ls-row"><div class="ls-dot"></div>대응 전략 수립</div>
     </div>
@@ -1940,7 +1981,7 @@ body{padding-top:60px!important}
     <textarea id="rep-memo" rows="2" placeholder="보험사 제시 금액, 순정/재생부품 여부, 특이사항"></textarea></div>
   </div>
   <div id="rep-quota-banner" style="display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--blue)">
-    <span>💡</span><span id="rep-quota-msg">AI 분석 남은 횟수 확인 중...</span>
+    <span>💡</span><span id="rep-quota-msg">AI는 본인 키로 선택 사용 · 기본 기능 무료</span>
   </div>
   <button class="btn-primary" style="background:#D97706" onclick="runRepairAI()">🔧 AI 수리비 분석</button>
   <div class="ai-loading" id="rep-loading"><div class="spinner"></div><div class="loading-text">수리비 시세 분석 중...</div></div>
@@ -1981,7 +2022,7 @@ body{padding-top:60px!important}
     <textarea id="stl-extra" rows="2" placeholder="후유증, 정신적 피해, 특이사항"></textarea></div>
   </div>
   <div id="stl-quota-banner" style="display:flex;align-items:center;gap:8px;background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--blue)">
-    <span>💡</span><span id="stl-quota-msg">AI 분석 남은 횟수 확인 중...</span>
+    <span>💡</span><span id="stl-quota-msg">AI는 본인 키로 선택 사용 · 기본 기능 무료</span>
   </div>
   <button class="btn-primary" style="background:var(--green)" onclick="runSettleAI()">💰 합의금 범위 계산</button>
   <div class="ai-loading" id="stl-loading"><div class="spinner"></div><div class="loading-text">합의금 기준 분석 중...</div></div>
@@ -2053,15 +2094,14 @@ body{padding-top:60px!important}
     </div>
     <div class="set-section-body open" id="set-apikey">
       <div style="background:var(--blue-bg);border:2px solid rgba(26,111,212,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--blue);line-height:1.7">
-        💡 <strong>무료 제공:</strong> AI 분석은 하루 <strong>10회</strong> 무료로 사용 가능합니다.<br>
-        더 많이 사용하려면 본인의 Gemini API 키를 입력하세요. (이 기기에만 저장, 무료 발급 가능)
+        기본 안내·전화·기록·공유는 무료이며 로그인도 필요 없습니다.<br>AI 분석만 본인 Gemini API 키로 선택 사용합니다. 키와 입력 내용은 분석 요청 시 이 서비스 서버를 거쳐 Google로 전달됩니다. Google 한도·요금이 적용됩니다.
       </div>
       <div id="quota-status-box" style="margin-bottom:12px;padding:12px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:700"></div>
       <div class="field">
-        <label class="field-label">Gemini API 키 (선택 — 무제한 사용)</label>
+        <label class="field-label">Gemini API 키 (AI가 필요할 때만)</label>
         <input type="password" id="user-api-key" placeholder="AIza..." autocomplete="off">
         <div style="font-size:12px;color:var(--text3);margin-top:4px">
-          무료 발급: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue)">aistudio.google.com</a> → Get API Key → Create API Key
+          키 발급: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue)">aistudio.google.com</a> → Get API Key → Create API Key
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -2308,7 +2348,11 @@ body{padding-top:60px!important}
 </div>
 </div>
 
+<script src="/vendor/qrcode.js"></script>
+<script src="/vendor/qrcode_UTF8.js"></script>
 <script>
+function escapeHTML(value) { return String(value ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function safePhone(value) { const p=String(value||'').trim(); return /^\+?[0-9][0-9 ()-]{1,24}$/.test(p) ? p.replace(/[ ()-]/g,'') : ''; }
 function showToast(msg, type='error'){
   let t=document.getElementById('_toast');
   if(!t){t=document.createElement('div');t.id='_toast';
@@ -2333,6 +2377,8 @@ const D = {
 
 /* ══════════════ NAV ══════════════ */
 function goPage(name) {
+  if(!document.getElementById('page-'+name)) return;
+  if(name==='start') renderStartInsurers();
   // 이전 페이지 추적
   const curActive = document.querySelector('.page.active');
   if (curActive && curActive.id !== 'page-'+name) {
@@ -2352,7 +2398,7 @@ function goPage(name) {
   }
 
   // 페이지 타이틀
-  const titles={quick:'현장기록',ai:'AI분석',docs:'서류생성',guard:'보험사대응',
+  const titles={start:'지금 할 일',quick:'현장기록',ai:'AI분석',docs:'서류생성',guard:'보험사대응',
     policy:'보험분석',timeline:'타임라인',share:'공유카드',repair:'수리비',
     settle:'합의금',notify:'알림공유',myinfo:'내 정보',settings:'설정',history:'기록관리'};
   const titleEl = document.getElementById('nav-page-title');
@@ -2360,6 +2406,7 @@ function goPage(name) {
 
   if(name==='settings') { loadSettings(); loadQuotaStatus(); }
   if(name==='history') { renderHistoryList(); }
+  if(name==='docs') selectDoc('memo');
   if(name==='timeline') renderTimeline();
   if(name==='share') generateShareCard();
   if(name==='notify') initNotifyPage();
@@ -2374,7 +2421,7 @@ function updateAIPhotoHint(){
   if(!hint) return;
   const imgs = getUploadedImages();
   if(imgs.length > 0){
-    hint.innerHTML = `<strong style="color:var(--green)">📸 사진 ${imgs.length}장이 첨부되어 있습니다</strong> — 분석 시 사진도 함께 참고합니다`;
+    hint.innerHTML = `<strong style="color:var(--green)">📸 사진 ${escapeHTML(imgs.length)}장이 첨부되어 있습니다</strong> — 분석 시 사진도 함께 참고합니다`;
     document.getElementById('ai-photo-hint').style.borderColor='var(--green)';
     document.getElementById('ai-photo-hint').style.background='var(--green-bg)';
   } else {
@@ -2521,7 +2568,7 @@ function showCarSuggest(inputId, boxId) {
 
   const results = [...full, ...modelOnly].slice(0,12);
   if(!results.length){box.className='suggest-box';return;}
-  box.innerHTML=results.map(r=>`<div class="suggest-item" data-input="${inputId}" data-box="${boxId}" data-val="${r.replace(/"/g,'&quot;')}">${r}</div>`).join('');
+  box.innerHTML=results.map(r=>`<div class="suggest-item" data-input="${escapeHTML(inputId)}" data-box="${escapeHTML(boxId)}" data-val="${escapeHTML(r)}">${escapeHTML(r)}</div>`).join('');
   box.className='suggest-box open';
 }
 
@@ -2533,7 +2580,7 @@ function showInsurerSuggest(inputId, boxId) {
     i.name.toLowerCase().includes(q) || i.tel.includes(q)  // 보험사명도 소문자 비교
   ).slice(0,6);
   if(!results.length){box.className='suggest-box';return;}
-  box.innerHTML=results.map(r=>`<div class="suggest-item" data-input="${inputId}" data-box="${boxId}" data-val="${r.name.replace(/"/g,'&quot;')}">${r.name} <span style="color:var(--text3);font-size:12px">${r.tel}</span></div>`).join('');
+  box.innerHTML=results.map(r=>`<div class="suggest-item" data-input="${escapeHTML(inputId)}" data-box="${escapeHTML(boxId)}" data-val="${escapeHTML(r.name)}">${escapeHTML(r.name)} <span style="color:var(--text3);font-size:12px">${escapeHTML(r.tel)}</span></div>`).join('');
   box.className='suggest-box open';
 }
 
@@ -2583,12 +2630,12 @@ function renderVehicleTabs() {
     if(v.insEnd){
       const diff=Math.ceil((new Date(v.insEnd)-new Date())/86400000);
       if(diff<0) badge=`<span style="font-size:10px;background:var(--red-bg);color:var(--red);border-radius:4px;padding:1px 5px;margin-left:3px">만료</span>`;
-      else if(diff<=30) badge=`<span style="font-size:10px;background:#FFF4E5;color:var(--orange);border-radius:4px;padding:1px 5px;margin-left:3px">${diff}일</span>`;
+      else if(diff<=30) badge=`<span style="font-size:10px;background:#FFF4E5;color:var(--orange);border-radius:4px;padding:1px 5px;margin-left:3px">${escapeHTML(diff)}일</span>`;
     }
-    return `<div class="veh-tab-item${i===activeVehIdx?' active':''}" onclick="switchVeh(${i})" style="${i===activeVehIdx?'border-bottom-color:'+color+';color:'+color:''}">
-      <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
-      ${label}${badge}
-      ${vehicles.length>1?`<button class="veh-tab-del" onclick="event.stopPropagation();deleteVehicle(${i})">×</button>`:''}
+    return `<div class="veh-tab-item${escapeHTML(i===activeVehIdx?' active':'')}" onclick="switchVeh(${escapeHTML(i)})" style="${i===activeVehIdx?'border-bottom-color:'+color+';color:'+color:''}">
+      <span style="width:8px;height:8px;border-radius:50%;background:${escapeHTML(color)};display:inline-block;flex-shrink:0"></span>
+      ${escapeHTML(label)}${badge}
+      ${vehicles.length>1?`<button class="veh-tab-del" onclick="event.stopPropagation();deleteVehicle(${escapeHTML(i)})">×</button>`:''}
     </div>`;
   }).join('');
 }
@@ -2601,46 +2648,46 @@ function renderVehiclePanel(idx) {
   let expWarn='';
   if(v.insEnd){
     const diff=Math.ceil((new Date(v.insEnd)-new Date())/86400000);
-    if(diff<0) expWarn=`<div style="margin-top:8px;padding:12px 14px;background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:10px;font-size:14px;color:var(--red)">⚠️ 보험이 ${Math.abs(diff)}일 전 만료되었습니다!</div>`;
-    else if(diff<=30) expWarn=`<div style="margin-top:8px;padding:12px 14px;background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:10px;font-size:14px;color:var(--orange)">⏰ 보험 만료 ${diff}일 전입니다</div>`;
+    if(diff<0) expWarn=`<div style="margin-top:8px;padding:12px 14px;background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:10px;font-size:14px;color:var(--red)">⚠️ 보험이 ${escapeHTML(Math.abs(diff))}일 전 만료되었습니다!</div>`;
+    else if(diff<=30) expWarn=`<div style="margin-top:8px;padding:12px 14px;background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:10px;font-size:14px;color:var(--orange)">⏰ 보험 만료 ${escapeHTML(diff)}일 전입니다</div>`;
   }
   panel.innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <div style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0"></div>
-      <input type="text" id="${vid}-nick" value="${v.nickname||''}" placeholder="차량 별명 (예: 내 차, 아내 차, 회사 차)"
+      <div style="width:12px;height:12px;border-radius:50%;background:${escapeHTML(color)};flex-shrink:0"></div>
+      <input type="text" id="${escapeHTML(vid)}-nick" value="${escapeHTML(v.nickname||'')}" placeholder="차량 별명 (예: 내 차, 아내 차, 회사 차)"
         style="border:none;border-bottom:2px solid var(--border);border-radius:0;padding:4px 0;font-size:16px;font-weight:700;flex:1;background:none"
-        onchange="vehicles[${idx}].nickname=this.value;renderVehicleTabs()">
+        onchange="vehicles[${escapeHTML(idx)}].nickname=this.value;renderVehicleTabs()">
     </div>
     <div class="field field-row">
       <div>
         <label class="field-label">차량 번호</label>
-        <input type="text" id="${vid}-plate" value="${v.plate||''}" placeholder="123가 4567" style="font-size:18px;font-weight:900;letter-spacing:1px" onchange="vehicles[${idx}].plate=this.value;renderVehicleTabs()">
+        <input type="text" id="${escapeHTML(vid)}-plate" value="${escapeHTML(v.plate||'')}" placeholder="123가 4567" style="font-size:18px;font-weight:900;letter-spacing:1px" onchange="vehicles[${escapeHTML(idx)}].plate=this.value;renderVehicleTabs()">
       </div>
       <div style="position:relative">
         <label class="field-label">차종</label>
-        <input type="text" id="${vid}-car" value="${v.car||''}" placeholder="현대, 기아…" autocomplete="off" oninput="vehicles[${idx}].car=this.value;showCarSuggest('${vid}-car','cs-${vid}')">
-        <div class="suggest-box" id="cs-${vid}"></div>
+        <input type="text" id="${escapeHTML(vid)}-car" value="${escapeHTML(v.car||'')}" placeholder="현대, 기아…" autocomplete="off" oninput="vehicles[${escapeHTML(idx)}].car=this.value;showCarSuggest('${escapeHTML(vid)}-car','cs-${escapeHTML(vid)}')">
+        <div class="suggest-box" id="cs-${escapeHTML(vid)}"></div>
       </div>
     </div>
     <div class="field field-row">
       <div style="position:relative">
         <label class="field-label">보험사</label>
-        <input type="text" id="${vid}-insurer" value="${v.insurer||''}" placeholder="삼성, KB…" autocomplete="off" oninput="vehicles[${idx}].insurer=this.value;showInsurerSuggest('${vid}-insurer','is-${vid}')">
-        <div class="suggest-box" id="is-${vid}"></div>
+        <input type="text" id="${escapeHTML(vid)}-insurer" value="${escapeHTML(v.insurer||'')}" placeholder="삼성, KB…" autocomplete="off" oninput="vehicles[${escapeHTML(idx)}].insurer=this.value;showInsurerSuggest('${escapeHTML(vid)}-insurer','is-${escapeHTML(vid)}')">
+        <div class="suggest-box" id="is-${escapeHTML(vid)}"></div>
       </div>
       <div>
         <label class="field-label">증권번호</label>
-        <input type="text" id="${vid}-policy" value="${v.policy||''}" placeholder="선택사항" onchange="vehicles[${idx}].policy=this.value">
+        <input type="text" id="${escapeHTML(vid)}-policy" value="${escapeHTML(v.policy||'')}" placeholder="선택사항" onchange="vehicles[${escapeHTML(idx)}].policy=this.value">
       </div>
     </div>
     <div class="field field-row">
       <div>
         <label class="field-label">보험 시작일</label>
-        <input type="date" id="${vid}-ins-start" value="${v.insStart||''}" onchange="vehicles[${idx}].insStart=this.value">
+        <input type="date" id="${escapeHTML(vid)}-ins-start" value="${escapeHTML(v.insStart||'')}" onchange="vehicles[${escapeHTML(idx)}].insStart=this.value">
       </div>
       <div>
         <label class="field-label">보험 만료일</label>
-        <input type="date" id="${vid}-ins-end" value="${v.insEnd||''}" onchange="vehicles[${idx}].insEnd=this.value;renderVehicleTabs();renderVehiclePanel(${idx})">
+        <input type="date" id="${escapeHTML(vid)}-ins-end" value="${escapeHTML(v.insEnd||'')}" onchange="vehicles[${escapeHTML(idx)}].insEnd=this.value;renderVehicleTabs();renderVehiclePanel(${escapeHTML(idx)})">
       </div>
     </div>
     ${expWarn}`;
@@ -2704,10 +2751,10 @@ function renderVehicleSelectInQuick(){
   const raw=localStorage.getItem('myInfo');let banner=document.getElementById('veh-quick-selector');
   if(!raw)return;
   const info=JSON.parse(raw),vehs=info.vehicles||[];
-  if(vehs.length<2){if(banner)banner.remove();applyMyInfoToRecord(0);return;}
+  if(vehs.length<2){if(banner)banner.remove();if(!checkData())applyMyInfoToRecord(0);return;}
   if(!banner){banner=document.createElement('div');banner.id='veh-quick-selector';banner.className='veh-select-card';const wrap=document.querySelector('#page-quick .wrap');if(wrap)wrap.insertBefore(banner,wrap.children[1]);}
   const ai=info.activeVehIdx||0;
-  banner.innerHTML=`<div class="vsc-title">🚗 어느 차량으로 기록하시겠어요?</div><div class="vsc-grid">${vehs.map((v,i)=>`<div class="vsc-btn${i===ai?' active':''}" onclick="selectQuickVeh(${i})"><div class="vsc-plate">${v.plate||'번호 미입력'}</div><div class="vsc-car">${v.nickname||v.car||'차량 '+(i+1)}</div><div class="vsc-ins">${v.insurer||'보험사 미입력'}</div></div>`).join('')}</div>`;
+  banner.innerHTML=`<div class="vsc-title">🚗 어느 차량으로 기록하시겠어요?</div><div class="vsc-grid">${vehs.map((v,i)=>`<div class="vsc-btn${escapeHTML(i===ai?' active':'')}" onclick="selectQuickVeh(${escapeHTML(i)})"><div class="vsc-plate">${escapeHTML(v.plate||'번호 미입력')}</div><div class="vsc-car">${escapeHTML(v.nickname||v.car||'차량 '+(i+1))}</div><div class="vsc-ins">${escapeHTML(v.insurer||'보험사 미입력')}</div></div>`).join('')}</div>`;
 }
 
 function selectQuickVeh(idx){const raw=localStorage.getItem('myInfo');if(raw){const info=JSON.parse(raw);info.activeVehIdx=idx;localStorage.setItem('myInfo',JSON.stringify(info));}applyMyInfoToRecord(idx);renderVehicleSelectInQuick();}
@@ -2729,18 +2776,18 @@ function highlightMyInsurerCall(insurerName){
     <div style="background:var(--red);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.85);margin-bottom:8px">⭐ 내 보험사 — 지금 바로 접수!</div>
       ${tel
-        ? `<a href="tel:${tel}" style="display:flex;align-items:center;gap:14px;text-decoration:none">
+        ? `<a href="tel:${escapeHTML(tel)}" style="display:flex;align-items:center;gap:14px;text-decoration:none">
              <div style="font-size:32px">📞</div>
              <div>
-               <div style="font-size:18px;font-weight:900;color:#fff">${name}</div>
-               <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:1px">${tel}</div>
+               <div style="font-size:18px;font-weight:900;color:#fff">${escapeHTML(name)}</div>
+               <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:1px">${escapeHTML(tel)}</div>
                <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px">탭하면 바로 전화 연결</div>
              </div>
            </a>`
         : `<div style="display:flex;align-items:center;gap:14px">
              <div style="font-size:32px">📞</div>
              <div>
-               <div style="font-size:20px;font-weight:900;color:#fff">${name}</div>
+               <div style="font-size:20px;font-weight:900;color:#fff">${escapeHTML(name)}</div>
                <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px">보험사 앱 또는 증권서 번호로 접수하세요</div>
              </div>
            </div>`
@@ -2781,7 +2828,7 @@ function checkFirstRun(){
     banner.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm)';
     banner.innerHTML = `
       <span style="font-size:18px">✅</span>
-      <span style="font-size:14px;font-weight:700;color:var(--text2);flex:1">${name} 차량 ${count}대 등록됨</span>
+      <span style="font-size:14px;font-weight:700;color:var(--text2);flex:1">${escapeHTML(name)} 차량 ${escapeHTML(count)}대 등록됨</span>
       <button onclick="goPage('myinfo')" style="background:none;border:2px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;white-space:nowrap">수정 →</button>`;
   }
 
@@ -2833,7 +2880,7 @@ function handlePhotoUpload(e){
   const list=document.getElementById('photo-preview-list');if(!list)return;
   Array.from(e.target.files).forEach(file=>{
     if(file.type.startsWith('image/')){const img=document.createElement('img');img.className='photo-thumb';img.title=file.name;const r=new FileReader();r.onload=ev=>{img.src=ev.target.result;};r.readAsDataURL(file);list.appendChild(img);}
-    else if(file.type.startsWith('video/')){const div=document.createElement('div');div.className='photo-vid-thumb';div.innerHTML=`<span style="font-size:22px">🎬</span><span>${file.name.slice(0,8)}…</span>`;list.appendChild(div);}
+    else if(file.type.startsWith('video/')){const div=document.createElement('div');div.className='photo-vid-thumb';div.innerHTML=`<span style="font-size:22px">🎬</span><span>${escapeHTML(file.name.slice(0,8))}…</span>`;list.appendChild(div);}
   });
 }
 
@@ -2857,19 +2904,19 @@ function renderStep2VehicleSelector() {
           if(!v.plate && !v.car) return '';
           const color = ['#1A6FD4','#1A9647','#D4720A','#9B51E0','#D62B2B','#0891B2'][i%6];
           const label = v.nickname || v.car || '차량 '+(i+1);
-          return `<button onclick="applyVehicleToStep2(${i})" style="
+          return `<button onclick="applyVehicleToStep2(${escapeHTML(i)})" style="
             display:flex;align-items:center;gap:12px;
             padding:14px 16px;border-radius:var(--radius-sm);
-            border:2px solid ${color};background:#fff;
+            border:2px solid ${escapeHTML(color)};background:#fff;
             font-family:'Noto Sans KR',sans-serif;cursor:pointer;text-align:left;
             transition:all 0.15s;
-          " onmouseover="this.style.background='${color}10'" onmouseout="this.style.background='#fff'">
-            <span style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0"></span>
+          " onmouseover="this.style.background='${escapeHTML(color)}10'" onmouseout="this.style.background='#fff'">
+            <span style="width:12px;height:12px;border-radius:50%;background:${escapeHTML(color)};flex-shrink:0"></span>
             <div style="flex:1">
-              <div style="font-size:17px;font-weight:900;color:#141418;letter-spacing:0.5px">${v.plate || '번호 미입력'}</div>
-              <div style="font-size:13px;color:#4A4D5A;margin-top:2px">${label}${v.insurer?' · '+v.insurer:''}</div>
+              <div style="font-size:17px;font-weight:900;color:#141418;letter-spacing:0.5px">${escapeHTML(v.plate || '번호 미입력')}</div>
+              <div style="font-size:13px;color:#4A4D5A;margin-top:2px">${escapeHTML(label)}${escapeHTML(v.insurer?' · '+v.insurer:'')}</div>
             </div>
-            <span style="font-size:13px;font-weight:700;color:${color}">선택 →</span>
+            <span style="font-size:13px;font-weight:700;color:${escapeHTML(color)}">선택 →</span>
           </button>`;
         }).join('')}
       </div>
@@ -2991,7 +3038,7 @@ function nextStep(to){
   if(STEP_VALIDATORS[from]&&!STEP_VALIDATORS[from]())return;
   collectStep(from);showPanel(to);window.scrollTo(0,0);
 }
-function prevStep(to){showPanel(to);window.scrollTo(0,0);}
+function prevStep(to){collectStep(currentStep);showPanel(to);window.scrollTo(0,0);}
 
 function collectStep(from){
   if(from===0){
@@ -3016,7 +3063,7 @@ function finishRecord(){
 
   // 현재 기록에 저장 시각 + 고유 ID 부여
   const now = new Date();
-  const id = 'acc_' + now.getTime();
+  const id = D._id || 'acc_' + crypto.randomUUID();
   const record = Object.assign({}, D, {
     _id: id,
     _savedAt: now.toISOString(),
@@ -3025,13 +3072,12 @@ function finishRecord(){
             (D.datetime ? ' · ' + D.datetime.replace('T',' ').slice(0,16) : '')
   });
 
-  // 누적 저장 (최대 20건)
+  // 기존 기록은 같은 ID로 갱신하고 과거 기록은 보존합니다.
   let history = [];
   try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
-  history.unshift(record);
-  if(history.length > 20) history = history.slice(0,20);
-  localStorage.setItem('accidentHistory', JSON.stringify(history));
-  localStorage.setItem('accidentData', JSON.stringify(D));
+  const existing=history.findIndex(r=>r._id===id);if(existing>=0)history[existing]=record;else history.unshift(record);
+  // Retain existing records; never silently discard an older accident.
+  try { localStorage.setItem('accidentHistory', JSON.stringify(history));localStorage.setItem('accidentData', JSON.stringify(record));replaceRecord(record); } catch(e){showToast('저장하지 못했습니다. 내용을 복사하거나 백업하고 저장 공간을 확인하세요.');return;}
 
   // 타임라인 자동 기록
   const types = D.types?.join(', ') || '교통사고';
@@ -3063,7 +3109,9 @@ function finishRecord(){
 }
 
 function resetRecord(){
+  if(!confirm('저장된 기록은 유지하고 새 상세 입력을 시작할까요?'))return;
   Object.keys(D).forEach(k=>{if(Array.isArray(D[k]))D[k]=[];else D[k]='';});
+  document.getElementById('photo-preview-list').replaceChildren();photoChecked.clear();
   showPanel(0);
   document.querySelectorAll('.sel-btn.selected').forEach(b=>b.classList.remove('selected'));
   document.querySelectorAll('.tag-btn').forEach(b=>{b.className='tag-btn';});
@@ -3159,7 +3207,7 @@ function updatePhotoChecklistForBlackbox(val) {
       cctvItem.querySelector('.pcl-imp').className = 'pcl-imp imp-yellow';
       cctvItem.querySelector('.pcl-hint').textContent = '사고 지점 전후 신호체계';
     }
-    banner.innerHTML = `<div style="background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--orange);display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">⚠️</span><span>블랙박스 있음 — <strong>지금 즉시 영상 백업!</strong><br>시동 끄면 자동 덮어쓰기 될 수 있습니다.</span></div>`;
+    banner.innerHTML = `<div style="background:#FFF4E5;border:2px solid rgba(212,114,10,0.3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--orange);display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">⚠️</span><span>블랙박스 있음 — <strong>지금 즉시 영상 백업!</strong><br>기기마다 보관 방식이 다릅니다. 안전한 곳에서 사고 영상을 별도로 보관하세요.</span></div>`;
 
   } else if (val === '없음') {
     bbItem.style.display = 'none';
@@ -3256,8 +3304,7 @@ async function runAI(prefilled){
     ? [...images, { type:'text', text: input + imageNote }]
     : input;
 
-  // 이미지 포함 시 web_search 병행 불가
-  const tools = images.length === 0 ? [{type:'web_search_20250305', name:'web_search'}] : undefined;
+
 
   try{
     const body = {
@@ -3278,7 +3325,7 @@ async function runAI(prefilled){
     document.getElementById('ai-loading').className='ai-loading';
     document.getElementById('ai-btn').disabled=false;
     const abt3=document.getElementById('ai-btn-top');if(abt3)abt3.disabled=false;
-    document.getElementById('ai-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;
+    document.getElementById('ai-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${escapeHTML(friendlyError(e.message))}</div>`;
     document.getElementById('ai-result').className='ai-result show';
   }
 }
@@ -3319,53 +3366,54 @@ function normalizeAIResponse(d) {
 }
 
 function renderAI(d){
-  const myF = parseInt(d.myFaultPct) || 0;
-  const opF = parseInt(d.opFaultPct) || 0;
+  const rawMy=Number(d.myFaultPct),rawOp=Number(d.opFaultPct);
+  const hasFault=d.myFaultPct!==undefined&&d.opFaultPct!==undefined&&Number.isFinite(rawMy)&&Number.isFinite(rawOp)&&rawMy>=0&&rawOp>=0&&rawMy<=100&&rawOp<=100&&rawMy+rawOp===100;
+  const myF=hasFault?rawMy:0,opF=hasFault?rawOp:0;
   const levelStyle={c:'border-left:5px solid var(--red);background:var(--red-bg)',w:'border-left:5px solid var(--orange);background:#FFF4E5',i:'border-left:5px solid var(--blue);background:var(--blue-bg)',l:'border-left:5px solid var(--green);background:var(--green-bg)'};
   const priColor={즉시:'var(--red)','5분내':'var(--orange)','24시간내':'var(--blue)'};
 
   const html=`
-    ${d._photoCount?`<div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px;font-size:14px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:8px">📸 사진 ${d._photoCount}장을 참고하여 분석했습니다</div>`:''}
-    ${d.lawUpdates&&d.lawUpdates!=='특이 변경사항 없음'?`<div class="r-card" style="border-left:5px solid var(--blue);margin-bottom:12px"><div class="r-label">🔍 법령 업데이트</div><div style="font-size:14px;color:var(--text2);line-height:1.7">${d.lawUpdates}</div></div>`:''}
+    ${d._photoCount?`<div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.3);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px;font-size:14px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:8px">📸 사진 ${escapeHTML(d._photoCount)}장을 AI에 전달했습니다 — 판단은 직접 확인하세요</div>`:''}
+    ${d.lawUpdates&&d.lawUpdates!=='특이 변경사항 없음'?`<div class="r-card" style="border-left:5px solid var(--blue);margin-bottom:12px"><div class="r-label">🔍 AI 법령 관련 의견 · 공식 확인 필요</div><div style="font-size:14px;color:var(--text2);line-height:1.7">${escapeHTML(d.lawUpdates)}</div></div>`:''}
     <div class="r-card">
       <div class="r-label">사고 유형 분석</div>
-      <div class="r-title">🚗 ${d.accidentType}</div>
-      <div class="r-desc">${d.summary}</div>
+      <div class="r-title">🚗 ${escapeHTML(d.accidentType)}</div>
+      <div class="r-desc">${escapeHTML(d.summary)}</div>
     </div>
     <div class="r-card">
-      <div class="r-label">⚖️ 과실 비율</div>
+      <div class="r-label">⚖️ 과실 비율 추정 · 확정 아님</div>
       <div class="fault-wrap">
         <div class="fault-nums">
-          <div><div class="fault-num" style="color:var(--blue)">${myF}%</div><div class="fault-name">내 과실</div></div>
-          <div style="text-align:right"><div class="fault-num" style="color:var(--red)">${opF}%</div><div class="fault-name">상대 과실</div></div>
+          <div><div class="fault-num" style="color:var(--blue)">${hasFault?escapeHTML(myF)+'%':'확인 필요'}</div><div class="fault-name">내 과실</div></div>
+          <div style="text-align:right"><div class="fault-num" style="color:var(--red)">${hasFault?escapeHTML(opF)+'%':'확인 필요'}</div><div class="fault-name">상대 과실</div></div>
         </div>
         <div class="fault-bar"><div class="fault-me" id="fme" style="width:0%"></div><div class="fault-op" id="fop" style="width:0%"></div></div>
-        <div class="fault-law">📌 ${d.faultBasis}</div>
-        ${d.faultVariables?`<div class="fault-law" style="margin-top:6px">⚡ ${d.faultVariables}</div>`:''}
+        <div class="fault-law">📌 ${escapeHTML(d.faultBasis)}</div>
+        ${d.faultVariables?`<div class="fault-law" style="margin-top:6px">⚡ ${escapeHTML(d.faultVariables)}</div>`:''}
       </div>
     </div>
     <div class="r-label" style="margin-bottom:8px">⚡ 즉시 행동</div>
     ${(d.immediateActions||[]).map(a=>`
-      <div class="action-card pri-${a.level==='c'?'now':a.level==='w'?'soon':'later'}">
-        <div class="ac-icon">${a.icon}</div>
+      <div class="action-card pri-${escapeHTML(a.level==='c'?'now':a.level==='w'?'soon':'later')}">
+        <div class="ac-icon">${escapeHTML(a.icon)}</div>
         <div style="flex:1">
-          <div class="ac-pri-badge">${a.priority}</div>
-          <div class="ac-title">${a.title}</div>
-          <div class="ac-body">${a.body}${a.items&&a.items.length?`<ul style="margin:6px 0 0 16px">${a.items.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}</div>
+          <div class="ac-pri-badge">${escapeHTML(a.priority)}</div>
+          <div class="ac-title">${escapeHTML(a.title)}</div>
+          <div class="ac-body">${escapeHTML(a.body)}${a.items&&a.items.length?`<ul style="margin:6px 0 0 16px">${a.items.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`:''}</div>
         </div>
       </div>`).join('')}
     <div class="r-card" style="margin-top:12px">
       <div class="r-label">📸 증거 수집</div>
-      <div class="ev-chips">${(d.evidence||[]).map(e=>`<div class="ev-chip">${e.icon} ${e.label}</div>`).join('')}</div>
+      <div class="ev-chips">${(d.evidence||[]).map(e=>`<div class="ev-chip">${escapeHTML(e.icon)} ${escapeHTML(e.label)}</div>`).join('')}</div>
     </div>
-    ${d.keyPhrase?`<div class="key-phrase r-card" style="margin-top:12px"><div class="r-label">💬 핵심 주장 (경찰·보험사에)</div>"${d.keyPhrase}"</div>`:''}
+    ${d.keyPhrase?`<div class="key-phrase r-card" style="margin-top:12px"><div class="r-label">💬 핵심 주장 (경찰·보험사에)</div>"${escapeHTML(d.keyPhrase)}"</div>`:''}
     <div class="r-label" style="margin:12px 0 8px">⚖️ 법적 대응</div>
     ${(d.legalTips||[]).map(t=>`
       <div class="action-card pri-later">
-        <div class="ac-icon">${t.icon}</div>
-        <div style="flex:1"><div class="ac-title">${t.title}</div><div class="ac-body">${t.body}${t.items&&t.items.length?`<ul style="margin:6px 0 0 16px">${t.items.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}</div></div>
+        <div class="ac-icon">${escapeHTML(t.icon)}</div>
+        <div style="flex:1"><div class="ac-title">${escapeHTML(t.title)}</div><div class="ac-body">${escapeHTML(t.body)}${t.items&&t.items.length?`<ul style="margin:6px 0 0 16px">${t.items.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`:''}</div></div>
       </div>`).join('')}
-    ${d.dontDo?`<div class="warn-card" style="margin-top:12px"><span style="font-size:20px;flex-shrink:0">🚫</span><div><strong style="color:var(--red)">절대 하면 안 됨:</strong> ${d.dontDo}</div></div>`:''}
+    ${d.dontDo?`<div class="warn-card" style="margin-top:12px"><span style="font-size:20px;flex-shrink:0">🚫</span><div><strong style="color:var(--red)">절대 하면 안 됨:</strong> ${escapeHTML(d.dontDo)}</div></div>`:''}
     <button class="reset-btn" onclick="resetAI()">↩ 다른 상황 분석</button>
     <div style="text-align:center;font-size:12px;color:var(--text3);margin-top:12px;line-height:1.7">
       ※ 위 분석은 AI가 제공하는 참고 정보입니다.<br>최종 과실 판정은 전문가 또는 보험사와 함께 확인하세요.
@@ -3420,7 +3468,7 @@ function loadSaved(){
     const s=localStorage.getItem('accidentData');
     if(s){
       const o=JSON.parse(s);
-      Object.assign(D,o);
+      replaceRecord(o);
       // 저장된 블랙박스 값이 있으면 체크리스트에 반영
       if(D.blackbox) updatePhotoChecklistForBlackbox(D.blackbox);
     }
@@ -3435,11 +3483,11 @@ function renderDoc(type){
   const now=new Date().toLocaleDateString('ko-KR'),dtStr=D.datetime?new Date(D.datetime).toLocaleString('ko-KR'):'미입력';
   prev.className='doc-preview';
   if(type==='police'){
-    prev.innerHTML=`<div style="position:relative"><div class="doc-watermark">교통사고 경위서</div><div class="doc-h1">교통사고 경위서</div><div class="doc-h2">▪ 사고 개요</div><table class="doc-tbl"><tr><td>사고 일시</td><td>${dtStr}</td></tr><tr><td>사고 장소</td><td>${D.location||'미입력'}</td></tr><tr><td>날씨</td><td>${D.weather||'미입력'}</td></tr><tr><td>사고 유형</td><td>${D.types.join(', ')||'미입력'}</td></tr><tr><td>블랙박스</td><td>${D.blackbox||'미입력'}</td></tr></table><div class="doc-h2">▪ 신청인</div><table class="doc-tbl"><tr><td>성명</td><td>${D.myName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.myPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.myPlate||'미입력'}</td></tr><tr><td>차종</td><td>${D.myCar||'미입력'}</td></tr><tr><td>보험사</td><td>${D.myInsurer||'미입력'}</td></tr><tr><td>차량 피해</td><td>${D.damages.join(', ')||'미입력'}</td></tr><tr><td>부상</td><td>${D.myInjury||'미입력'}</td></tr></table><div class="doc-h2">▪ 상대방</div><table class="doc-tbl"><tr><td>성명</td><td>${D.opName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.opPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.opPlate||'미입력'}</td></tr><tr><td>차종</td><td>${D.opCar||'미입력'}</td></tr><tr><td>보험사</td><td>${D.opInsurer||'미입력'}</td></tr><tr><td>부상</td><td>${D.opInjury||'미입력'}</td></tr></table>${D.witness?`<div class="doc-h2">▪ 목격자</div><table class="doc-tbl"><tr><td>연락처</td><td>${D.witness}</td></tr></table>`:''}<div class="doc-h2">▪ 사고 경위</div><div class="doc-para">${D.desc||'미입력'}</div>${D.injuryDetail?`<div class="doc-h2">▪ 부상 상세</div><div class="doc-para">${D.injuryDetail}</div>`:''}<div class="doc-sig"><p>작성일: ${now}</p><p style="margin-top:8px">작성자: ${D.myName||'　　　　　'} &nbsp;&nbsp; 서명: _______________</p><p style="margin-top:4px">위 내용은 사실과 다름이 없음을 확인합니다.</p></div><div class="doc-note">※ 본 경위서는 교통사고 대응 앱에서 자동 생성되었습니다. 서명 후 제출하세요.</div></div>`;
+    prev.innerHTML=`<div style="position:relative"><div class="doc-watermark">교통사고 경위서</div><div class="doc-h1">교통사고 경위서</div><div class="doc-h2">▪ 사고 개요</div><table class="doc-tbl"><tr><td>사고 일시</td><td>${escapeHTML(dtStr)}</td></tr><tr><td>사고 장소</td><td>${escapeHTML(D.location||'미입력')}</td></tr><tr><td>날씨</td><td>${escapeHTML(D.weather||'미입력')}</td></tr><tr><td>사고 유형</td><td>${escapeHTML(D.types.join(', ')||'미입력')}</td></tr><tr><td>블랙박스</td><td>${escapeHTML(D.blackbox||'미입력')}</td></tr></table><div class="doc-h2">▪ 신청인</div><table class="doc-tbl"><tr><td>성명</td><td>${escapeHTML(D.myName||'미입력')}</td></tr><tr><td>연락처</td><td>${escapeHTML(D.myPhone||'미입력')}</td></tr><tr><td>차량번호</td><td>${escapeHTML(D.myPlate||'미입력')}</td></tr><tr><td>차종</td><td>${escapeHTML(D.myCar||'미입력')}</td></tr><tr><td>보험사</td><td>${escapeHTML(D.myInsurer||'미입력')}</td></tr><tr><td>차량 피해</td><td>${escapeHTML(D.damages.join(', ')||'미입력')}</td></tr><tr><td>부상</td><td>${escapeHTML(D.myInjury||'미입력')}</td></tr></table><div class="doc-h2">▪ 상대방</div><table class="doc-tbl"><tr><td>성명</td><td>${escapeHTML(D.opName||'미입력')}</td></tr><tr><td>연락처</td><td>${escapeHTML(D.opPhone||'미입력')}</td></tr><tr><td>차량번호</td><td>${escapeHTML(D.opPlate||'미입력')}</td></tr><tr><td>차종</td><td>${escapeHTML(D.opCar||'미입력')}</td></tr><tr><td>보험사</td><td>${escapeHTML(D.opInsurer||'미입력')}</td></tr><tr><td>부상</td><td>${escapeHTML(D.opInjury||'미입력')}</td></tr></table>${D.witness?`<div class="doc-h2">▪ 목격자</div><table class="doc-tbl"><tr><td>연락처</td><td>${escapeHTML(D.witness)}</td></tr></table>`:''}<div class="doc-h2">▪ 사고 경위</div><div class="doc-para">${escapeHTML(D.desc||'미입력')}</div>${D.injuryDetail?`<div class="doc-h2">▪ 부상 상세</div><div class="doc-para">${escapeHTML(D.injuryDetail)}</div>`:''}<div class="doc-sig"><p>작성일: ${escapeHTML(now)}</p><p style="margin-top:8px">작성자: ${escapeHTML(D.myName||'　　　　　')} &nbsp;&nbsp; 서명: _______________</p><p style="margin-top:4px">위 내용은 사실과 다름이 없음을 확인합니다.</p></div><div class="doc-note">※ 본 경위서는 교통사고 대응 앱에서 자동 생성되었습니다. 서명 후 제출하세요.</div></div>`;
   }else if(type==='insurance'){
-    prev.innerHTML=`<div style="position:relative"><div class="doc-watermark">보험청구용</div><div class="doc-h1">교통사고 확인서 (보험 청구용)</div><div class="doc-h2">▪ 사고 정보</div><table class="doc-tbl"><tr><td>사고 일시</td><td>${dtStr}</td></tr><tr><td>사고 장소</td><td>${D.location||'미입력'}</td></tr><tr><td>날씨</td><td>${D.weather||'미입력'}</td></tr><tr><td>사고 유형</td><td>${D.types.join(', ')||'미입력'}</td></tr><tr><td>신고 완료</td><td>${D.reports.join(', ')||'미입력'}</td></tr></table><div class="doc-h2">▪ 보험 계약자</div><table class="doc-tbl"><tr><td>성명</td><td>${D.myName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.myPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.myPlate||'미입력'}</td></tr><tr><td>차종</td><td>${D.myCar||'미입력'}</td></tr><tr><td>가입 보험사</td><td>${D.myInsurer||'미입력'}</td></tr><tr><td>증권번호</td><td>${D.myPolicy||'미입력'}</td></tr><tr><td>차량 피해</td><td>${D.damages.join(', ')||'미입력'}</td></tr><tr><td>인적 피해</td><td>${D.myInjury||'미입력'}${D.injuryDetail?' — '+D.injuryDetail:''}</td></tr></table><div class="doc-h2">▪ 상대방</div><table class="doc-tbl"><tr><td>성명</td><td>${D.opName||'미입력'}</td></tr><tr><td>연락처</td><td>${D.opPhone||'미입력'}</td></tr><tr><td>차량번호</td><td>${D.opPlate||'미입력'}</td></tr><tr><td>보험사</td><td>${D.opInsurer||'미입력'}</td></tr></table><div class="doc-h2">▪ 사고 경위</div><div class="doc-para">${D.desc||'미입력'}</div><div class="doc-note">📌 함께 제출할 서류: 교통사고사실확인원, 진단서, 진료비 영수증, 차량 수리 견적서, 통장 사본, 신분증 사본</div><div class="doc-sig"><p>작성일: ${now}</p><p style="margin-top:8px">청구인: ${D.myName||'　　　　　'} &nbsp;&nbsp; 서명: _______________</p></div></div>`;
+    prev.innerHTML=`<div style="position:relative"><div class="doc-watermark">보험청구용</div><div class="doc-h1">교통사고 확인서 (보험 청구용)</div><div class="doc-h2">▪ 사고 정보</div><table class="doc-tbl"><tr><td>사고 일시</td><td>${escapeHTML(dtStr)}</td></tr><tr><td>사고 장소</td><td>${escapeHTML(D.location||'미입력')}</td></tr><tr><td>날씨</td><td>${escapeHTML(D.weather||'미입력')}</td></tr><tr><td>사고 유형</td><td>${escapeHTML(D.types.join(', ')||'미입력')}</td></tr><tr><td>신고 완료</td><td>${escapeHTML(D.reports.join(', ')||'미입력')}</td></tr></table><div class="doc-h2">▪ 보험 계약자</div><table class="doc-tbl"><tr><td>성명</td><td>${escapeHTML(D.myName||'미입력')}</td></tr><tr><td>연락처</td><td>${escapeHTML(D.myPhone||'미입력')}</td></tr><tr><td>차량번호</td><td>${escapeHTML(D.myPlate||'미입력')}</td></tr><tr><td>차종</td><td>${escapeHTML(D.myCar||'미입력')}</td></tr><tr><td>가입 보험사</td><td>${escapeHTML(D.myInsurer||'미입력')}</td></tr><tr><td>증권번호</td><td>${escapeHTML(D.myPolicy||'미입력')}</td></tr><tr><td>차량 피해</td><td>${escapeHTML(D.damages.join(', ')||'미입력')}</td></tr><tr><td>인적 피해</td><td>${escapeHTML(D.myInjury||'미입력')}${escapeHTML(D.injuryDetail?' — '+D.injuryDetail:'')}</td></tr></table><div class="doc-h2">▪ 상대방</div><table class="doc-tbl"><tr><td>성명</td><td>${escapeHTML(D.opName||'미입력')}</td></tr><tr><td>연락처</td><td>${escapeHTML(D.opPhone||'미입력')}</td></tr><tr><td>차량번호</td><td>${escapeHTML(D.opPlate||'미입력')}</td></tr><tr><td>보험사</td><td>${escapeHTML(D.opInsurer||'미입력')}</td></tr></table><div class="doc-h2">▪ 사고 경위</div><div class="doc-para">${escapeHTML(D.desc||'미입력')}</div><div class="doc-note">📌 함께 제출할 서류: 교통사고사실확인원, 진단서, 진료비 영수증, 차량 수리 견적서, 통장 사본, 신분증 사본</div><div class="doc-sig"><p>작성일: ${escapeHTML(now)}</p><p style="margin-top:8px">청구인: ${escapeHTML(D.myName||'　　　　　')} &nbsp;&nbsp; 서명: _______________</p></div></div>`;
   }else if(type==='memo'){
-    prev.innerHTML=`<div class="doc-h1" style="font-size:18px">사고 현장 메모</div><table class="doc-tbl"><tr><td>일시</td><td><strong>${dtStr}</strong></td></tr><tr><td>장소</td><td><strong>${D.location||'—'}</strong></td></tr><tr><td>날씨</td><td>${D.weather||'—'}</td></tr><tr><td>유형</td><td>${D.types.join(', ')||'—'}</td></tr></table><div class="doc-h2">내 차량</div><table class="doc-tbl"><tr><td>번호</td><td><strong style="font-size:17px">${D.myPlate||'—'}</strong></td></tr><tr><td>이름/연락</td><td>${D.myName||'—'} / ${D.myPhone||'—'}</td></tr><tr><td>보험사</td><td>${D.myInsurer||'—'}</td></tr><tr><td>피해</td><td>${D.damages.join(', ')||'—'} / 부상: ${D.myInjury||'—'}</td></tr></table><div class="doc-h2">상대방</div><table class="doc-tbl"><tr><td>번호</td><td><strong style="font-size:17px">${D.opPlate||'—'}</strong></td></tr><tr><td>이름/연락</td><td>${D.opName||'—'} / ${D.opPhone||'—'}</td></tr><tr><td>보험사</td><td>${D.opInsurer||'—'}</td></tr></table>${D.witness?`<div class="doc-h2">목격자</div><table class="doc-tbl"><tr><td>연락처</td><td><strong>${D.witness}</strong></td></tr></table>`:''}<div class="doc-h2">경위</div><div class="doc-para">${D.desc||'—'}</div><div style="margin-top:16px;font-size:12px;color:#999">블랙박스: ${D.blackbox||'—'} | 작성: ${now}</div>`;
+    prev.innerHTML=`<div class="doc-h1" style="font-size:18px">사고 현장 메모</div><table class="doc-tbl"><tr><td>일시</td><td><strong>${escapeHTML(dtStr)}</strong></td></tr><tr><td>장소</td><td><strong>${escapeHTML(D.location||'—')}</strong></td></tr><tr><td>날씨</td><td>${escapeHTML(D.weather||'—')}</td></tr><tr><td>유형</td><td>${escapeHTML(D.types.join(', ')||'—')}</td></tr></table><div class="doc-h2">내 차량</div><table class="doc-tbl"><tr><td>번호</td><td><strong style="font-size:17px">${escapeHTML(D.myPlate||'—')}</strong></td></tr><tr><td>이름/연락</td><td>${escapeHTML(D.myName||'—')} / ${escapeHTML(D.myPhone||'—')}</td></tr><tr><td>보험사</td><td>${escapeHTML(D.myInsurer||'—')}</td></tr><tr><td>피해</td><td>${escapeHTML(D.damages.join(', ')||'—')} / 부상: ${escapeHTML(D.myInjury||'—')}</td></tr></table><div class="doc-h2">상대방</div><table class="doc-tbl"><tr><td>번호</td><td><strong style="font-size:17px">${escapeHTML(D.opPlate||'—')}</strong></td></tr><tr><td>이름/연락</td><td>${escapeHTML(D.opName||'—')} / ${escapeHTML(D.opPhone||'—')}</td></tr><tr><td>보험사</td><td>${escapeHTML(D.opInsurer||'—')}</td></tr></table>${D.witness?`<div class="doc-h2">목격자</div><table class="doc-tbl"><tr><td>연락처</td><td><strong>${escapeHTML(D.witness)}</strong></td></tr></table>`:''}<div class="doc-h2">경위</div><div class="doc-para">${escapeHTML(D.desc||'—')}</div><div style="margin-top:16px;font-size:12px;color:#999">블랙박스: ${escapeHTML(D.blackbox||'—')} | 작성: ${escapeHTML(now)}</div>`;
   }
 }
 
@@ -3502,19 +3550,19 @@ async function runGuardAI(){
     const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
     const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
     const lc={high:'var(--red)',medium:'var(--orange)',low:'var(--green)'};const lt={high:'⚠️ 고위험',medium:'⚠️ 주의',low:'✅ 일반'};
-    let html=`<div class="r-card" style="border-left:5px solid ${lc[d.suspicionLevel]}">
+    let html=`<div class="r-card" style="border-left:5px solid ${escapeHTML(lc[d.suspicionLevel])}">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:15px;font-weight:900;color:${lc[d.suspicionLevel]}">${lt[d.suspicionLevel]}</span>
+        <span style="font-size:15px;font-weight:900;color:${escapeHTML(lc[d.suspicionLevel])}">${escapeHTML(lt[d.suspicionLevel])}</span>
       </div>
-      <div style="font-size:15px;color:var(--text2);line-height:1.7">${d.summary}</div>
+      <div style="font-size:15px;color:var(--text2);line-height:1.7">${escapeHTML(d.summary)}</div>
     </div>`;
-    if(d.tactics&&d.tactics.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)">🎯 보험사 전술</div>`;d.tactics.forEach(t=>{html+=`<div class="gr-card warning" style="background:var(--red-bg);border-left:5px solid var(--red);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px"><div class="gr-card-title" style="font-size:15px;font-weight:900;margin-bottom:6px;color:var(--red)">🔴 ${t.name}</div><div class="gr-card-body" style="font-size:14px;color:var(--text2);line-height:1.7">${t.desc}</div></div>`;});}
-    if(d.counters&&d.counters.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)">✅ 즉시 쓸 수 있는 대응 문구</div>`;d.counters.forEach(c=>{html+=`<div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.25);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;font-size:15px;color:var(--text);line-height:1.7;font-style:italic">💬 "${c}"</div>`;});}
-    if(d.legalBasis)html+=`<div class="action-card pri-later" style="margin-top:8px"><div class="ac-icon">📚</div><div><div class="ac-title">법적 근거</div><div class="ac-body">${d.legalBasis}</div></div></div>`;
-    if(d.escalation)html+=`<div class="action-card" style="border-left:5px solid var(--orange);background:#FFF4E5;margin-top:8px"><div class="ac-icon">🏛️</div><div><div class="ac-title">분쟁 조정 방법</div><div class="ac-body">${d.escalation}</div></div></div>`;
+    if(d.tactics&&d.tactics.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)">🎯 보험사 전술</div>`;d.tactics.forEach(t=>{html+=`<div class="gr-card warning" style="background:var(--red-bg);border-left:5px solid var(--red);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px"><div class="gr-card-title" style="font-size:15px;font-weight:900;margin-bottom:6px;color:var(--red)">🔴 ${escapeHTML(t.name)}</div><div class="gr-card-body" style="font-size:14px;color:var(--text2);line-height:1.7">${escapeHTML(t.desc)}</div></div>`;});}
+    if(d.counters&&d.counters.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)">✅ 즉시 쓸 수 있는 대응 문구</div>`;d.counters.forEach(c=>{html+=`<div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.25);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:8px;font-size:15px;color:var(--text);line-height:1.7;font-style:italic">💬 "${escapeHTML(c)}"</div>`;});}
+    if(d.legalBasis)html+=`<div class="action-card pri-later" style="margin-top:8px"><div class="ac-icon">📚</div><div><div class="ac-title">법적 근거</div><div class="ac-body">${escapeHTML(d.legalBasis)}</div></div></div>`;
+    if(d.escalation)html+=`<div class="action-card" style="border-left:5px solid var(--orange);background:#FFF4E5;margin-top:8px"><div class="ac-icon">🏛️</div><div><div class="ac-title">분쟁 조정 방법</div><div class="ac-body">${escapeHTML(d.escalation)}</div></div></div>`;
     html+=`<button class="reset-btn" onclick="document.getElementById('guard-result').innerHTML='';document.getElementById('guard-input').value=''">↩ 다른 상황 분석</button>`;
     document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=html;
-  }catch(e){document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;}
+  }catch(e){document.getElementById('guard-loading').className='ai-loading';document.getElementById('guard-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${escapeHTML(friendlyError(e.message))}</div>`;}
 }
 
 /* ══════════════ POLICY AI ══════════════ */
@@ -3594,15 +3642,15 @@ async function runPolicyAI(){
     const raw=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
     const d=JSON.parse(raw.replace(/```json|```/g,'').trim());
     let html='';
-    if(d.coverageItems?.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 보장 항목 & 한도</div><div class="pcover-grid">`;d.coverageItems.forEach(item=>{html+=`<div class="pcover-card"><div class="pcover-name">${item.name}</div><div class="pcover-limit">${item.limit}</div>${item.selfPay?`<div style="font-size:12px;color:var(--orange);margin-bottom:3px">자기부담: ${item.selfPay}</div>`:''}<div class="pcover-note">${item.note||''}</div></div>`;});html+=`</div>`;}
-    if(d.summary)html+=`<div class="card" style="margin-top:12px"><div class="r-label">📋 전체 총평</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${d.summary}</div></div>`;
-    if(d.strengths?.length||d.weaknesses?.length){html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.2);border-radius:var(--radius-sm);padding:14px"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ 강점</div>${(d.strengths||[]).map(s=>`<div style="font-size:14px;color:var(--text2);margin-bottom:5px">• ${s}</div>`).join('')}</div><div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.2);border-radius:var(--radius-sm);padding:14px"><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ 취약점</div>${(d.weaknesses||[]).map(w=>`<div style="font-size:14px;color:var(--text2);margin-bottom:5px">• ${w}</div>`).join('')}</div></div>`;}
-    if(d.blindSpots?.length)d.blindSpots.forEach(b=>{html+=`<div class="p-warn-box">⚠️ <div><strong style="color:var(--orange)">${b.title}</strong><br>${b.desc}</div></div>`;});
-    if(d.accidentScenarios?.length)d.accidentScenarios.forEach(s=>{html+=`<div class="p-tip-box"><div class="p-tip-title">📌 ${s.scenario}</div><div style="font-size:14px;color:var(--text2);line-height:1.7">${s.coverage}</div></div>`;});
-    if(d.questionAnswers)html+=`<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="r-label" style="color:var(--blue)">💬 질문 답변</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${d.questionAnswers}</div></div>`;
+    if(d.coverageItems?.length){html+=`<div style="font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 보장 항목 & 한도</div><div class="pcover-grid">`;d.coverageItems.forEach(item=>{html+=`<div class="pcover-card"><div class="pcover-name">${escapeHTML(item.name)}</div><div class="pcover-limit">${escapeHTML(item.limit)}</div>${item.selfPay?`<div style="font-size:12px;color:var(--orange);margin-bottom:3px">자기부담: ${escapeHTML(item.selfPay)}</div>`:''}<div class="pcover-note">${escapeHTML(item.note||'')}</div></div>`;});html+=`</div>`;}
+    if(d.summary)html+=`<div class="card" style="margin-top:12px"><div class="r-label">📋 전체 총평</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${escapeHTML(d.summary)}</div></div>`;
+    if(d.strengths?.length||d.weaknesses?.length){html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div style="background:var(--green-bg);border:2px solid rgba(26,150,71,0.2);border-radius:var(--radius-sm);padding:14px"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ 강점</div>${(d.strengths||[]).map(s=>`<div style="font-size:14px;color:var(--text2);margin-bottom:5px">• ${escapeHTML(s)}</div>`).join('')}</div><div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.2);border-radius:var(--radius-sm);padding:14px"><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ 취약점</div>${(d.weaknesses||[]).map(w=>`<div style="font-size:14px;color:var(--text2);margin-bottom:5px">• ${escapeHTML(w)}</div>`).join('')}</div></div>`;}
+    if(d.blindSpots?.length)d.blindSpots.forEach(b=>{html+=`<div class="p-warn-box">⚠️ <div><strong style="color:var(--orange)">${escapeHTML(b.title)}</strong><br>${escapeHTML(b.desc)}</div></div>`;});
+    if(d.accidentScenarios?.length)d.accidentScenarios.forEach(s=>{html+=`<div class="p-tip-box"><div class="p-tip-title">📌 ${escapeHTML(s.scenario)}</div><div style="font-size:14px;color:var(--text2);line-height:1.7">${escapeHTML(s.coverage)}</div></div>`;});
+    if(d.questionAnswers)html+=`<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="r-label" style="color:var(--blue)">💬 질문 답변</div><div style="font-size:15px;color:var(--text2);line-height:1.75">${escapeHTML(d.questionAnswers)}</div></div>`;
     html+=`<div class="policy-disclaimer">⚠️ AI 참고용 분석입니다. 실제 보험금 지급은 약관 및 사고 상황에 따라 달라집니다.</div><button class="reset-btn" onclick="resetPolicy()">↩ 다른 보험 분석</button>`;
     document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=html;document.getElementById('policy-result').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(e){document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;}
+  }catch(e){document.getElementById('policy-loading').className='ai-loading';document.getElementById('policy-btn').disabled=false;document.getElementById('policy-result').innerHTML=`<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;font-size:15px;color:var(--red)">⚠️ ${escapeHTML(friendlyError(e.message))}</div>`;}
 }
 
 function resetPolicy(){document.getElementById('policy-result').innerHTML='';document.getElementById('policy-text').value='';document.getElementById('policy-question').value='';document.getElementById('policy-file').value='';document.getElementById('uz-filename').style.display='none';document.getElementById('upload-zone').classList.remove('has-file');policyFileBase64=null;policyFileType=null;window.scrollTo(0,0);}
@@ -3631,28 +3679,28 @@ function renderHistoryList() {
     <div style="border:2px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:10px">
       <!-- 헤더 -->
       <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border-bottom:2px solid var(--border)">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">${history.length - i}</div>
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">${escapeHTML(history.length - i)}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${types}</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px">${dt}</div>
+          <div style="font-size:15px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHTML(types)}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${escapeHTML(dt)}</div>
         </div>
       </div>
       <!-- 내용 요약 -->
       <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text2)">
-        <div>📍 ${loc}</div>
-        ${plate ? `<div>🚗 내 차량: <strong style="color:var(--text)">${plate}</strong></div>` : ''}
-        ${opPlate ? `<div>🚙 상대 차량: <strong style="color:var(--text)">${opPlate}</strong></div>` : ''}
-        ${rec.myInsurer ? `<div>🏢 내 보험사: ${rec.myInsurer}</div>` : ''}
+        <div>📍 ${escapeHTML(loc)}</div>
+        ${plate ? `<div>🚗 내 차량: <strong style="color:var(--text)">${escapeHTML(plate)}</strong></div>` : ''}
+        ${opPlate ? `<div>🚙 상대 차량: <strong style="color:var(--text)">${escapeHTML(opPlate)}</strong></div>` : ''}
+        ${rec.myInsurer ? `<div>🏢 내 보험사: ${escapeHTML(rec.myInsurer)}</div>` : ''}
       </div>
       <!-- 버튼 -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:2px solid var(--border)">
-        <button onclick="loadHistoryRecord(${i})" style="padding:12px 6px;background:#fff;border:none;border-right:1px solid var(--border);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--blue);cursor:pointer">
+        <button onclick="loadHistoryRecord(${escapeHTML(i)})" style="padding:12px 6px;background:#fff;border:none;border-right:1px solid var(--border);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--blue);cursor:pointer">
           ✏️ 불러오기
         </button>
-        <button onclick="exportRecordPDF(${i})" style="padding:12px 6px;background:#fff;border:none;border-right:1px solid var(--border);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--green);cursor:pointer">
+        <button onclick="exportRecordPDF(${escapeHTML(i)})" style="padding:12px 6px;background:#fff;border:none;border-right:1px solid var(--border);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--green);cursor:pointer">
           📄 PDF 저장
         </button>
-        <button onclick="deleteHistoryRecord(${i})" style="padding:12px 6px;background:#fff;border:none;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--red);cursor:pointer">
+        <button onclick="deleteHistoryRecord(${escapeHTML(i)})" style="padding:12px 6px;background:#fff;border:none;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:var(--red);cursor:pointer">
           🗑️ 삭제
         </button>
       </div>
@@ -3665,11 +3713,11 @@ function loadHistoryRecord(idx) {
   try { history = JSON.parse(localStorage.getItem('accidentHistory') || '[]'); } catch(e){}
   const rec = history[idx];
   if (!rec) return;
-  Object.assign(D, rec);
+  replaceRecord(rec);
   localStorage.setItem('accidentData', JSON.stringify(D));
 
   // 현장기록 panel-0 UI 복원
-  restorePanel0UI();
+  restoreRecordFields();
 
   loadSettings();
 
@@ -3748,7 +3796,7 @@ function exportRecordPDF(idx) {
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html lang="ko"><head>
   <meta charset="UTF-8">
-  <title>교통사고 기록 — ${rec._label||dt}</title>
+  <title>교통사고 기록 — ${escapeHTML(rec._label||dt)}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -3766,55 +3814,55 @@ function exportRecordPDF(idx) {
   </style>
   </head><body>
   <h1>🚨 교통사고 현장 기록</h1>
-  <div class="sub">저장일시: ${savedAt}&nbsp;&nbsp;|&nbsp;&nbsp;출력일: ${new Date().toLocaleString('ko-KR')}</div>
+  <div class="sub">저장일시: ${escapeHTML(savedAt)}&nbsp;&nbsp;|&nbsp;&nbsp;출력일: ${escapeHTML(new Date().toLocaleString('ko-KR'))}</div>
 
   <div class="section">
     <div class="section-title">📍 사고 기본 정보</div>
     <table>
-      <tr><td>사고 유형</td><td>${(rec.types||[]).join(', ')||'미입력'}</td></tr>
-      <tr><td>사고 일시</td><td>${dt}</td></tr>
-      <tr><td>사고 장소</td><td>${rec.location||'미입력'}</td></tr>
-      <tr><td>날씨</td><td>${rec.weather||'미입력'}</td></tr>
-      <tr><td>블랙박스</td><td>${rec.blackbox||'미입력'}</td></tr>
-      <tr><td>신고 여부</td><td>${(rec.reports||[]).join(', ')||'미입력'}</td></tr>
+      <tr><td>사고 유형</td><td>${escapeHTML((rec.types||[]).join(', ')||'미입력')}</td></tr>
+      <tr><td>사고 일시</td><td>${escapeHTML(dt)}</td></tr>
+      <tr><td>사고 장소</td><td>${escapeHTML(rec.location||'미입력')}</td></tr>
+      <tr><td>날씨</td><td>${escapeHTML(rec.weather||'미입력')}</td></tr>
+      <tr><td>블랙박스</td><td>${escapeHTML(rec.blackbox||'미입력')}</td></tr>
+      <tr><td>신고 여부</td><td>${escapeHTML((rec.reports||[]).join(', ')||'미입력')}</td></tr>
     </table>
   </div>
 
   <div class="section">
     <div class="section-title">🚗 내 차량 정보</div>
     <table>
-      <tr><td>차량 번호</td><td>${rec.myPlate||'미입력'}</td></tr>
-      <tr><td>차종</td><td>${rec.myCar||'미입력'}</td></tr>
-      <tr><td>이름</td><td>${rec.myName||'미입력'}</td></tr>
-      <tr><td>연락처</td><td>${rec.myPhone||'미입력'}</td></tr>
-      <tr><td>보험사</td><td>${rec.myInsurer||'미입력'}</td></tr>
-      <tr><td>증권번호</td><td>${rec.myPolicy||'미입력'}</td></tr>
-      <tr><td>차량 피해</td><td>${(rec.damages||[]).join(', ')||'미입력'}</td></tr>
-      <tr><td>부상 여부</td><td>${rec.myInjury||'미입력'}</td></tr>
+      <tr><td>차량 번호</td><td>${escapeHTML(rec.myPlate||'미입력')}</td></tr>
+      <tr><td>차종</td><td>${escapeHTML(rec.myCar||'미입력')}</td></tr>
+      <tr><td>이름</td><td>${escapeHTML(rec.myName||'미입력')}</td></tr>
+      <tr><td>연락처</td><td>${escapeHTML(rec.myPhone||'미입력')}</td></tr>
+      <tr><td>보험사</td><td>${escapeHTML(rec.myInsurer||'미입력')}</td></tr>
+      <tr><td>증권번호</td><td>${escapeHTML(rec.myPolicy||'미입력')}</td></tr>
+      <tr><td>차량 피해</td><td>${escapeHTML((rec.damages||[]).join(', ')||'미입력')}</td></tr>
+      <tr><td>부상 여부</td><td>${escapeHTML(rec.myInjury||'미입력')}</td></tr>
     </table>
   </div>
 
   <div class="section">
     <div class="section-title">🚙 상대방 정보</div>
     <table>
-      <tr><td>차량 번호</td><td>${rec.opPlate||'미입력'}</td></tr>
-      <tr><td>차종</td><td>${rec.opCar||'미입력'}</td></tr>
-      <tr><td>이름</td><td>${rec.opName||'미입력'}</td></tr>
-      <tr><td>연락처</td><td>${rec.opPhone||'미입력'}</td></tr>
-      <tr><td>보험사</td><td>${rec.opInsurer||'미입력'}</td></tr>
-      <tr><td>부상 여부</td><td>${rec.opInjury||'미입력'}</td></tr>
-      <tr><td>목격자 연락처</td><td>${rec.witness||'없음'}</td></tr>
+      <tr><td>차량 번호</td><td>${escapeHTML(rec.opPlate||'미입력')}</td></tr>
+      <tr><td>차종</td><td>${escapeHTML(rec.opCar||'미입력')}</td></tr>
+      <tr><td>이름</td><td>${escapeHTML(rec.opName||'미입력')}</td></tr>
+      <tr><td>연락처</td><td>${escapeHTML(rec.opPhone||'미입력')}</td></tr>
+      <tr><td>보험사</td><td>${escapeHTML(rec.opInsurer||'미입력')}</td></tr>
+      <tr><td>부상 여부</td><td>${escapeHTML(rec.opInjury||'미입력')}</td></tr>
+      <tr><td>목격자 연락처</td><td>${escapeHTML(rec.witness||'없음')}</td></tr>
     </table>
   </div>
 
   <div class="section">
     <div class="section-title">📝 사고 경위</div>
-    <div class="desc-box">${rec.desc||'미입력'}</div>
+    <div class="desc-box">${escapeHTML(rec.desc||'미입력')}</div>
   </div>
 
   ${rec.injuryDetail ? `<div class="section">
     <div class="section-title">🏥 부상 상세</div>
-    <div class="desc-box">${rec.injuryDetail}</div>
+    <div class="desc-box">${escapeHTML(rec.injuryDetail)}</div>
   </div>` : ''}
 
   <div class="footer">
@@ -3838,7 +3886,7 @@ function loadSettings(){
   const raw=localStorage.getItem('accidentData'),sum=document.getElementById('settings-record-summary'),nd=document.getElementById('settings-no-data'),ea=document.getElementById('settings-edit-area');
   if(!raw){if(nd)nd.style.display='block';if(ea)ea.style.display='none';return;}
   setD=JSON.parse(raw);if(nd)nd.style.display='none';if(ea)ea.style.display='block';
-  if(sum){const items=[setD.datetime?`🕐 ${setD.datetime.replace('T',' ')}`:null,setD.location?`📍 ${setD.location}`:null,(setD.types&&setD.types.length)?`🚗 ${setD.types.join(', ')}`:null,setD.myPlate?`내 번호: ${setD.myPlate}`:null,setD.opPlate?`상대: ${setD.opPlate}`:null].filter(Boolean);sum.innerHTML=`<div class="set-summary-card">${items.map(i=>`<div class="set-summary-item">${i}</div>`).join('<span style="color:var(--border)"> │ </span>')}</div>`;}
+  if(sum){const items=[setD.datetime?`🕐 ${setD.datetime.replace('T',' ')}`:null,setD.location?`📍 ${setD.location}`:null,(setD.types&&setD.types.length)?`🚗 ${setD.types.join(', ')}`:null,setD.myPlate?`내 번호: ${setD.myPlate}`:null,setD.opPlate?`상대: ${setD.opPlate}`:null].filter(Boolean);sum.innerHTML=`<div class="set-summary-card">${items.map(i=>`<div class="set-summary-item">${escapeHTML(i)}</div>`).join('<span style="color:var(--border)"> │ </span>')}</div>`;}
   const sv=(id,val)=>{const e=document.getElementById(id);if(e&&val)e.value=val;};
   sv('set-datetime',setD.datetime);sv('set-location',setD.location);
   if(setD.types&&setD.types.length){document.querySelectorAll('#set-types-grid .sel-btn').forEach(btn=>{const onclick=btn.getAttribute('onclick')||'';const match=onclick.match(/setToggleType\(this,'([^']+)'\)/);if(match&&setD.types.includes(match[1]))btn.classList.add('selected');});}
@@ -3921,7 +3969,7 @@ async function getGPSLocation() {
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ko`,
-        { headers: { 'User-Agent': 'AccidentApp/1.0' } }
+        {signal:AbortSignal.timeout(6000)}
       );
       const data = await res.json();
       const addr = buildKoreanAddress(data, lat, lon);
@@ -3932,12 +3980,12 @@ async function getGPSLocation() {
       const mapEl = document.getElementById('gps-map');
       mapEl.src = `https://maps.google.com/maps?q=${lat},${lon}&z=17&output=embed&hl=ko`;
       const addrBar = document.getElementById('gps-addr-bar');
-      addrBar.innerHTML = `📍 ${addr} <span style="font-size:11px;opacity:0.8;margin-left:6px">정확도 ±${acc}m</span>`;
+      addrBar.innerHTML = `📍 ${escapeHTML(addr)} <span style="font-size:11px;opacity:0.8;margin-left:6px">정확도 ±${escapeHTML(acc)}m</span>`;
       mapWrap.style.display = 'block';
       showGpsStatus('success', `✅ 위치 확인 완료! 정확도: ±${acc}m`);
     } catch(e) {
       const fallback = `위도 ${lat.toFixed(5)}, 경도 ${lon.toFixed(5)}`;
-      document.getElementById('f-location').value = fallback;
+      document.getElementById('f-location').value = fallback; D.location=fallback;D._gpsLat=lat;D._gpsLng=lon;
       showGpsStatus('warn', '⚠️ 주소 변환 실패 — 직접 주소를 입력해주세요.');
     }
     resetGpsBtn();
@@ -3945,9 +3993,9 @@ async function getGPSLocation() {
   } catch(err) {
     resetGpsBtn();
     if (err.code === 1 || (err.message||'').toLowerCase().includes('denied')) {
-      showGpsStatus('error', '❌ 위치 권한이 거부되었습니다.\n📱 설정 → 앱 → 사고대응 → 권한 → 위치 → 허용');
+      showGpsStatus('error', '위치 권한 없이도 입력할 수 있습니다. 도로명·주변 표지판을 직접 적어주세요.');
     } else if (err.code === 2) {
-      showGpsStatus('error', '❌ GPS 신호 없음. 실외로 이동 후 다시 시도하세요.');
+      showGpsStatus('error', '위치를 확인할 수 없습니다. 안전한 곳에서 도로명·주변 표지판을 직접 입력하세요.');
     } else if (err.code === 3) {
       showGpsStatus('error', '❌ 위치 확인 시간 초과. 다시 시도해주세요.');
     } else {
@@ -4014,9 +4062,7 @@ function resetGpsBtn() {
 }
 
 /* ══════════════ API 설정 & 쿼터 ══════════════ */
-const API_BASE = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-  ? 'https://accident-response-app.vercel.app/api/ai'  // 로컬 테스트 시 배포 서버 사용
-  : '/api/ai';
+const API_BASE = '/api/ai';
 
 function getUserApiKey() {
   return localStorage.getItem('userApiKey') || '';
@@ -4024,15 +4070,15 @@ function getUserApiKey() {
 function saveApiKey() {
   const key = document.getElementById('user-api-key').value.trim();
   if (!key) { showApiKeyMsg('API 키를 입력해주세요.', 'warn'); return; }
-  if (!key.startsWith('AIza') && !key.startsWith('sk-ant-')) { showApiKeyMsg('올바른 API 키 형식이 아닙니다. (Gemini: AIza... / Claude: sk-ant-...)', 'warn'); return; }
+  if (!/^AIza[\w-]{20,100}$/.test(key)) { showApiKeyMsg('올바른 API 키 형식이 아닙니다. (Gemini: AIza...)', 'warn'); return; }
   localStorage.setItem('userApiKey', key);
-  showApiKeyMsg('✅ API 키가 저장되었습니다. 이제 AI 분석을 무제한으로 사용할 수 있습니다!', 'ok');
+  showApiKeyMsg('API 키가 이 브라우저에 저장되었습니다. Google 이용 한도·요금이 적용됩니다.', 'ok');
   loadQuotaStatus();
 }
 function clearApiKey() {
   localStorage.removeItem('userApiKey');
   document.getElementById('user-api-key').value = '';
-  showApiKeyMsg('🗑️ API 키가 삭제되었습니다. 하루 3회 무료 모드로 전환됩니다.', 'info');
+  showApiKeyMsg('API 키를 삭제했습니다. 기본 안내·기록·공유는 계속 무료로 사용합니다.', 'info');
   loadQuotaStatus();
 }
 function showApiKeyMsg(msg, type) {
@@ -4046,35 +4092,47 @@ function showApiKeyMsg(msg, type) {
 }
 
 /* ══════════════ 💾 데이터 백업/복원 ══════════════ */
-function exportData() {
-  const keys = ['accidentData','myInfo','accidentHistory','accidentTimeline','userApiKey','appSettings'];
-  const backup = { _version: 1, _date: new Date().toISOString(), _appName: '교통사고대응' };
-  keys.forEach(k => { const v = localStorage.getItem(k); if (v) backup[k] = v; });
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const date = new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','-').slice(0,-1);
-  a.href = url; a.download = `사고대응_백업_${date}.json`;
-  a.click(); URL.revokeObjectURL(url);
-  showBackupMsg('✅ 백업 파일이 다운로드되었습니다.', 'ok');
+const BACKUP_KEYS=['accidentData','myInfo','accidentHistory','accidentTimeline','appSettings','accidentQuickDraft'];
+function buildBackup(){const data={_version:2,_date:new Date().toISOString(),_appName:'교통사고대응',_note:'API 키·사진·영상 원본 제외'};for(const k of BACKUP_KEYS){const v=localStorage.getItem(k);if(v)data[k]=v;}return data;}
+function downloadBackup(data,prefix='사고대응_백업'){
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download=prefix+'_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-function importData(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data._appName !== '교통사고대응') { showBackupMsg('⚠️ 올바른 백업 파일이 아닙니다.', 'warn'); return; }
-      const keys = ['accidentData','myInfo','accidentHistory','accidentTimeline','userApiKey','appSettings'];
-      keys.forEach(k => { if (data[k]) localStorage.setItem(k, data[k]); });
-      showBackupMsg('✅ 데이터를 성공적으로 복원했습니다. 앱을 새로고침 해주세요.', 'ok');
-      setTimeout(() => location.reload(), 2000);
-    } catch(e) { showBackupMsg('⚠️ 파일을 읽을 수 없습니다. 올바른 백업 파일인지 확인하세요.', 'warn'); }
-  };
-  reader.readAsText(file);
-  input.value = '';
+function exportData(){downloadBackup(buildBackup());showBackupMsg('백업 다운로드를 요청했습니다. API 키·사진·영상은 제외됩니다. 파일 앱에서 확인하세요.','ok');}
+function validateBackup(data){
+  if(!data||data._appName!=='교통사고대응'||![1,2].includes(data._version))throw new Error('잘못된 백업');
+  const out={};
+  for(const k of BACKUP_KEYS){
+    if(!Object.hasOwn(data,k))continue;
+    if(typeof data[k]!=='string'||data[k].length>4_000_000)throw new Error('잘못된 항목');
+    const val=JSON.parse(data[k]);const array=['accidentHistory','accidentTimeline'].includes(k);
+    if(!val||typeof val!=='object'||Array.isArray(val)!==array)throw new Error('잘못된 항목');
+    const check=v=>{if(v&&typeof v==='object'){for(const key of Object.keys(v)){if(['__proto__','constructor','prototype'].includes(key))throw new Error('잘못된 항목');check(v[key]);}}};check(val);
+    if(k==='myInfo'&&['name','phone','emergency','emergencyName','agent','garage'].some(key=>val[key]!==undefined&&typeof val[key]!=='string'))throw new Error('잘못된 내 정보');
+    if(k==='myInfo'&&val.vehicles!==undefined&&(!Array.isArray(val.vehicles)||val.vehicles.some(v=>!v||typeof v!=='object'||Array.isArray(v))))throw new Error('잘못된 차량 정보');
+    if(k==='myInfo'&&Array.isArray(val.vehicles)&&val.vehicles.some(v=>['plate','car','insurer','policy','insStart','insEnd','nickname'].some(key=>v[key]!==undefined&&typeof v[key]!=='string')))throw new Error('잘못된 차량 정보');
+    if(k==='accidentTimeline'&&val.some(v=>!v||typeof v.text!=='string'||typeof v.time!=='string'||typeof v.icon!=='string'))throw new Error('잘못된 타임라인');
+    const records=k==='accidentHistory'?val:k==='accidentData'?[val]:[];
+    if(records.some(r=>!r||typeof r!=='object'||['types','damages','reports'].some(key=>r[key]!==undefined&&(!Array.isArray(r[key])||r[key].some(v=>typeof v!=='string')))))throw new Error('잘못된 사고 기록');
+    if(records.some(r=>['datetime','location','myPlate','myCar','myName','myPhone','myInsurer','myPolicy','opPlate','opCar','opName','opPhone','opInsurer','opPolicy','witness','myInjury','opInjury','injuryDetail','desc','blackbox','weather'].some(key=>r[key]!==undefined&&typeof r[key]!=='string')))throw new Error('잘못된 사고 정보');
+    out[k]=JSON.stringify(val);
+  }
+  if(!Object.keys(out).length)throw new Error('비어 있는 백업');return out;
 }
+function importData(input){
+  const file=input.files?.[0];if(!file)return;input.value='';
+  if(file.size>5_000_000){showBackupMsg('5MB 이하의 백업 파일을 선택해주세요.','warn');return;}
+  const reader=new FileReader();reader.onerror=()=>showBackupMsg('파일을 읽지 못했습니다. 기존 기록은 유지됩니다.','warn');
+  reader.onload=e=>{
+    let entries;try{entries=validateBackup(JSON.parse(e.target.result));}catch(err){showBackupMsg('올바른 백업 형식이 아닙니다. 기존 기록과 API 키는 바뀌지 않았습니다.','warn');return;}
+    if(!confirm('백업의 '+Object.keys(entries).length+'개 항목으로 기존 내용을 바꿉니다. 먼저 현재 데이터 백업을 다운로드합니다. API 키는 가져오지 않습니다. 계속할까요?'))return;
+    const before=buildBackup();downloadBackup(before,'사고대응_복원전');
+    const previous={};try{for(const k of Object.keys(entries))previous[k]=localStorage.getItem(k);for(const [k,v]of Object.entries(entries))localStorage.setItem(k,v);}
+    catch(err){for(const [k,v]of Object.entries(previous)){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(rollback){}}showBackupMsg('복원을 완료하지 못했습니다. 복원 전 백업을 보관하고 저장 공간을 확인하세요.','warn');return;}
+    showBackupMsg('복원 완료. API 키는 그대로 유지됩니다. 새로고침해 확인하세요.','ok');
+  };reader.readAsText(file);
+}
+
 function showBackupMsg(msg, type) {
   const el = document.getElementById('backup-msg');
   if (!el) return;
@@ -4101,32 +4159,18 @@ async function installPWA() {
 /* ══════════════ 오류 메시지 한국어화 ══════════════ */
 function friendlyError(msg) {
   if (!msg) return 'AI 분석 중 오류가 발생했습니다.';
-  if (msg.includes('quota') || msg.includes('limit') || msg.includes('exceeded')) return '오늘 무료 AI 분석 횟수를 모두 사용했습니다.\n내일 다시 시도하거나 설정에서 Gemini API 키를 입력해주세요.';
+  if(msg.includes('본인 Gemini')||msg.includes('취소')||msg.includes('파일')||msg.includes('지원하지'))return escapeHTML(msg);
+  if (msg.includes('quota') || msg.includes('limit') || msg.includes('exceeded')) return 'Google API 이용 한도에 도달했습니다. Google AI Studio에서 한도·요금을 확인해주세요.';
   if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed')) return '네트워크 연결을 확인해주세요.';
   if (msg.includes('API') || msg.includes('key') || msg.includes('auth')) return 'API 키가 올바르지 않습니다. 설정에서 키를 확인해주세요.';
   if (msg.includes('timeout') || msg.includes('시간')) return 'AI 응답이 너무 오래 걸립니다. 잠시 후 다시 시도해주세요.';
   return 'AI 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
 }
 async function loadQuotaStatus() {
-  const box = document.getElementById('quota-status-box');
-  if (!box) return;
-  const userKey = getUserApiKey();
-  if (userKey) {
-    box.innerHTML = `<span style="color:#7C3AED">🔑 본인 API 키 사용 중 — 무제한</span>`;
-    document.getElementById('user-api-key').value = userKey;
-    updateAllQuotaBanners('🔑 본인 API 키 사용 중 — 무제한');
-    return;
-  }
-  try {
-    const res = await fetch(API_BASE, { method: 'GET' });
-    const d = await res.json();
-    const remain = d.remaining ?? 3;
-    const color = remain > 2 ? "var(--green)" : remain > 0 ? "var(--orange)" : "var(--red)";
-    box.innerHTML = `<span style="color:${color}">오늘 남은 무료 AI 분석: <strong>${remain}/${d.quota ?? 10}회</strong></span>`;
-    updateAllQuotaBanners(`오늘 AI 분석 ${remain}회 남음 — 무료 제공 (하루 ${d.quota ?? 10}회)`);
-  } catch(e) {
-    box.innerHTML = `<span style="color:var(--text3)">서버 연결 확인 중...</span>`;
-  }
+  const hasKey=!!getUserApiKey(),box=document.getElementById('quota-status-box');
+  const msg=hasKey?'본인 Gemini 키 사용 · Google 한도·요금 적용':'기본 기능 무료 · AI가 필요할 때만 본인 Gemini 키 등록';
+  if(box)box.textContent=msg;
+  updateAllQuotaBanners(msg);
 }
 function updateAllQuotaBanners(msg) {
   ['rep-quota-msg','stl-quota-msg'].forEach(id => {
@@ -4134,14 +4178,11 @@ function updateAllQuotaBanners(msg) {
   });
 }
 async function callAI(body) {
-  const userKey = getUserApiKey();
-  const headers = { 'Content-Type': 'application/json' };
-  if (userKey) headers['X-User-Api-Key'] = userKey;
-  const res = await fetch(API_BASE, { method:'POST', headers, body: JSON.stringify(body) });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'AI 오류');
-  if (data._remaining !== undefined) updateAllQuotaBanners(`오늘 AI 분석 ${data._remaining}회 남음`);
-  return data;
+  const userKey=getUserApiKey();
+  if(!userKey){goPage('settings');throw new Error('본인 Gemini API 키가 필요합니다. 기본 기능은 키 없이 사용할 수 있습니다.');}
+  if(!confirm('입력한 사고 내용과 첨부 사진/서류를 Google AI로 보내 분석할까요? 개인정보를 확인한 뒤 진행하세요.'))throw new Error('분석 전송을 취소했습니다.');
+  const res=await fetch(API_BASE,{method:'POST',headers:{'Content-Type':'application/json','X-User-Api-Key':userKey},body:JSON.stringify(body),signal:AbortSignal.timeout(55000)});
+  const data=await res.json();if(!res.ok)throw new Error(data.error||'AI 오류');return data;
 }
 
 /* ══════════════ ⏱️ 타임라인 ══════════════ */
@@ -4177,12 +4218,12 @@ function renderTimeline() {
     const dateStr = `${dt.getMonth()+1}/${dt.getDate()} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
     return `<div style="display:flex;gap:12px;margin-bottom:12px">
       <div style="display:flex;flex-direction:column;align-items:center;gap:0">
-        <div style="width:38px;height:38px;border-radius:50%;background:${ev.auto?'var(--blue)':'var(--orange)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${ev.icon}</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:${escapeHTML(ev.auto?'var(--blue)':'var(--orange)')};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${escapeHTML(ev.icon)}</div>
         ${i<list.length-1?`<div style="width:2px;flex:1;background:var(--border);margin:4px 0"></div>`:''}
       </div>
-      <div style="flex:1;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:${i<list.length-1?'0':'0'}">
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">${dateStr} ${ev.auto?'<span style="background:var(--blue-bg);color:var(--blue);padding:2px 6px;border-radius:4px;font-size:11px">자동</span>':''}</div>
-        <div style="font-size:15px;font-weight:700;color:var(--text)">${ev.text}</div>
+      <div style="flex:1;background:var(--bg2);border:2px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:${escapeHTML(i<list.length-1?'0':'0')}">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">${escapeHTML(dateStr)} ${ev.auto?'<span style="background:var(--blue-bg);color:var(--blue);padding:2px 6px;border-radius:4px;font-size:11px">자동</span>':''}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">${escapeHTML(ev.text)}</div>
       </div>
     </div>`;
   }).join('');
@@ -4199,7 +4240,7 @@ function printTimeline() {
   const rows = list.map(ev => {
     const dt = new Date(ev.time);
     const dateStr = `${dt.getFullYear()}-${dt.getMonth()+1}-${dt.getDate()} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
-    return `<tr><td style="width:140px;color:#555;font-size:13px">${dateStr}</td><td>${ev.icon} ${ev.text}</td></tr>`;
+    return `<tr><td style="width:140px;color:#555;font-size:13px">${escapeHTML(dateStr)}</td><td>${escapeHTML(ev.icon)} ${escapeHTML(ev.text)}</td></tr>`;
   }).join('');
   win.document.write(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>사고 타임라인</title>
   <style>body{font-family:'Noto Sans KR',sans-serif;padding:30px;max-width:700px;margin:0 auto}
@@ -4239,13 +4280,13 @@ function renderShareVehSelector() {
     const label = v.nickname || v.plate || ('차량 ' + (i+1));
     const color = colors[i % colors.length];
     const active = i === cur;
-    return `<button onclick="selectShareVeh(${i})" style="
-      padding:10px 16px;border-radius:10px;border:2px solid ${active ? color : 'var(--border)'};
-      background:${active ? color : 'var(--bg)'};color:${active ? '#fff' : 'var(--text2)'};
+    return `<button onclick="selectShareVeh(${escapeHTML(i)})" style="
+      padding:10px 16px;border-radius:10px;border:2px solid ${escapeHTML(active ? color : 'var(--border)')};
+      background:${escapeHTML(active ? color : 'var(--bg)')};color:${escapeHTML(active ? '#fff' : 'var(--text2)')};
       font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;cursor:pointer;
       display:flex;flex-direction:column;align-items:flex-start;gap:2px;transition:all 0.15s">
-      <span>${label}</span>
-      <span style="font-size:11px;opacity:0.75">${v.insurer || '보험사 미입력'}</span>
+      <span>${escapeHTML(label)}</span>
+      <span style="font-size:11px;opacity:0.75">${escapeHTML(v.insurer || '보험사 미입력')}</span>
     </button>`;
   }).join('');
 }
@@ -4279,27 +4320,27 @@ function generateShareCard() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
         <div>
           <div style="font-size:11px;opacity:0.7;margin-bottom:3px">성명</div>
-          <div style="font-size:20px;font-weight:900">${data.name}</div>
+          <div style="font-size:20px;font-weight:900">${escapeHTML(data.name)}</div>
         </div>
         <div>
           <div style="font-size:11px;opacity:0.7;margin-bottom:3px">연락처</div>
-          <div style="font-size:20px;font-weight:900">${data.phone}</div>
+          <div style="font-size:20px;font-weight:900">${escapeHTML(data.phone)}</div>
         </div>
         <div>
           <div style="font-size:11px;opacity:0.7;margin-bottom:3px">차량번호</div>
-          <div style="font-size:22px;font-weight:900;letter-spacing:2px">${data.plate}</div>
+          <div style="font-size:22px;font-weight:900;letter-spacing:2px">${escapeHTML(data.plate)}</div>
         </div>
         <div>
           <div style="font-size:11px;opacity:0.7;margin-bottom:3px">차종</div>
-          <div style="font-size:16px;font-weight:700">${data.car}</div>
+          <div style="font-size:16px;font-weight:700">${escapeHTML(data.car)}</div>
         </div>
       </div>
       <div style="background:rgba(255,255,255,0.15);border-radius:10px;padding:12px;margin-bottom:12px">
         <div style="font-size:11px;opacity:0.7;margin-bottom:4px">보험사 / 증권번호</div>
-        <div style="font-size:17px;font-weight:900">${data.insurer} ${data.policy ? '/ '+data.policy : ''}</div>
+        <div style="font-size:17px;font-weight:900">${escapeHTML(data.insurer)} ${escapeHTML(data.policy ? '/ '+data.policy : '')}</div>
       </div>
       <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:10px;font-size:13px;opacity:0.85">
-        📍 ${data.location}<br>🕐 ${data.datetime}
+        📍 ${escapeHTML(data.location)}<br>🕐 ${escapeHTML(data.datetime)}
       </div>
     </div>`;
 
@@ -4325,10 +4366,11 @@ function generateShareCard() {
     dt: data.datetime
   });
   const baseUrl = location.origin + location.pathname;
-  window._shareQRData = `${baseUrl}?${params.toString()}`;
+  window._shareQRData = `${baseUrl}#${params.toString()}`;
 }
 
 function toggleQR() {
+  if(document.getElementById('qr-section')?.style.display==='none'&&!confirm('이 QR에는 이름·전화번호·차량·보험 정보가 포함됩니다. 사고 당사자에게만 보여주세요. 계속할까요?'))return;
   const sec = document.getElementById('qr-section');
   const btn = document.getElementById('qr-gen-btn');
   if (!sec) return;
@@ -4400,16 +4442,17 @@ function saveQRImage() {
 }
 
 function buildQRFallback(container, text) {
-  const encoded = encodeURIComponent(text);
-  container.innerHTML = '';
-  const img = document.createElement('img');
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}&color=0F4A8A&bgcolor=ffffff&margin=0`;
-  img.alt = 'QR코드';
-  img.style.cssText = 'width:200px;height:200px;display:block;margin:0 auto;border-radius:4px';
-  img.onerror = () => {
-    container.innerHTML = `<div style="width:200px;height:60px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);text-align:center">QR코드 생성 실패<br>인터넷을 확인하세요</div>`;
-  };
-  container.appendChild(img);
+  container.replaceChildren();
+  try {
+    const qr=qrcode(0,'M'); qr.addData(text,'Byte'); qr.make();
+    const count=qr.getModuleCount(), scale=4, margin=4;
+    const canvas=document.createElement('canvas'); canvas.width=canvas.height=(count+margin*2)*scale;
+    canvas.setAttribute('aria-label','사고 정보 QR코드'); canvas.setAttribute('role','img');
+    canvas.style.cssText='width:100%;max-width:280px;height:auto;image-rendering:pixelated';
+    const ctx=canvas.getContext('2d'); ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#000';
+    for(let y=0;y<count;y++)for(let x=0;x<count;x++)if(qr.isDark(y,x))ctx.fillRect((x+margin)*scale,(y+margin)*scale,scale,scale);
+    container.appendChild(canvas);
+  } catch(e) { container.textContent='정보가 너무 길어 QR을 만들 수 없습니다. 기록 요약을 복사해 공유해주세요.'; }
 }
 function printShareCard() {
   const card = document.getElementById('share-card');
@@ -4478,10 +4521,10 @@ function initRepairPage() {
   btnWrap.style.display = 'flex';
   btnWrap.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px';
   btnWrap.innerHTML = vehicles.map((v, i) => `
-    <button onclick="selectRepairVeh(${i})" id="rep-veh-btn-${i}"
+    <button onclick="selectRepairVeh(${escapeHTML(i)})" id="rep-veh-btn-${escapeHTML(i)}"
       style="padding:10px 14px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif;text-align:left;min-width:120px">
-      <div style="font-size:14px;font-weight:900;letter-spacing:1px">${v.plate||'번호없음'}</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:2px">${v.car||'차종미입력'}</div>
+      <div style="font-size:14px;font-weight:900;letter-spacing:1px">${escapeHTML(v.plate||'번호없음')}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">${escapeHTML(v.car||'차종미입력')}</div>
     </button>`).join('') +
     `<button onclick="clearRepairCar()" id="rep-veh-btn-manual"
       style="padding:10px 14px;border-radius:10px;border:2px dashed var(--border);background:none;font-size:13px;font-weight:700;color:var(--text3);cursor:pointer;font-family:'Noto Sans KR',sans-serif">
@@ -4552,36 +4595,36 @@ JSON으로만 응답:
     const verdictColor = d.verdict==='적정'?'var(--green)':d.verdict==='약간과다'?'var(--orange)':'var(--red)';
     const verdictBg = d.verdict==='적정'?'var(--green-bg)':d.verdict==='약간과다'?'#FFF4E5':'var(--red-bg)';
     let html = `
-      <div class="card" style="border-color:${verdictColor};border-width:3px">
-        <div style="font-size:20px;font-weight:900;color:${verdictColor};margin-bottom:6px">${d.verdict==='적정'?'✅':d.verdict==='약간과다'?'⚠️':'🚨'} ${d.verdict}</div>
-        <div style="font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:12px">${d.verdictReason||''}</div>
-        <div style="background:${verdictBg};border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
-          <div><div style="font-size:11px;color:var(--text3)">최저</div><div style="font-size:16px;font-weight:900">${d.minPrice?d.minPrice.toLocaleString()+'원':'—'}</div></div>
-          <div><div style="font-size:11px;color:var(--text3)">평균</div><div style="font-size:18px;font-weight:900;color:${verdictColor}">${d.avgPrice?d.avgPrice.toLocaleString()+'원':'—'}</div></div>
-          <div><div style="font-size:11px;color:var(--text3)">최고</div><div style="font-size:16px;font-weight:900">${d.maxPrice?d.maxPrice.toLocaleString()+'원':'—'}</div></div>
+      <div class="card" style="border-color:${escapeHTML(verdictColor)};border-width:3px">
+        <div style="font-size:20px;font-weight:900;color:${escapeHTML(verdictColor)};margin-bottom:6px">${escapeHTML(d.verdict==='적정'?'✅':d.verdict==='약간과다'?'⚠️':'🚨')} ${escapeHTML(d.verdict)}</div>
+        <div style="font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:12px">${escapeHTML(d.verdictReason||'')}</div>
+        <div style="background:${escapeHTML(verdictBg)};border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+          <div><div style="font-size:11px;color:var(--text3)">최저</div><div style="font-size:16px;font-weight:900">${escapeHTML(d.minPrice?d.minPrice.toLocaleString()+'원':'—')}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">평균</div><div style="font-size:18px;font-weight:900;color:${escapeHTML(verdictColor)}">${escapeHTML(d.avgPrice?d.avgPrice.toLocaleString()+'원':'—')}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">최고</div><div style="font-size:16px;font-weight:900">${escapeHTML(d.maxPrice?d.maxPrice.toLocaleString()+'원':'—')}</div></div>
         </div>
-        ${d.fairRange?`<div style="text-align:center;margin-top:8px;font-size:13px;color:var(--text2)">적정 범위: <strong>${d.fairRange}</strong></div>`:''}
+        ${d.fairRange?`<div style="text-align:center;margin-top:8px;font-size:13px;color:var(--text2)">적정 범위: <strong>${escapeHTML(d.fairRange)}</strong></div>`:''}
       </div>`;
     if (d.eachAnalysis?.length) {
       html += `<div class="card"><div class="card-title">🏪 공업사별 분석</div>`;
       d.eachAnalysis.forEach(e => {
-        html += `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${e.shop}</strong> ${e.price?e.price.toLocaleString()+'원':''}<br><span style="font-size:13px;color:var(--text2)">${e.comment||''}</span></div>`;
+        html += `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${escapeHTML(e.shop)}</strong> ${escapeHTML(e.price?e.price.toLocaleString()+'원':'')}<br><span style="font-size:13px;color:var(--text2)">${escapeHTML(e.comment||'')}</span></div>`;
       });
       html += '</div>';
     }
     if (d.redFlags?.length) {
-      html += `<div class="card" style="background:var(--red-bg);border-color:rgba(214,43,43,0.3)"><div class="card-title" style="color:var(--red)">🚨 과다청구 의심 신호</div>${d.redFlags.map(r=>`<div style="font-size:14px;color:var(--text2);margin-bottom:6px">• ${r}</div>`).join('')}</div>`;
+      html += `<div class="card" style="background:var(--red-bg);border-color:rgba(214,43,43,0.3)"><div class="card-title" style="color:var(--red)">🚨 과다청구 의심 신호</div>${d.redFlags.map(r=>`<div style="font-size:14px;color:var(--text2);margin-bottom:6px">• ${escapeHTML(r)}</div>`).join('')}</div>`;
     }
     if (d.tips?.length) {
-      html += `<div class="card"><div class="card-title">💡 수리 시 주의사항</div>${d.tips.map(t=>`<div style="font-size:14px;color:var(--text2);margin-bottom:6px">• ${t}</div>`).join('')}</div>`;
+      html += `<div class="card"><div class="card-title">💡 수리 시 주의사항</div>${d.tips.map(t=>`<div style="font-size:14px;color:var(--text2);margin-bottom:6px">• ${escapeHTML(t)}</div>`).join('')}</div>`;
     }
     if (d.recommendation) {
-      html += `<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="card-title" style="color:var(--blue)">📌 최종 추천</div><div style="font-size:15px;color:var(--text2);line-height:1.7">${d.recommendation}</div></div>`;
+      html += `<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="card-title" style="color:var(--blue)">📌 최종 추천</div><div style="font-size:15px;color:var(--text2);line-height:1.7">${escapeHTML(d.recommendation)}</div></div>`;
     }
     html += `<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">※ AI 참고용 분석입니다. 실제 수리비는 차량 상태에 따라 다를 수 있습니다.</div>`;
     document.getElementById('rep-result').innerHTML = html;
   } catch(e) {
-    document.getElementById('rep-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;
+    document.getElementById('rep-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${escapeHTML(friendlyError(e.message))}</div>`;
   }
   document.getElementById('rep-loading').className = 'ai-loading';
 }
@@ -4619,30 +4662,30 @@ JSON으로만 응답:
       <div class="card" style="border-color:var(--green);border-width:3px">
         <div style="font-size:14px;font-weight:700;color:var(--text3);margin-bottom:8px">💰 적정 합의금 범위</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;background:var(--green-bg);border-radius:8px;padding:14px">
-          <div><div style="font-size:11px;color:var(--text3)">최소</div><div style="font-size:16px;font-weight:900">${fmt(d.minSettle)}</div></div>
-          <div><div style="font-size:11px;color:var(--text3)">권장</div><div style="font-size:20px;font-weight:900;color:var(--green)">${fmt(d.recommendSettle)}</div></div>
-          <div><div style="font-size:11px;color:var(--text3)">최대</div><div style="font-size:16px;font-weight:900">${fmt(d.maxSettle)}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">최소</div><div style="font-size:16px;font-weight:900">${escapeHTML(fmt(d.minSettle))}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">권장</div><div style="font-size:20px;font-weight:900;color:var(--green)">${escapeHTML(fmt(d.recommendSettle))}</div></div>
+          <div><div style="font-size:11px;color:var(--text3)">최대</div><div style="font-size:16px;font-weight:900">${escapeHTML(fmt(d.maxSettle))}</div></div>
         </div>
-        ${d.faultAdjust?`<div style="margin-top:10px;font-size:13px;color:var(--text2);background:var(--bg2);padding:10px;border-radius:8px">⚖️ ${d.faultAdjust}</div>`:''}
+        ${d.faultAdjust?`<div style="margin-top:10px;font-size:13px;color:var(--text2);background:var(--bg2);padding:10px;border-radius:8px">⚖️ ${escapeHTML(d.faultAdjust)}</div>`:''}
       </div>`;
     if (d.breakdown) {
       html += `<div class="card"><div class="card-title">📊 항목별 내역</div>
-        ${Object.entries(d.breakdown).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px"><span>${{painDamage:'위자료',incomeLoss:'휴업손해',medExpense:'치료비',total:'합계'}[k]||k}</span><strong>${v}</strong></div>`).join('')}
+        ${Object.entries(d.breakdown).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px"><span>${escapeHTML({painDamage:'위자료',incomeLoss:'휴업손해',medExpense:'치료비',total:'합계'}[k]||k)}</span><strong>${escapeHTML(v)}</strong></div>`).join('')}
       </div>`;
     }
     if (d.strategy) {
-      html += `<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="card-title" style="color:var(--blue)">🛡️ 협상 전략</div><div style="font-size:15px;color:var(--text2);line-height:1.7">${d.strategy}</div></div>`;
+      html += `<div class="card" style="background:var(--blue-bg);border-color:rgba(26,111,212,0.2)"><div class="card-title" style="color:var(--blue)">🛡️ 협상 전략</div><div style="font-size:15px;color:var(--text2);line-height:1.7">${escapeHTML(d.strategy)}</div></div>`;
     }
     if (d.doList?.length || d.dontList?.length) {
       html += `<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ 해야 할 것</div>${(d.doList||[]).map(t=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">• ${t}</div>`).join('')}</div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">❌ 하지 말 것</div>${(d.dontList||[]).map(t=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">• ${t}</div>`).join('')}</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ 해야 할 것</div>${(d.doList||[]).map(t=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">• ${escapeHTML(t)}</div>`).join('')}</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">❌ 하지 말 것</div>${(d.dontList||[]).map(t=>`<div style="font-size:13px;color:var(--text2);margin-bottom:5px">• ${escapeHTML(t)}</div>`).join('')}</div>
       </div></div>`;
     }
     html += `<div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">※ AI 참고용 분석입니다. 실제 합의금은 전문 변호사·손해사정사와 확인하세요.</div>`;
     document.getElementById('stl-result').innerHTML = html;
   } catch(e) {
-    document.getElementById('stl-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${friendlyError(e.message)}</div>`;
+    document.getElementById('stl-result').innerHTML = `<div style="background:var(--red-bg);border:2px solid rgba(214,43,43,0.3);border-radius:var(--radius);padding:16px;color:var(--red)">⚠️ ${escapeHTML(friendlyError(e.message))}</div>`;
   }
   document.getElementById('stl-loading').className = 'ai-loading';
 }
@@ -4731,11 +4774,12 @@ function showContactModal(contacts) {
     <div style="background:var(--bg);border-radius:20px 20px 0 0;padding:24px 20px;width:100%;max-width:480px;box-shadow:0 -8px 32px rgba(0,0,0,0.3)">
       <div style="font-size:17px;font-weight:900;margin-bottom:16px">📒 저장된 연락처 선택</div>
       ${contacts.map((c,i) => `
-        <button onclick="selectSavedContact('${c.label}','${c.phone}')" style="width:100%;padding:16px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-align:left;margin-bottom:8px;color:var(--text)">
-          ${c.label}<br><span style="font-size:17px;color:var(--blue);font-weight:900">${c.phone}</span>
+        <button data-contact-index="${escapeHTML(i)}" style="width:100%;padding:16px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-align:left;margin-bottom:8px;color:var(--text)">
+          ${escapeHTML(c.label)}<br><span style="font-size:17px;color:var(--blue);font-weight:900">${escapeHTML(c.phone)}</span>
         </button>`).join('')}
       <button onclick="document.getElementById('contact-modal').remove()" style="width:100%;padding:14px;border-radius:12px;border:2px solid var(--border);background:none;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;color:var(--text2);margin-top:4px">취소</button>
     </div>`;
+  modal.querySelectorAll('[data-contact-index]').forEach(b=>b.onclick=()=>{const c=contacts[Number(b.dataset.contactIndex)];selectSavedContact(c.label,c.phone);});
   modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
@@ -4777,10 +4821,11 @@ function renderNtfQuickContacts() {
   el.style.display = 'block';
   el.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px">⚡ 빠른 선택</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${items.map(c => `<button onclick="selectSavedContact('${c.label}','${c.phone}')" style="padding:8px 14px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);display:flex;flex-direction:column;gap:2px;text-align:left">
-        <span>${c.label}</span><span style="color:var(--blue);font-size:14px;font-weight:900">${c.phone}</span>
+      ${items.map((c,i) => `<button data-contact-index="${escapeHTML(i)}" style="padding:8px 14px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--text2);display:flex;flex-direction:column;gap:2px;text-align:left">
+        <span>${escapeHTML(c.label)}</span><span style="color:var(--blue);font-size:14px;font-weight:900">${escapeHTML(c.phone)}</span>
       </button>`).join('')}
     </div>`;
+  el.querySelectorAll('[data-contact-index]').forEach(b=>b.onclick=()=>{const c=items[Number(b.dataset.contactIndex)];selectSavedContact(c.label,c.phone);});
 }
 
 function autoGenerateIfReady() {
@@ -4797,9 +4842,9 @@ function generateNotifyMsg() {
   const myinjury = D.myInjury || '확인 중';
   const msg = `[교통사고 발생 알림]\n\n${name}에게 사고 사실을 알립니다.\n\n🕐 일시: ${datetime}\n📍 위치: ${location}\n🚗 사고유형: ${types}\n🏥 부상상태: ${myinjury}\n\n현재 현장에 있습니다. 연락 부탁드립니다.`;
   document.getElementById('ntf-preview').textContent = msg;
-  const phone = document.getElementById('ntf-phone').value.trim().replace(/-/g,'');
+  const phone = document.getElementById('ntf-phone').value.trim();
   const encoded = encodeURIComponent(msg);
-  document.getElementById('ntf-sms-btn').href = `sms:${phone}?body=${encoded}`;
+  document.getElementById('ntf-sms-btn').href = `sms:${safePhone(phone)}?body=${encoded}`;
   document.getElementById('ntf-kakao-btn').onclick = function(e) {
     e.preventDefault();
     if (navigator.clipboard) {
@@ -4835,34 +4880,34 @@ function showRecordSummary() {
     const dt = data.datetime ? data.datetime.replace('T',' ') : '미입력';
     const row = (label, val, color='') => val
       ? `<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-           <span style="font-size:12px;font-weight:700;color:var(--text3);width:72px;flex-shrink:0">${label}</span>
-           <span style="font-size:14px;font-weight:700;color:${color||'var(--text)'};flex:1">${val}</span>
+           <span style="font-size:12px;font-weight:700;color:var(--text3);width:72px;flex-shrink:0">${escapeHTML(label)}</span>
+           <span style="font-size:14px;font-weight:700;color:${escapeHTML(color||'var(--text)')};flex:1">${escapeHTML(val)}</span>
          </div>` : '';
 
     body.innerHTML = `
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:900;color:var(--red);letter-spacing:1px;margin-bottom:6px">🚗 사고 기본</div>
-        ${row('유형', data.types?.join(', '))}
-        ${row('일시', dt)}
-        ${row('장소', data.location)}
-        ${row('날씨', data.weather)}
+        ${escapeHTML(row('유형', data.types?.join(', ')))}
+        ${escapeHTML(row('일시', dt))}
+        ${escapeHTML(row('장소', data.location))}
+        ${escapeHTML(row('날씨', data.weather))}
       </div>
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:900;color:var(--blue);letter-spacing:1px;margin-bottom:6px">👤 내 차량</div>
-        ${row('번호판', data.myPlate, 'var(--blue)')}
-        ${row('차종', data.myCar)}
-        ${row('이름', data.myName)}
-        ${row('연락처', data.myPhone)}
-        ${row('보험사', data.myInsurer)}
+        ${escapeHTML(row('번호판', data.myPlate, 'var(--blue)'))}
+        ${escapeHTML(row('차종', data.myCar))}
+        ${escapeHTML(row('이름', data.myName))}
+        ${escapeHTML(row('연락처', data.myPhone))}
+        ${escapeHTML(row('보험사', data.myInsurer))}
       </div>
       ${(data.opPlate||data.opName) ? `
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:900;color:var(--orange);letter-spacing:1px;margin-bottom:6px">🚙 상대방</div>
-        ${row('번호판', data.opPlate, 'var(--orange)')}
-        ${row('차종', data.opCar)}
-        ${row('이름', data.opName)}
-        ${row('연락처', data.opPhone)}
-        ${row('보험사', data.opInsurer)}
+        ${escapeHTML(row('번호판', data.opPlate, 'var(--orange)'))}
+        ${escapeHTML(row('차종', data.opCar))}
+        ${escapeHTML(row('이름', data.opName))}
+        ${escapeHTML(row('연락처', data.opPhone))}
+        ${escapeHTML(row('보험사', data.opInsurer))}
       </div>` : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
         <button onclick="goPage('quick');closeRecordSummary()" style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:13px;font-weight:800;color:var(--text);cursor:pointer;font-family:'Noto Sans KR',sans-serif">✏️ 수정하기</button>
@@ -4940,17 +4985,84 @@ function closeMoreMenu(){
   document.getElementById('more-menu').classList.remove('show');
   document.getElementById('more-overlay').classList.remove('show');
 }
+let simpleDraft={};
+function startStage(stage){
+  ['safety','contact','record'].forEach((id,i)=>{document.getElementById('start-'+id).hidden=i!==stage-1;});
+  window.scrollTo(0,0);document.querySelector('#start-'+['safety','contact','record'][stage-1]+' h1')?.focus({preventScroll:true});
+}
+function renderStartInsurers(){
+  const select=document.getElementById('start-insurer');if(!select||select.options.length>1)return;
+  INSURER_DATA.forEach(v=>{const opt=document.createElement('option');opt.value=v.name;opt.textContent=v.name;select.appendChild(opt);});
+}
+function updateStartInsurerCall(){
+  const val=document.getElementById('start-insurer').value,found=INSURER_DATA.find(v=>v.name===val),a=document.getElementById('start-insurer-call');
+  a.hidden=!found;if(found){a.href='tel:'+safePhone(found.tel);a.textContent=found.name+' '+found.tel+' 전화';}else a.removeAttribute('href');
+}
+function initSimpleStart(){
+  renderStartInsurers();
+  try{const d=JSON.parse(localStorage.getItem('accidentQuickDraft')||'{}');if(d&&typeof d==='object'&&!Array.isArray(d))simpleDraft=d;}catch(e){}
+  for(const k of ['location','plate','desc']){const el=document.getElementById('simple-'+k);el.value=typeof simpleDraft[k]==='string'?simpleDraft[k]:'';el.addEventListener('input',saveSimpleDraft);}
+  // Korean status also distinguishes draft from a completed saved record.
+  if(simpleDraft.datetime)document.getElementById('simple-draft-status').textContent='이전 입력을 이어서 작성합니다. 아래 저장 버튼을 눌러 기록에 남기세요.';
+  const logo=document.querySelector('.nav-logo');if(logo){logo.setAttribute('role','button');logo.tabIndex=0;logo.setAttribute('aria-label','현재 사고 기록 요약');logo.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showRecordSummary();}};}
+  document.querySelector('.sos-main-btn')?.setAttribute('aria-label','긴급 전화 열기');
+}
+function saveSimpleDraft(){
+  simpleDraft.datetime ||= new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+  for(const k of ['location','plate','desc'])simpleDraft[k]=document.getElementById('simple-'+k).value;
+  const el=document.getElementById('simple-draft-status');
+  try{localStorage.setItem('accidentQuickDraft',JSON.stringify(simpleDraft));el.textContent='입력 임시 저장됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});return true;}
+  catch(e){el.textContent='저장 공간이 부족하거나 저장이 차단됐습니다. 내용을 복사해 보관하세요.';return false;}
+}
+function simpleRecordData(){
+  const base={types:[],weather:'',datetime:'',location:'',myPlate:'',myCar:'',myName:'',myPhone:'',myInsurer:'',myPolicy:'',damages:[],opPlate:'',opCar:'',opName:'',opPhone:'',opInsurer:'',opPolicy:'',witness:'',myInjury:'',opInjury:'',injuryDetail:'',reports:[],desc:'',blackbox:''};
+  return Object.assign(base,{datetime:simpleDraft.datetime,location:simpleDraft.location||'',opPlate:simpleDraft.plate||'',desc:simpleDraft.desc||'',myInsurer:document.getElementById('start-insurer').value});
+}
+function saveSimpleRecord(){
+  if(!saveSimpleDraft())return false;
+  const status=document.getElementById('simple-save-status');
+  if(![simpleDraft.location,simpleDraft.plate,simpleDraft.desc].some(v=>v?.trim())){status.textContent='장소·번호·상황 중 아는 것 하나만 적어주세요.';document.getElementById('simple-location').focus();return false;}
+  try{
+    const history=JSON.parse(localStorage.getItem('accidentHistory')||'[]');if(!Array.isArray(history))throw new Error('history');
+    const data=simpleRecordData(),id=simpleDraft.recordId||'acc_'+crypto.randomUUID();
+    const rec={...data,_id:id,_savedAt:new Date().toISOString(),_label:'간단 기록 · '+(data.location||'장소 미입력').slice(0,25)};
+    const i=history.findIndex(r=>r._id===id);if(i>=0)history[i]=rec;else history.unshift(rec);
+    // Main storage is written first; a failed history write is never announced as success.
+    localStorage.setItem('accidentHistory',JSON.stringify(history));localStorage.setItem('accidentData',JSON.stringify(rec));
+    simpleDraft.recordId=id;localStorage.setItem('accidentQuickDraft',JSON.stringify(simpleDraft));replaceRecord(rec);restoreRecordFields();
+    status.textContent='기록 저장 완료 · 이 브라우저에 저장됐습니다. 사진 원본은 따로 보관하세요.';return true;
+  }catch(e){status.textContent='저장을 완료하지 못했습니다. 기록 요약을 복사해 보관하세요.';return false;}
+}
+function copySimpleRecord(){
+  const value=k=>document.getElementById('simple-'+k).value.trim()||'확인 중';
+  const text='교통사고 기록\n장소: '+value('location')+'\n상대 차량: '+value('plate')+'\n상황: '+value('desc');
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>showToast('요약을 복사했습니다. 보낼 앱에 붙여넣으세요.','ok')).catch(()=>fallbackCopy(text));else fallbackCopy(text);
+}
+function openDetailedRecord(){if(!saveSimpleRecord())return;goPage('quick');showPanel(0);}
+function startNewSimpleRecord(){if(!confirm('현재 기록을 저장하거나 복사하셨나요? 저장된 사고는 유지하고 새 입력을 시작합니다.'))return;simpleDraft={};for(const k of ['location','plate','desc'])document.getElementById('simple-'+k).value='';localStorage.setItem('accidentQuickDraft','{}');document.getElementById('simple-save-status').textContent='';document.getElementById('simple-draft-status').textContent='새 사고 입력';startStage(1);}
+async function shareAppLink(){const url=location.origin+location.pathname;try{if(navigator.share)await navigator.share({title:'교통사고 대응 · 지금 할 일',url});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);showToast('앱 주소를 복사했습니다. 가족에게 붙여넣어 보내세요.','ok');}else fallbackCopy(url);}catch(e){if(e.name!=='AbortError')showToast('공유하지 못했습니다. 주소창의 링크를 복사해주세요.');}}
+function replaceRecord(record){
+  for(const k of Object.keys(D))delete D[k];
+  Object.assign(D,{types:[],damages:[],reports:[]},record);
+  for(const k of ['types','damages','reports'])if(!Array.isArray(D[k]))D[k]=[];
+}
+function restoreRecordFields(){
+  restorePanel0UI();
+  const fields={myPlate:'myplate',myCar:'mycar',myName:'myname',myPhone:'myphone',myInsurer:'myinsurer',myPolicy:'mypolicy',opPlate:'opplate',opCar:'opcar',opName:'opname',opPhone:'opphone',opInsurer:'opinsurer',opPolicy:'oppolicy',witness:'witness',injuryDetail:'injurydetail',desc:'desc'};
+  for(const [k,id] of Object.entries(fields)){const el=document.getElementById('f-'+id);if(el)el.value=D[k]||'';}
+}
+
 /* ══════════════ INIT ══════════════ */
 window.addEventListener('load',()=>{
   // QR 공유카드 URL 파라미터 감지
-  const urlParams = new URLSearchParams(location.search);
+  const urlParams = new URLSearchParams(location.hash.startsWith('#card=') ? location.hash.slice(1) : location.search);
   if (urlParams.get('card') === '1') {
     showSharedCard(urlParams);
     return;
   }
-  loadSaved();loadMyInfo();renderVehicleSelectInQuick();applyMyInfoToRecord();checkFirstRun();updateSOSInsurer();
+  loadSaved();loadMyInfo();renderVehicleSelectInQuick();restoreRecordFields();if(!checkData())applyMyInfoToRecord();checkFirstRun();updateSOSInsurer();initSimpleStart();
   const now=new Date(),iso=new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
-  const dt=document.getElementById('f-datetime');if(dt)dt.value=iso;
+  const dt=document.getElementById('f-datetime');if(dt&&!dt.value)dt.value=iso;
 });
 
 function showSharedCard(params) {
@@ -4968,37 +5080,37 @@ function showSharedCard(params) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
           <div>
             <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:4px">성명</div>
-            <div style="font-size:22px;font-weight:900;color:#1a1a1a">${params.get('n')||'미입력'}</div>
+            <div style="font-size:22px;font-weight:900;color:#1a1a1a">${escapeHTML(params.get('n')||'미입력')}</div>
           </div>
           <div>
             <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:4px">연락처</div>
-            <a href="tel:${params.get('p')||''}" style="font-size:20px;font-weight:900;color:#1A6FD4;text-decoration:none">${params.get('p')||'미입력'}</a>
+            <a href="tel:${escapeHTML(safePhone(params.get('p')))}" style="font-size:20px;font-weight:900;color:#1A6FD4;text-decoration:none">${escapeHTML(params.get('p')||'미입력')}</a>
           </div>
         </div>
 
         <div style="background:#F0F7FF;border-radius:12px;padding:16px;margin-bottom:16px">
           <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:6px">차량번호</div>
-          <div style="font-size:28px;font-weight:900;color:#0F4A8A;letter-spacing:3px">${params.get('pl')||'미입력'}</div>
-          <div style="font-size:13px;color:#555;margin-top:4px">${params.get('c')||'미입력'}</div>
+          <div style="font-size:28px;font-weight:900;color:#0F4A8A;letter-spacing:3px">${escapeHTML(params.get('pl')||'미입력')}</div>
+          <div style="font-size:13px;color:#555;margin-top:4px">${escapeHTML(params.get('c')||'미입력')}</div>
         </div>
 
         <div style="background:#FFF8F0;border-radius:12px;padding:14px;margin-bottom:16px">
           <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:4px">보험사 / 증권번호</div>
-          <div style="font-size:17px;font-weight:900;color:#D66B00">${params.get('i')||'미입력'}${params.get('po') ? ' / '+params.get('po') : ''}</div>
+          <div style="font-size:17px;font-weight:900;color:#D66B00">${escapeHTML(params.get('i')||'미입력')}${escapeHTML(params.get('po') ? ' / '+params.get('po') : '')}</div>
         </div>
 
         <div style="border-top:1px solid #eee;padding-top:12px;font-size:13px;color:#777;line-height:1.8">
-          📍 ${params.get('loc')||'미입력'}<br>
-          🕐 ${params.get('dt')||'미입력'}
+          📍 ${escapeHTML(params.get('loc')||'미입력')}<br>
+          🕐 ${escapeHTML(params.get('dt')||'미입력')}
         </div>
       </div>
 
-      <a href="tel:${params.get('p')||''}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;padding:16px;border-radius:14px;background:#fff;color:#1A6FD4;font-size:16px;font-weight:900;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,0.15)">
+      <a href="tel:${escapeHTML(safePhone(params.get('p')))}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:16px;padding:16px;border-radius:14px;background:#fff;color:#1A6FD4;font-size:16px;font-weight:900;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,0.15)">
         📞 바로 전화하기
       </a>
 
       <div style="text-align:center;margin-top:20px">
-        <a href="${location.origin}${location.pathname}" style="font-size:12px;color:rgba(255,255,255,0.6);text-decoration:none">🚨 사고대응 앱 열기</a>
+        <a href="${escapeHTML(location.origin)}${escapeHTML(location.pathname)}" style="font-size:12px;color:rgba(255,255,255,0.6);text-decoration:none">🚨 사고대응 앱 열기</a>
       </div>
     </div>
   </div>`;
