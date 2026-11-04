@@ -1,0 +1,9 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const source=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const storage=new Map([['userApiKey','DO_NOT_EXPORT'],['accidentData',JSON.stringify({types:[],location:'test',damages:[],reports:[]})]]);
+const ctx=vm.createContext({localStorage:{getItem:k=>storage.get(k)||null},URL,Blob,setTimeout});
+vm.runInContext(source.slice(source.indexOf('function escapeHTML('),source.indexOf('function showToast('))+source.slice(source.indexOf('const BACKUP_KEYS='),source.indexOf('function importData(')),ctx);
+const call=e=>vm.runInContext(e,ctx);
+test('backup excludes credentials; legacy restore ignores saved API key',()=>{assert.equal(Object.hasOwn(call('buildBackup()'),'userApiKey'),false);const legacy={_version:1,_appName:'교통사고대응',userApiKey:'DONT_IMPORT',accidentData:storage.get('accidentData')};ctx.fixture=legacy;assert.equal(Object.hasOwn(call('validateBackup(fixture)'),'userApiKey'),false);assert.equal(storage.get('userApiKey'),'DO_NOT_EXPORT');});
+test('wrong shape and poisoned backup rejected before writes',()=>{for(const f of [{_version:2,_appName:'x'},{_version:2,_appName:'교통사고대응',accidentHistory:'{}'},{_version:2,_appName:'교통사고대응',accidentData:'{"types":"wrong"}'},{_version:2,_appName:'교통사고대응',myInfo:'{"__proto__":{}}'}]){ctx.fixture=f;assert.throws(()=>call('validateBackup(fixture)'));}assert.equal(storage.size,2);});
+test('QR/card text is escaped and malformed phone cannot become a link',()=>{ctx.fixture='<b id="probe">x</b> & " \' ';const escaped=call('escapeHTML(fixture)');assert.ok(!escaped.includes('<b'));assert.ok(escaped.includes('&lt;b'));ctx.fixture='010-1234-5678';assert.equal(call('safePhone(fixture)'),'01012345678');ctx.fixture='" onclick="alert(1)';assert.equal(call('safePhone(fixture)'),'');});
