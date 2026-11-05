@@ -78,7 +78,7 @@ def update(previous,entries,now):
     queue={r['id']:r for r in previous.get('reviewQueue',[])}
     for row in changes:queue[row['id']]=row
     merged={**prev,**{r['id']:r for r in entries}}
-    return {'schemaVersion':1,'status':'ok','lastAttemptAt':now.isoformat(),'lastSuccessAt':now.isoformat(),'schedule':'매주 월요일 오전 9:20 (한국시간) · 실행 지연 가능','mode':'metadata-only-no-ai','scope':'도로교통법·교통사고처리 특례법·자동차손해배상 보장법 및 시행령·시행규칙의 최근 공포목록 각 30행(최초 기준 이후 보존). 판례·보험약관·행정규칙은 포함하지 않음.','limitations':'한 개정 법령에 시행일이 여러 개일 수 있습니다. 일부 조항의 시행일이며 법 전체가 이 날짜에 모두 바뀐다는 뜻은 아닙니다. 개정 감지와 앱 안내문 반영은 별개입니다.','initialized':not bool(prev),'newChangeCount':len(changes),'entries':sorted(merged.values(),key=lambda r:(r['published'],r['effective'],r['id']),reverse=True),'reviewQueue':sorted(queue.values(),key=lambda r:r['detectedAt'],reverse=True),'source':'https://www.law.go.kr/LSW/nwRvsLsPop.do'}
+    return {'schemaVersion':1,'status':'ok','lastAttemptAt':now.isoformat(),'lastSuccessAt':now.isoformat(),'schedule':'매주 금요일 오후 1:00 (한국시간) · 실행 지연 가능','mode':'metadata-only-no-ai','scope':'도로교통법·교통사고처리 특례법·자동차손해배상 보장법 및 시행령·시행규칙의 최근 공포목록 각 30행(최초 기준 이후 보존). 판례·보험약관·행정규칙은 포함하지 않음.','limitations':'한 개정 법령에 시행일이 여러 개일 수 있습니다. 일부 조항의 시행일이며 법 전체가 이 날짜에 모두 바뀐다는 뜻은 아닙니다. 개정 감지와 앱 안내문 반영은 별개입니다.','initialized':not bool(prev),'newChangeCount':len(changes),'entries':sorted(merged.values(),key=lambda r:(r['published'],r['effective'],r['id']),reverse=True),'reviewQueue':sorted(queue.values(),key=lambda r:r['detectedAt'],reverse=True),'source':'https://www.law.go.kr/LSW/nwRvsLsPop.do'}
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=Path(__file__).resolve().parents[1]/'law-updates.json');args=parser.parse_args()
