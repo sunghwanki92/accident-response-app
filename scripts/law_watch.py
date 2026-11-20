@@ -45,19 +45,107 @@ def parse_page(html,family):
     if not result:raise ValueError('대상 법령 목록이 비어 있음: '+family)
     return result
 
+class PublicationRows(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.controls={}; self.page_limit=[]; self.after_page=False; self.limit_span=False; self.rows=[]; self.headers=[]; self.table=False
+        self.caption=False; self.caption_text=[]; self.match=False
+        self.cells=None; self.cell=None; self.info=None
+    def handle_starttag(self,tag,attrs):
+        a=dict(attrs)
+        if self.after_page:
+            self.limit_span=(tag=='span'); self.after_page=False
+        if tag=='input' and a.get('id'):
+            if a['id']=='pageIndex':self.after_page=True
+            self.controls[a['id']]=a.get('value','')
+        if tag=='table':
+            self.table=True; self.match=False
+        if tag=='caption' and self.table:
+            self.caption=True; self.caption_text=[]
+        if self.match and tag=='tr':
+            self.cells=[]; self.info=None
+        if self.match and tag in ('td','th') and self.cells is not None:
+            self.cell=[]
+        if self.match and tag=='p' and self.cell is not None and len(self.cells)==7 and ''.join(self.cell).strip():
+            self.cell.append(',')
+        if self.match and tag=='a' and self.cell is not None and 'lawInfoPop' in a.get('onclick',''):
+            if self.info is not None:raise ValueError('중복 원문 링크')
+            self.info=a['onclick']
+    def handle_data(self,data):
+        if self.limit_span:self.page_limit.append(data)
+        if self.caption:self.caption_text.append(data)
+        if self.cell is not None:self.cell.append(data)
+    def handle_endtag(self,tag):
+        if tag=='span':self.limit_span=False
+        if tag=='caption' and self.caption:
+            self.caption=False; self.match=' '.join(''.join(self.caption_text).split())=='공포법령 검색결과 목록'
+        if self.match and tag in ('td','th') and self.cell is not None:
+            v=' '.join(''.join(self.cell).split())
+            if tag=='th':self.headers.append(v)
+            else:self.cells.append(v)
+            self.cell=None
+        if self.match and tag=='tr' and self.cells is not None:
+            if self.cells:self.rows.append((self.cells,self.info))
+            self.cells=None
+        if tag=='table':
+            self.match=False; self.table=False
+
+
+def parse_publication_page(html, family, page):
+    parser=PublicationRows(); parser.feed(html)
+    c=parser.controls
+    for key,value in {'frm_menuId':'1','frm_subMenuId':'23','frm_tabMenuId':'123','frm_query':family,'frm_pg':str(page),'frm_selSort':'20desc','frm_outmax':'15','pageIndex':str(page)}.items():
+        if c.get(key)!=value:raise ValueError('공식 공포목록 검색 확인 실패: '+key)
+    count=re.findall(r'<p\b[^>]*\bid="totCnt"[^>]*>\s*총\s*<span>\s*([\d,]+)\s*</span>\s*건\s*</p>',html)
+    limit=re.findall(r'/([0-9]+)', ''.join(parser.page_limit).strip())
+    if len(count)!=1 or len(limit)!=1:raise ValueError('공식 공포목록 페이지 수 확인 실패')
+    total=int(count[0].replace(',','')); pages=int(limit[0])
+    if not (0<page<=pages) or pages!=(total+14)//15 or len(parser.rows)!=min(15,total-15*(page-1)):
+        raise ValueError('공식 공포목록 페이지/행 수 불일치')
+    if parser.headers!=['번호','법령명','공포일자','법령종류','공포번호','시행일자','제정·개정구분','소관부처']:
+        raise ValueError('공식 공포목록 표 구조 변경')
+    norm=lambda s:re.sub(r'\s','',s)
+    root=norm(family)
+    records=[]
+    for cells,info in parser.rows:
+        if len(cells)!=8 or not cells[0].isdigit():raise ValueError('공식 공포목록 열 구조 변경')
+        name,published,kind,number,effective,amendment,ministry=cells[1:]
+        if norm(name) not in {root,root+'시행령',root+'시행규칙'}:continue
+        m=re.match(r"lawInfoPop\(\s*'(\d+)'\s*,\s*'(\d{8})'\s*,\s*'(\d+)'\s*,\s*'(\d{8})'",info or '')
+        if not m:raise ValueError('원문 식별자 확인 실패')
+        seq,pub,doc,eff=m.groups()
+        published,effective=date_value(published),date_value(effective)
+        if pub!=published.replace('-','') or eff!=effective.replace('-','') or not re.fullmatch(r'제\d+호',number) or int(doc)!=int(number[1:-1]):
+            raise ValueError('원문 공포번호/일자 불일치')
+        if not all((kind,amendment,ministry)):raise ValueError('필수 법령 메타데이터 누락')
+        records.append({'id':seq+':'+effective,'name':name,'ministry':ministry,'amendment':amendment,'type':kind,'number':number,'published':published,'effective':effective,'url':BASE+'lsInfoP.do?'+urllib.parse.urlencode({'lsiSeq':seq,'viewCls':'lsRvsDocInfoR'})})
+    if not records:raise ValueError('대상 법령 목록이 비어 있음: '+family)
+    return records,pages,total
+
+
 def fetch_entries():
     rows={}
     for family in FAMILIES:
+        baseline=None
         for page in (1,2):
-            url=BASE+'nwRvsLsPop.do?'+urllib.parse.urlencode({'lsNm':family,'searchType':'lsNm','sortIdx':0,'pg':page})
-            req=urllib.request.Request(url,headers={'User-Agent':'TomKi-Law-Metadata-Watch/1.0 (weekly, public metadata)'})
-            with urllib.request.urlopen(req,timeout=20) as r:
-                if r.status!=200:raise ValueError('공식 목록 HTTP 오류')
-                text=r.read(2_000_000).decode('utf8')
-            marker=re.search(r'건\s*\((\d+)/(\d+)\)',text)
-            if not marker or int(marker[1])!=page:raise ValueError('공식 목록 페이지 확인 실패')
-            for entry in parse_page(text,family):rows[entry['id']]=entry
-            if int(marker[2])<=page:break
+            try:
+                url=BASE+'lsSc.do?'+urllib.parse.urlencode({'eventGubun':'060103','menuId':1,'query':family,'subMenuId':23,'tabMenuId':123,'pg':page,'selSort':'20desc','outmax':15})
+                req=urllib.request.Request(url,headers={'User-Agent':'TomKi-Law-Metadata-Watch/1.0 (weekly, public metadata)'})
+                with urllib.request.urlopen(req,timeout=20) as r:
+                    if r.status!=200:raise ValueError('공식 목록 HTTP 오류')
+                    endpoint=urllib.parse.urlsplit(r.geturl())
+                    if (endpoint.scheme,endpoint.netloc,endpoint.path)!=('https','www.law.go.kr','/LSW/lsSc.do'):raise ValueError('공식 목록 출처 확인 실패')
+                    text=r.read(2_000_000).decode('utf8')
+                records,pages,total=parse_publication_page(text,family,page)
+                if baseline is not None and baseline!=(pages,total):raise ValueError('공식 공포목록 조회 중 총계 변경')
+                baseline=(pages,total)
+                for entry in records:
+                    key=entry['id']
+                    if key in rows:raise ValueError('공식 목록 중복 원문/시행일 식별자')
+                    rows[key]=entry
+                if pages<=page:break
+            except (ValueError,OSError) as exc:
+                raise ValueError(f'{family} {page}쪽: {exc}') from exc
     return sorted(rows.values(),key=lambda r:(r['published'],r['effective'],r['id']),reverse=True)
 
 def update(previous,entries,now):
@@ -78,7 +166,7 @@ def update(previous,entries,now):
     queue={r['id']:r for r in previous.get('reviewQueue',[])}
     for row in changes:queue[row['id']]=row
     merged={**prev,**{r['id']:r for r in entries}}
-    return {'schemaVersion':1,'status':'ok','lastAttemptAt':now.isoformat(),'lastSuccessAt':now.isoformat(),'schedule':'매주 금요일 오후 1:00 (한국시간) · 실행 지연 가능','mode':'metadata-only-no-ai','scope':'도로교통법·교통사고처리 특례법·자동차손해배상 보장법 및 시행령·시행규칙의 최근 공포목록 각 30행(최초 기준 이후 보존). 판례·보험약관·행정규칙은 포함하지 않음.','limitations':'한 개정 법령에 시행일이 여러 개일 수 있습니다. 일부 조항의 시행일이며 법 전체가 이 날짜에 모두 바뀐다는 뜻은 아닙니다. 개정 감지와 앱 안내문 반영은 별개입니다.','initialized':not bool(prev),'newChangeCount':len(changes),'entries':sorted(merged.values(),key=lambda r:(r['published'],r['effective'],r['id']),reverse=True),'reviewQueue':sorted(queue.values(),key=lambda r:r['detectedAt'],reverse=True),'source':'https://www.law.go.kr/LSW/nwRvsLsPop.do'}
+    return {'schemaVersion':1,'status':'ok','lastAttemptAt':now.isoformat(),'lastSuccessAt':now.isoformat(),'schedule':'매주 금요일 오후 1:00 (한국시간) · 실행 지연 가능','mode':'metadata-only-no-ai','scope':'도로교통법·교통사고처리 특례법·자동차손해배상 보장법 및 시행령·시행규칙의 최근 공포목록 각 30행(최초 기준 이후 보존). 판례·보험약관·행정규칙은 포함하지 않음.','limitations':'한 개정 법령에 시행일이 여러 개일 수 있습니다. 일부 조항의 시행일이며 법 전체가 이 날짜에 모두 바뀐다는 뜻은 아닙니다. 개정 감지와 앱 안내문 반영은 별개입니다.','initialized':not bool(prev),'newChangeCount':len(changes),'entries':sorted(merged.values(),key=lambda r:(r['published'],r['effective'],r['id']),reverse=True),'reviewQueue':sorted(queue.values(),key=lambda r:r['detectedAt'],reverse=True),'source':'https://www.law.go.kr/LSW/lsSc.do?menuId=1&subMenuId=23&tabMenuId=123'}
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=Path(__file__).resolve().parents[1]/'law-updates.json');args=parser.parse_args()

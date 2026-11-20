@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "status": "error",
-  "lastAttemptAt": "2026-11-20T21:21:30.563657+09:00",
-  "lastSuccessAt": "2026-11-13T20:43:57.758173+09:00",
+  "status": "ok",
+  "lastAttemptAt": "2026-11-20T22:18:44.174694+09:00",
+  "lastSuccessAt": "2026-11-20T22:18:44.174694+09:00",
   "schedule": "매주 금요일 오후 1:00 (한국시간) · 실행 지연 가능",
   "mode": "metadata-only-no-ai",
   "scope": "도로교통법·교통사고처리 특례법·자동차손해배상 보장법 및 시행령·시행규칙의 최근 공포목록 각 30행(최초 기준 이후 보존). 판례·보험약관·행정규칙은 포함하지 않음.",
@@ -771,7 +771,5 @@
     }
   ],
   "reviewQueue": [],
-  "source": "https://www.law.go.kr/LSW/nwRvsLsPop.do",
-  "error": "공식 목록 확인 실패. 기존 정보를 유지하며 변경 없음을 뜻하지 않습니다.",
-  "diagnostic": "공식 목록 페이지 확인 실패"
+  "source": "https://www.law.go.kr/LSW/lsSc.do?menuId=1&subMenuId=23&tabMenuId=123"
 }
