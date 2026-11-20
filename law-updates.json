@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "ok",
-  "lastAttemptAt": "2026-11-13T20:43:57.758173+09:00",
+  "status": "error",
+  "lastAttemptAt": "2026-11-20T21:21:30.563657+09:00",
   "lastSuccessAt": "2026-11-13T20:43:57.758173+09:00",
   "schedule": "매주 금요일 오후 1:00 (한국시간) · 실행 지연 가능",
   "mode": "metadata-only-no-ai",
@@ -771,5 +771,7 @@
     }
   ],
   "reviewQueue": [],
-  "source": "https://www.law.go.kr/LSW/nwRvsLsPop.do"
+  "source": "https://www.law.go.kr/LSW/nwRvsLsPop.do",
+  "error": "공식 목록 확인 실패. 기존 정보를 유지하며 변경 없음을 뜻하지 않습니다.",
+  "diagnostic": "공식 목록 페이지 확인 실패"
 }
